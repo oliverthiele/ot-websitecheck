@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="de" datatype="plaintext"
+        original="EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf"
+        product-name="ot-websitecheck">
+    <header/>
+    <body>
+      <trans-unit id="mlang_tabs_tab" resname="mlang_tabs_tab" approved="yes">
+        <source>Website Check</source>
+        <target>Website-Check</target>
+      </trans-unit>
+      <trans-unit id="mlang_labels_tablabel" resname="mlang_labels_tablabel" approved="yes">
+        <source>Crawl sitemaps and compare environments</source>
+        <target>Sitemaps crawlen und Umgebungen vergleichen</target>
+      </trans-unit>
+      <trans-unit id="mlang_labels_tabdescr" resname="mlang_labels_tabdescr" approved="yes">
+        <source>Tools that crawl XML sitemaps and record what every URL answers.</source>
+        <target>Werkzeuge, die XML-Sitemaps crawlen und festhalten, was jede URL antwortet.</target>
+      </trans-unit>
+      <trans-unit id="module.status.title" resname="module.status.title" approved="yes">
+        <source>Status check</source>
+        <target>Status-Check</target>
+      </trans-unit>
+      <trans-unit id="module.status.shortDescription" resname="module.status.shortDescription" approved="yes">
+        <source>HTTP status and error markers per URL</source>
+        <target>HTTP-Status und Fehlermarker pro URL</target>
+      </trans-unit>
+      <trans-unit id="module.status.description" resname="module.status.description" approved="yes">
+        <source>Review the results of the websitecheck:checksitemap and websitecheck:crawllinks commands: URLs without HTTP 200, TYPO3 error pages and links whose arguments have no effect.</source>
+        <target>Ergebnisse der Commands websitecheck:checksitemap und websitecheck:crawllinks: URLs ohne HTTP 200, TYPO3-Fehlerseiten und Links, deren Argumente nichts bewirken.</target>
+      </trans-unit>
+      <trans-unit id="module.migration.title" resname="module.migration.title" approved="yes">
+        <source>Migration check</source>
+        <target>Migrations-Check</target>
+      </trans-unit>
+      <trans-unit id="module.migration.shortDescription" resname="module.migration.shortDescription" approved="yes">
+        <source>Moved URLs without a working redirect</source>
+        <target>Verschobene URLs ohne funktionierende Weiterleitung</target>
+      </trans-unit>
+      <trans-unit id="module.migration.description" resname="module.migration.description" approved="yes">
+        <source>Review the results of the websitecheck:migrationcheck command: does every URL of the reference environment still lead to the same page or record on the target environment — directly or through a redirect?</source>
+        <target>Ergebnisse des Commands websitecheck:migrationcheck: Führt jede URL der Referenzumgebung auf der Zielumgebung noch zur selben Seite bzw. zum selben Datensatz — direkt oder über eine Weiterleitung?</target>
+      </trans-unit>
+      <trans-unit id="module.sitemaps.title" resname="module.sitemaps.title" approved="yes">
+        <source>Sitemaps</source>
+        <target>Sitemaps</target>
+      </trans-unit>
+      <trans-unit id="module.sitemaps.shortDescription" resname="module.sitemaps.shortDescription" approved="yes">
+        <source>Stored sitemap snapshots per site and language</source>
+        <target>Gespeicherte Sitemap-Snapshots pro Website und Sprache</target>
+      </trans-unit>
+      <trans-unit id="module.sitemaps.description" resname="module.sitemaps.description" approved="yes">
+        <source>Review the snapshots of the websitecheck:importsitemaps command: how many URLs every language lists per sitemap group, which sitemap files failed, and a note per snapshot.</source>
+        <target>Snapshots des Commands websitecheck:importsitemaps: wie viele URLs jede Sprache pro Sitemap-Gruppe enthält, welche Sitemap-Dateien fehlschlugen, und eine Notiz pro Snapshot.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

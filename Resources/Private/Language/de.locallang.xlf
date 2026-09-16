@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="de" datatype="plaintext"
+        original="EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf"
+        product-name="ot-websitecheck">
+    <header/>
+    <body>
+      <trans-unit id="filter.run" resname="filter.run" approved="yes">
+        <source>Run</source>
+        <target>Lauf</target>
+      </trans-unit>
+      <trans-unit id="filter.allGroups" resname="filter.allGroups" approved="yes">
+        <source>— all sitemap groups —</source>
+        <target>— alle Sitemap-Gruppen —</target>
+      </trans-unit>
+      <trans-unit id="filter.allLanguages" resname="filter.allLanguages" approved="yes">
+        <source>— all languages —</source>
+        <target>— alle Sprachen —</target>
+      </trans-unit>
+      <trans-unit id="filter.allVerdicts" resname="filter.allVerdicts" approved="yes">
+        <source>— all verdicts —</source>
+        <target>— alle Ergebnisse —</target>
+      </trans-unit>
+      <trans-unit id="filter.onlyProblems" resname="filter.onlyProblems" approved="yes">
+        <source>only problems and warnings</source>
+        <target>nur Probleme und Warnungen</target>
+      </trans-unit>
+      <trans-unit id="filter.onlyUnreviewed" resname="filter.onlyUnreviewed" approved="yes">
+        <source>only not yet reviewed</source>
+        <target>nur noch nicht geprüfte</target>
+      </trans-unit>
+      <trans-unit id="filter.showTargetSitemap" resname="filter.showTargetSitemap" approved="yes">
+        <source>show pages from the target sitemap</source>
+        <target>Seiten aus der Ziel-Sitemap anzeigen</target>
+      </trans-unit>
+      <trans-unit id="filter.submit" resname="filter.submit" approved="yes">
+        <source>Filter</source>
+        <target>Filtern</target>
+      </trans-unit>
+      <trans-unit id="summary.title" resname="summary.title" approved="yes">
+        <source>Verdicts of the target rows in this run</source>
+        <target>Ergebnisse der Zielzeilen in diesem Lauf</target>
+      </trans-unit>
+      <trans-unit id="button.deleteRun" resname="button.deleteRun" approved="yes">
+        <source>Delete run "%1$s"</source>
+        <target>Lauf „%1$s“ löschen</target>
+      </trans-unit>
+      <trans-unit id="button.edit" resname="button.edit" approved="yes">
+        <source>Edit</source>
+        <target>Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="flash.deleteRun.success" resname="flash.deleteRun.success" approved="yes">
+        <source>%1$s row(s) of run "%2$s" deleted.</source>
+        <target>%1$s Zeile(n) des Laufs „%2$s“ gelöscht.</target>
+      </trans-unit>
+      <trans-unit id="empty.noRuns" resname="empty.noRuns" approved="yes">
+        <source>No migration check has been run yet. Start one with the command websitecheck:migrationcheck.</source>
+        <target>Es wurde noch kein Migrations-Check ausgeführt. Starten Sie einen mit dem Command websitecheck:migrationcheck.</target>
+      </trans-unit>
+      <trans-unit id="empty.noResults" resname="empty.noResults" approved="yes">
+        <source>No results match the current filters.</source>
+        <target>Keine Ergebnisse für die aktuellen Filter.</target>
+      </trans-unit>
+      <trans-unit id="section.noGroup" resname="section.noGroup" approved="yes">
+        <source>(no sitemap group)</source>
+        <target>(keine Sitemap-Gruppe)</target>
+      </trans-unit>
+      <trans-unit id="identity.page" resname="identity.page" approved="yes">
+        <source>Page %1$s</source>
+        <target>Seite %1$s</target>
+      </trans-unit>
+      <trans-unit id="identity.record" resname="identity.record" approved="yes">
+        <source>%1$s %2$s on page %3$s</source>
+        <target>%1$s %2$s auf Seite %3$s</target>
+      </trans-unit>
+      <trans-unit id="identity.unknown" resname="identity.unknown" approved="yes">
+        <source>Unknown page</source>
+        <target>Unbekannte Seite</target>
+      </trans-unit>
+      <trans-unit id="column.language" resname="column.language" approved="yes">
+        <source>Language</source>
+        <target>Sprache</target>
+      </trans-unit>
+      <trans-unit id="column.environment" resname="column.environment" approved="yes">
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </trans-unit>
+      <trans-unit id="column.status" resname="column.status" approved="yes">
+        <source>Code</source>
+        <target>Code</target>
+      </trans-unit>
+      <trans-unit id="column.finalPath" resname="column.finalPath" approved="yes">
+        <source>Final path</source>
+        <target>Endpfad</target>
+      </trans-unit>
+      <trans-unit id="column.redirects" resname="column.redirects" approved="yes">
+        <source>Redirects</source>
+        <target>Weiterleitungen</target>
+      </trans-unit>
+      <trans-unit id="column.verdict" resname="column.verdict" approved="yes">
+        <source>Verdict</source>
+        <target>Ergebnis</target>
+      </trans-unit>
+      <trans-unit id="column.reviewed" resname="column.reviewed" approved="yes">
+        <source>Reviewed</source>
+        <target>Geprüft</target>
+      </trans-unit>
+      <trans-unit id="label.suggestedTarget" resname="label.suggestedTarget" approved="yes">
+        <source>Suggested target</source>
+        <target>Vorgeschlagenes Ziel</target>
+      </trans-unit>
+      <trans-unit id="label.note" resname="label.note" approved="yes">
+        <source>Note</source>
+        <target>Notiz</target>
+      </trans-unit>
+      <trans-unit id="reviewed.yes" resname="reviewed.yes" approved="yes">
+        <source>yes</source>
+        <target>ja</target>
+      </trans-unit>
+      <trans-unit id="reviewed.no" resname="reviewed.no" approved="yes">
+        <source>no</source>
+        <target>nein</target>
+      </trans-unit>
+      <trans-unit id="verdict.notAnalyzed" resname="verdict.notAnalyzed" approved="yes">
+        <source>Not analysed yet</source>
+        <target>Noch nicht ausgewertet</target>
+      </trans-unit>
+      <trans-unit id="verdict.reference" resname="verdict.reference" approved="yes">
+        <source>Reference</source>
+        <target>Referenz</target>
+      </trans-unit>
+      <trans-unit id="verdict.referenceNotOk" resname="verdict.referenceNotOk" approved="yes">
+        <source>Reference not OK</source>
+        <target>Referenz nicht OK</target>
+      </trans-unit>
+      <trans-unit id="verdict.ok" resname="verdict.ok" approved="yes">
+        <source>OK</source>
+        <target>OK</target>
+      </trans-unit>
+      <trans-unit id="verdict.movedWithRedirect" resname="verdict.movedWithRedirect" approved="yes">
+        <source>Moved with redirect</source>
+        <target>Verschoben mit Weiterleitung</target>
+      </trans-unit>
+      <trans-unit id="verdict.missing" resname="verdict.missing" approved="yes">
+        <source>Missing</source>
+        <target>Fehlt</target>
+      </trans-unit>
+      <trans-unit id="verdict.redirectBroken" resname="verdict.redirectBroken" approved="yes">
+        <source>Redirect broken</source>
+        <target>Weiterleitung defekt</target>
+      </trans-unit>
+      <trans-unit id="verdict.otherContent" resname="verdict.otherContent" approved="yes">
+        <source>Other content</source>
+        <target>Anderer Inhalt</target>
+      </trans-unit>
+      <trans-unit id="verdict.identityUnknown" resname="verdict.identityUnknown" approved="yes">
+        <source>Identity unknown</source>
+        <target>Identität unbekannt</target>
+      </trans-unit>
+      <trans-unit id="verdict.listed" resname="verdict.listed" approved="yes">
+        <source>Listed in target sitemap</source>
+        <target>In Ziel-Sitemap gelistet</target>
+      </trans-unit>
+      <trans-unit id="warning.redirectChain" resname="warning.redirectChain" approved="yes">
+        <source>Redirect chain</source>
+        <target>Weiterleitungskette</target>
+      </trans-unit>
+      <trans-unit id="warning.redirectChain.description" resname="warning.redirectChain.description" approved="yes">
+        <source>More than one redirect before the final page. Point the first redirect directly at the final URL.</source>
+        <target>Mehr als eine Weiterleitung bis zur Endseite. Die erste Weiterleitung direkt auf die End-URL zeigen lassen.</target>
+      </trans-unit>
+      <trans-unit id="warning.temporaryRedirect" resname="warning.temporaryRedirect" approved="yes">
+        <source>Temporary redirect</source>
+        <target>Temporäre Weiterleitung</target>
+      </trans-unit>
+      <trans-unit id="warning.temporaryRedirect.description" resname="warning.temporaryRedirect.description" approved="yes">
+        <source>The chain contains a 302, 303 or 307. A permanent move should answer 301 or 308.</source>
+        <target>Die Kette enthält einen 302, 303 oder 307. Ein dauerhafter Umzug sollte mit 301 oder 308 antworten.</target>
+      </trans-unit>
+      <trans-unit id="warning.redirectToRootPage" resname="warning.redirectToRootPage" approved="yes">
+        <source>Redirect to start page</source>
+        <target>Weiterleitung auf Startseite</target>
+      </trans-unit>
+      <trans-unit id="warning.redirectToRootPage.description" resname="warning.redirectToRootPage.description" approved="yes">
+        <source>A deep URL redirects to a start page. Search engines often treat this as a soft 404.</source>
+        <target>Eine tiefe URL leitet auf eine Startseite weiter. Suchmaschinen werten das oft als Soft-404.</target>
+      </trans-unit>
+      <trans-unit id="warning.listedUrlRedirects" resname="warning.listedUrlRedirects" approved="yes">
+        <source>Sitemap URL redirects</source>
+        <target>Sitemap-URL leitet weiter</target>
+      </trans-unit>
+      <trans-unit id="warning.listedUrlRedirects.description" resname="warning.listedUrlRedirects.description" approved="yes">
+        <source>The sitemap lists a URL that redirects. A sitemap should only contain final URLs.</source>
+        <target>Die Sitemap listet eine URL, die weiterleitet. Eine Sitemap sollte nur End-URLs enthalten.</target>
+      </trans-unit>
+      <trans-unit id="warning.languageChanged" resname="warning.languageChanged" approved="yes">
+        <source>Language changed</source>
+        <target>Sprache gewechselt</target>
+      </trans-unit>
+      <trans-unit id="warning.languageChanged.description" resname="warning.languageChanged.description" approved="yes">
+        <source>The target page is in a different language than the reference page.</source>
+        <target>Die Zielseite ist in einer anderen Sprache als die Referenzseite.</target>
+      </trans-unit>
+      <trans-unit id="warning.recordIdentityUnknown" resname="warning.recordIdentityUnknown" approved="yes">
+        <source>Record unknown</source>
+        <target>Datensatz unbekannt</target>
+      </trans-unit>
+      <trans-unit id="warning.recordIdentityUnknown.description" resname="warning.recordIdentityUnknown.description" approved="yes">
+        <source>Several URLs render this page without a record marker — probably a detail page. Which record is shown cannot be compared.</source>
+        <target>Mehrere URLs rendern diese Seite ohne Datensatz-Marker — vermutlich eine Detailseite. Welcher Datensatz angezeigt wird, lässt sich nicht vergleichen.</target>
+      </trans-unit>
+      <trans-unit id="warning.duplicateDetailPage" resname="warning.duplicateDetailPage" approved="yes">
+        <source>Duplicate detail page</source>
+        <target>Doppelte Detailseite</target>
+      </trans-unit>
+      <trans-unit id="warning.duplicateDetailPage.description" resname="warning.duplicateDetailPage.description" approved="yes">
+        <source>The same record is rendered by more than one page. That is duplicate content.</source>
+        <target>Derselbe Datensatz wird von mehr als einer Seite ausgegeben. Das ist Duplicate Content.</target>
+      </trans-unit>
+      <trans-unit id="abortReason.loop" resname="abortReason.loop" approved="yes">
+        <source>redirect loop</source>
+        <target>Weiterleitungsschleife</target>
+      </trans-unit>
+      <trans-unit id="abortReason.hopLimit" resname="abortReason.hopLimit" approved="yes">
+        <source>too many redirects</source>
+        <target>zu viele Weiterleitungen</target>
+      </trans-unit>
+      <trans-unit id="abortReason.missingLocation" resname="abortReason.missingLocation" approved="yes">
+        <source>redirect without Location header</source>
+        <target>Weiterleitung ohne Location-Header</target>
+      </trans-unit>
+      <trans-unit id="abortReason.connectionError" resname="abortReason.connectionError" approved="yes">
+        <source>connection error</source>
+        <target>Verbindungsfehler</target>
+      </trans-unit>
+      <trans-unit id="snapshot.intro" resname="snapshot.intro" approved="yes">
+        <source>Sitemaps of every language of a site, stored at one point in time — imported here or with the websitecheck:importsitemaps command. A snapshot stays available after the site itself has changed.</source>
+        <target>Sitemaps aller Sprachen einer Website, zu einem Zeitpunkt gespeichert — hier importiert oder mit dem Command websitecheck:importsitemaps. Ein Snapshot bleibt verfügbar, auch wenn sich die Website selbst inzwischen geändert hat.</target>
+      </trans-unit>
+      <trans-unit id="snapshot.noLanguage" resname="snapshot.noLanguage" approved="yes">
+        <source>(no language)</source>
+        <target>(ohne Sprache)</target>
+      </trans-unit>
+      <trans-unit id="empty.noSnapshots" resname="empty.noSnapshots" approved="yes">
+        <source>No sitemap snapshots stored yet.</source>
+        <target>Noch keine Sitemap-Snapshots gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="button.editNote" resname="button.editNote" approved="yes">
+        <source>Edit note</source>
+        <target>Notiz bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="button.delete" resname="button.delete" approved="yes">
+        <source>Delete</source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="flash.deleteSnapshot.success" resname="flash.deleteSnapshot.success" approved="yes">
+        <source>The snapshot was deleted.</source>
+        <target>Der Snapshot wurde gelöscht.</target>
+      </trans-unit>
+      <trans-unit id="flash.deleteSnapshot.notFound" resname="flash.deleteSnapshot.notFound" approved="yes">
+        <source>The snapshot does not exist (any more).</source>
+        <target>Der Snapshot existiert nicht (mehr).</target>
+      </trans-unit>
+      <trans-unit id="documentType.invalid" resname="documentType.invalid" approved="yes">
+        <source>no valid sitemap</source>
+        <target>keine gültige Sitemap</target>
+      </trans-unit>
+      <trans-unit id="documentType.unreachable" resname="documentType.unreachable" approved="yes">
+        <source>not reachable</source>
+        <target>nicht erreichbar</target>
+      </trans-unit>
+      <trans-unit id="snapshot.summary" resname="snapshot.summary" approved="yes">
+        <source>%1$s languages · %2$s sitemap files · %3$s URLs</source>
+        <target>%1$s Sprachen · %2$s Sitemap-Dateien · %3$s URLs</target>
+      </trans-unit>
+      <trans-unit id="snapshot.failedCount" resname="snapshot.failedCount" approved="yes">
+        <source>%1$s failed</source>
+        <target>%1$s fehlgeschlagen</target>
+      </trans-unit>
+      <trans-unit id="snapshot.incomplete" resname="snapshot.incomplete" approved="yes">
+        <source>incomplete — import was interrupted</source>
+        <target>unvollständig — Import wurde abgebrochen</target>
+      </trans-unit>
+      <trans-unit id="snapshot.index" resname="snapshot.index" approved="yes">
+        <source>Sitemap index</source>
+        <target>Sitemap-Index</target>
+      </trans-unit>
+      <trans-unit id="snapshot.ok" resname="snapshot.ok" approved="yes">
+        <source>ok</source>
+        <target>ok</target>
+      </trans-unit>
+      <trans-unit id="column.sitemapGroup" resname="column.sitemapGroup" approved="yes">
+        <source>Sitemap group</source>
+        <target>Sitemap-Gruppe</target>
+      </trans-unit>
+      <trans-unit id="column.files" resname="column.files" approved="yes">
+        <source>Files</source>
+        <target>Dateien</target>
+      </trans-unit>
+      <trans-unit id="column.urls" resname="column.urls" approved="yes">
+        <source>URLs</source>
+        <target>URLs</target>
+      </trans-unit>
+      <trans-unit id="button.showRaw" resname="button.showRaw" approved="yes">
+        <source>Raw content</source>
+        <target>Rohinhalt</target>
+      </trans-unit>
+      <trans-unit id="import.title" resname="import.title" approved="yes">
+        <source>Import sitemaps</source>
+        <target>Sitemaps importieren</target>
+      </trans-unit>
+      <trans-unit id="import.base" resname="import.base" approved="yes">
+        <source>Site URL (base and base variants of the site configuration)</source>
+        <target>Website-URL (base und baseVariants der Site-Konfiguration)</target>
+      </trans-unit>
+      <trans-unit id="import.basicAuthUser" resname="import.basicAuthUser" approved="yes">
+        <source>Basic Auth user</source>
+        <target>Basic-Auth-Benutzer</target>
+      </trans-unit>
+      <trans-unit id="import.basicAuthPassword" resname="import.basicAuthPassword" approved="yes">
+        <source>Basic Auth password</source>
+        <target>Basic-Auth-Passwort</target>
+      </trans-unit>
+      <trans-unit id="import.basicAuthHint" resname="import.basicAuthHint" approved="yes">
+        <source>Only needed for protected environments. The credentials are used for this import and are not stored.</source>
+        <target>Nur für geschützte Umgebungen nötig. Die Zugangsdaten werden nur für diesen Import verwendet und nicht gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="import.discover" resname="import.discover" approved="yes">
+        <source>Find sitemaps</source>
+        <target>Sitemaps suchen</target>
+      </trans-unit>
+      <trans-unit id="import.foundSitemaps" resname="import.foundSitemaps" approved="yes">
+        <source>Sitemaps found per language</source>
+        <target>Gefundene Sitemaps pro Sprache</target>
+      </trans-unit>
+      <trans-unit id="import.label" resname="import.label" approved="yes">
+        <source>Label (optional)</source>
+        <target>Bezeichnung (optional)</target>
+      </trans-unit>
+      <trans-unit id="import.start" resname="import.start" approved="yes">
+        <source>Import selected sitemaps</source>
+        <target>Ausgewählte Sitemaps importieren</target>
+      </trans-unit>
+      <trans-unit id="import.finished" resname="import.finished" approved="yes">
+        <source>Import finished</source>
+        <target>Import abgeschlossen</target>
+      </trans-unit>
+      <trans-unit id="import.noSelection" resname="import.noSelection" approved="yes">
+        <source>Select at least one language.</source>
+        <target>Mindestens eine Sprache auswählen.</target>
+      </trans-unit>
+      <trans-unit id="import.noBases" resname="import.noBases" approved="yes">
+        <source>No site with a base URL is configured.</source>
+        <target>Keine Site mit einer Basis-URL konfiguriert.</target>
+      </trans-unit>
+      <trans-unit id="import.notAllowed" resname="import.notAllowed" approved="yes">
+        <source>not on a host of the configured sites — use the CLI command</source>
+        <target>nicht auf einem Host der konfigurierten Sites — CLI-Command verwenden</target>
+      </trans-unit>
+      <trans-unit id="import.status.waiting" resname="import.status.waiting" approved="yes">
+        <source>waiting</source>
+        <target>wartet</target>
+      </trans-unit>
+      <trans-unit id="import.status.running" resname="import.status.running" approved="yes">
+        <source>importing …</source>
+        <target>wird importiert …</target>
+      </trans-unit>
+      <trans-unit id="import.status.done" resname="import.status.done" approved="yes">
+        <source>%1$s URLs in %2$s files</source>
+        <target>%1$s URLs in %2$s Dateien</target>
+      </trans-unit>
+      <trans-unit id="import.status.failedFiles" resname="import.status.failedFiles" approved="yes">
+        <source>%1$s files failed</source>
+        <target>%1$s Dateien fehlgeschlagen</target>
+      </trans-unit>
+      <trans-unit id="error.import.accessDenied" resname="error.import.accessDenied" approved="yes">
+        <source>Only administrators can import sitemaps.</source>
+        <target>Nur Administratoren können Sitemaps importieren.</target>
+      </trans-unit>
+      <trans-unit id="error.import.unknownBase" resname="error.import.unknownBase" approved="yes">
+        <source>This URL is not a base of a configured site.</source>
+        <target>Diese URL ist keine Basis einer konfigurierten Site.</target>
+      </trans-unit>
+      <trans-unit id="error.import.unknownHost" resname="error.import.unknownHost" approved="yes">
+        <source>The sitemap is not on a host of the configured sites.</source>
+        <target>Die Sitemap liegt nicht auf einem Host der konfigurierten Sites.</target>
+      </trans-unit>
+      <trans-unit id="error.import.labelTooLong" resname="error.import.labelTooLong" approved="yes">
+        <source>The label must not be longer than 100 characters.</source>
+        <target>Die Bezeichnung darf höchstens 100 Zeichen lang sein.</target>
+      </trans-unit>
+      <trans-unit id="error.import.labelExists" resname="error.import.labelExists" approved="yes">
+        <source>A snapshot with this label already exists.</source>
+        <target>Ein Snapshot mit dieser Bezeichnung existiert bereits.</target>
+      </trans-unit>
+      <trans-unit id="error.import.snapshotNotImporting" resname="error.import.snapshotNotImporting" approved="yes">
+        <source>The snapshot does not exist or its import has already been finished.</source>
+        <target>Der Snapshot existiert nicht oder sein Import ist bereits abgeschlossen.</target>
+      </trans-unit>
+      <trans-unit id="error.import.noUrls" resname="error.import.noUrls" approved="yes">
+        <source>No page URLs found — the snapshot was not stored.</source>
+        <target>Keine Seiten-URLs gefunden — der Snapshot wurde nicht gespeichert.</target>
+      </trans-unit>
+      <trans-unit id="error.import.requestFailed" resname="error.import.requestFailed" approved="yes">
+        <source>The request failed. Check the connection and the Basic Auth credentials.</source>
+        <target>Die Anfrage ist fehlgeschlagen. Verbindung und Basic-Auth-Zugangsdaten prüfen.</target>
+      </trans-unit>
+      <trans-unit id="column.state" resname="column.state" approved="yes">
+        <source>Status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="column.sitemap" resname="column.sitemap" approved="yes">
+        <source>Sitemap</source>
+        <target>Sitemap</target>
+      </trans-unit>
+      <trans-unit id="button.openSitemap" resname="button.openSitemap" approved="yes">
+        <source>Open</source>
+        <target>Öffnen</target>
+      </trans-unit>
+      <trans-unit id="button.showFiles" resname="button.showFiles" approved="yes">
+        <source>%1$s files</source>
+        <target>%1$s Dateien</target>
+      </trans-unit>
+      <trans-unit id="run.snapshots" resname="run.snapshots" approved="yes">
+        <source>Compares snapshot "%1$s" (before) with snapshot "%2$s" (after), requested on %3$s</source>
+        <target>Vergleicht Snapshot „%1$s“ (vorher) mit Snapshot „%2$s“ (nachher), abgefragt auf %3$s</target>
+      </trans-unit>
+      <trans-unit id="run.snapshotDeleted" resname="run.snapshotDeleted" approved="yes">
+        <source>(deleted snapshot)</source>
+        <target>(gelöschter Snapshot)</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,50 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  OliverThiele\OtWebsitecheck\:
+    resource: '../Classes/*'
+    exclude:
+      - '../Classes/Domain/Model/*'
+      - '../Classes/Domain/ValueObject/*'
+      - '../Classes/Exception/*'
+
+  OliverThiele\OtWebsitecheck\Command\MigrationCheckCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:migrationcheck'
+        description: 'Check whether the URLs of a reference environment still lead to the same content on a target environment.'
+
+  OliverThiele\OtWebsitecheck\Command\ImportSitemapsCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:importsitemaps'
+        description: 'Store the sitemaps of every language of a site as one snapshot.'
+
+  OliverThiele\OtWebsitecheck\Command\CleanupSnapshotsCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:cleanupsnapshots'
+        description: 'Remove old sitemap snapshots; snapshots with a note or used by a migration check run are kept.'
+
+  OliverThiele\OtWebsitecheck\Command\CheckSitemapCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:checksitemap'
+        description: 'Request every URL of a sitemap snapshot and record the HTTP status and error markers.'
+
+  OliverThiele\OtWebsitecheck\Command\CrawlLinksCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:crawllinks'
+        description: 'Follow the plugin links on every page of a sitemap snapshot and check where they actually lead.'
+
+  # AJAX controllers are resolved via GeneralUtility::makeInstance() by the AJAX RouteDispatcher
+  # (Configuration/Backend/AjaxRoutes.php), which requires them to be reachable by class name from the container.
+  OliverThiele\OtWebsitecheck\Controller\ToggleReviewedAjaxController:
+    public: true
+
+  OliverThiele\OtWebsitecheck\Controller\SitemapImportAjaxController:
+    public: true

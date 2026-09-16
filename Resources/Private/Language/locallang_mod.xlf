@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" datatype="plaintext"
+        original="EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf"
+        product-name="ot-websitecheck">
+    <header/>
+    <body>
+      <trans-unit id="mlang_tabs_tab" resname="mlang_tabs_tab">
+        <source>Website Check</source>
+      </trans-unit>
+      <trans-unit id="mlang_labels_tablabel" resname="mlang_labels_tablabel">
+        <source>Crawl sitemaps and compare environments</source>
+      </trans-unit>
+      <trans-unit id="mlang_labels_tabdescr" resname="mlang_labels_tabdescr">
+        <source>Tools that crawl XML sitemaps and record what every URL answers.</source>
+      </trans-unit>
+      <trans-unit id="module.status.title" resname="module.status.title">
+        <source>Status check</source>
+      </trans-unit>
+      <trans-unit id="module.status.shortDescription" resname="module.status.shortDescription">
+        <source>HTTP status and error markers per URL</source>
+      </trans-unit>
+      <trans-unit id="module.status.description" resname="module.status.description">
+        <source>Review the results of the websitecheck:checksitemap and websitecheck:crawllinks commands: URLs without HTTP 200, TYPO3 error pages and links whose arguments have no effect.</source>
+      </trans-unit>
+      <trans-unit id="module.migration.title" resname="module.migration.title">
+        <source>Migration check</source>
+      </trans-unit>
+      <trans-unit id="module.migration.shortDescription" resname="module.migration.shortDescription">
+        <source>Moved URLs without a working redirect</source>
+      </trans-unit>
+      <trans-unit id="module.migration.description" resname="module.migration.description">
+        <source>Review the results of the websitecheck:migrationcheck command: does every URL of the reference environment still lead to the same page or record on the target environment — directly or through a redirect?</source>
+      </trans-unit>
+      <trans-unit id="module.sitemaps.title" resname="module.sitemaps.title">
+        <source>Sitemaps</source>
+      </trans-unit>
+      <trans-unit id="module.sitemaps.shortDescription" resname="module.sitemaps.shortDescription">
+        <source>Stored sitemap snapshots per site and language</source>
+      </trans-unit>
+      <trans-unit id="module.sitemaps.description" resname="module.sitemaps.description">
+        <source>Review the snapshots of the websitecheck:importsitemaps command: how many URLs every language lists per sitemap group, which sitemap files failed, and a note per snapshot.</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,191 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/reviewed-toggle.js"/>
+    <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+
+    <h1><f:translate key="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.migration.title"/></h1>
+
+    <f:if condition="{runOptions}">
+        <f:then>
+            <f:render section="Filter" arguments="{_all}"/>
+            <f:render section="Summary" arguments="{_all}"/>
+            <f:render section="Results" arguments="{_all}"/>
+        </f:then>
+        <f:else>
+            <f:be.infobox state="-1">{f:translate(key: '{languageFile}empty.noRuns')}</f:be.infobox>
+        </f:else>
+    </f:if>
+
+</f:section>
+
+<f:section name="Filter">
+    <f:form action="index" method="get" class="mb-3">
+        <f:form.hidden name="token" value="{moduleToken}"/>
+        <div class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label class="visually-hidden" for="websitecheckRun">{f:translate(key: '{languageFile}filter.run')}</label>
+                <f:form.select name="run" id="websitecheckRun" options="{runOptions}" value="{currentRun}" class="form-select"/>
+            </div>
+            <div class="col-auto">
+                <f:form.select name="group" options="{groupOptions}" value="{currentGroup}" class="form-select"/>
+            </div>
+            <div class="col-auto">
+                <f:form.select name="language" options="{languageOptions}" value="{currentLanguage}" class="form-select"/>
+            </div>
+            <div class="col-auto">
+                <f:form.select name="verdict" options="{verdictOptions}" value="{currentVerdict}" class="form-select"/>
+            </div>
+            <div class="col-auto form-check">
+                <f:form.checkbox name="onlyProblems" id="websitecheckOnlyProblems" value="1" checked="{onlyProblems}" class="form-check-input"/>
+                <label class="form-check-label" for="websitecheckOnlyProblems">{f:translate(key: '{languageFile}filter.onlyProblems')}</label>
+            </div>
+            <div class="col-auto form-check">
+                <f:form.checkbox name="onlyUnreviewed" id="websitecheckOnlyUnreviewed" value="1" checked="{onlyUnreviewed}" class="form-check-input"/>
+                <label class="form-check-label" for="websitecheckOnlyUnreviewed">{f:translate(key: '{languageFile}filter.onlyUnreviewed')}</label>
+            </div>
+            <div class="col-auto form-check">
+                <f:form.checkbox name="showTargetSitemap" id="websitecheckShowTargetSitemap" value="1" checked="{showTargetSitemap}" class="form-check-input"/>
+                <label class="form-check-label" for="websitecheckShowTargetSitemap">{f:translate(key: '{languageFile}filter.showTargetSitemap')}</label>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-default">{f:translate(key: '{languageFile}filter.submit')}</button>
+            </div>
+        </div>
+    </f:form>
+</f:section>
+
+<f:section name="Summary">
+    <f:if condition="{runSnapshots}">
+        <p class="mb-2">
+            {f:translate(key: '{languageFile}run.snapshots', arguments: {0: runSnapshots.reference, 1: runSnapshots.target, 2: runSnapshots.targetHost})}
+            — <f:format.date format="d.m.Y H:i">@{runSnapshots.startedAt}</f:format.date>
+        </p>
+    </f:if>
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <span>{f:translate(key: '{languageFile}summary.title')}:</span>
+        <f:for each="{verdictCounts}" as="count" key="verdictName">
+            <span class="badge badge-default">{f:translate(key: '{languageFile}verdict.{verdictName}')}: {count}</span>
+        </f:for>
+        <f:form action="deleteRun" method="post" class="ms-auto">
+            <f:form.hidden name="run" value="{currentRun}"/>
+            <button type="submit" class="btn btn-danger btn-sm">{f:translate(key: '{languageFile}button.deleteRun', arguments: {0: currentRun})}</button>
+        </f:form>
+    </div>
+</f:section>
+
+<f:section name="Results">
+    <f:for each="{sections}" as="section">
+        <h2 class="mt-4">
+            <f:if condition="{section.name}">
+                <f:then>{section.name}</f:then>
+                <f:else>{f:translate(key: '{languageFile}section.noGroup')}</f:else>
+            </f:if>
+        </h2>
+
+        <f:for each="{section.identities}" as="identity">
+            <div class="panel panel-default mb-3">
+                <div class="panel-heading">
+                    <f:render section="IdentityHeading" arguments="{identity: identity.header, languageFile: languageFile}"/>
+                </div>
+                <div class="table-fit mb-0">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>{f:translate(key: '{languageFile}column.language')}</th>
+                                <th>{f:translate(key: '{languageFile}column.environment')}</th>
+                                <th>{f:translate(key: '{languageFile}column.status')}</th>
+                                <th>{f:translate(key: '{languageFile}column.finalPath')}</th>
+                                <th>{f:translate(key: '{languageFile}column.redirects')}</th>
+                                <th>{f:translate(key: '{languageFile}column.verdict')}</th>
+                                <th>{f:translate(key: '{languageFile}column.reviewed')}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <f:for each="{identity.rows}" as="row">
+                                <f:render section="Row" arguments="{row: row, languageFile: languageFile}"/>
+                            </f:for>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </f:for>
+    </f:for>
+
+    <f:if condition="{sections}">
+        <f:else>
+            <f:be.infobox state="-1">{f:translate(key: '{languageFile}empty.noResults')}</f:be.infobox>
+        </f:else>
+    </f:if>
+</f:section>
+
+<f:section name="IdentityHeading">
+    <strong>
+        <f:if condition="{identity.recordUid}">
+            <f:then>{f:translate(key: '{languageFile}identity.record', arguments: {0: identity.recordTable, 1: identity.recordUid, 2: identity.pageUid})}</f:then>
+            <f:else if="{identity.pageUid}">{f:translate(key: '{languageFile}identity.page', arguments: {0: identity.pageUid})}</f:else>
+            <f:else>{f:translate(key: '{languageFile}identity.unknown')}</f:else>
+        </f:if>
+    </strong>
+    <f:if condition="{identity.title}"> — {identity.title}</f:if>
+</f:section>
+
+<f:section name="Row">
+    <tr>
+        <td>{row.language}</td>
+        <td>{row.environment}</td>
+        <td class="text-nowrap">
+            <span class="badge badge-{row.firstStatusSeverity}">{row.firstStatus}</span>
+            <f:if condition="{row.hopCount}">
+                → <span class="badge badge-{row.finalStatusSeverity}">{row.finalStatus}</span>
+            </f:if>
+            <f:if condition="{row.abortReason}">
+                <br/><small class="text-danger">{f:translate(key: '{languageFile}abortReason.{row.abortReason}')}</small>
+            </f:if>
+        </td>
+        <td><a href="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</a></td>
+        <td>
+            <f:for each="{row.chain}" as="step" iteration="stepIteration">
+                <f:if condition="{stepIteration.isFirst}">
+                    <f:then><a href="{step.url}" target="_blank" rel="noreferrer">{step.label}</a></f:then>
+                    <f:else> → <a href="{step.url}" target="_blank" rel="noreferrer">{step.label}</a> ({step.status})</f:else>
+                </f:if>
+            </f:for>
+        </td>
+        <td>
+            <span class="badge badge-{row.verdictSeverity}">{f:translate(key: '{languageFile}verdict.{row.verdict}')}</span>
+            <f:for each="{row.warnings}" as="warning">
+                <span class="badge badge-warning" title="{f:translate(key: '{languageFile}warning.{warning}.description')}">{f:translate(key: '{languageFile}warning.{warning}')}</span>
+            </f:for>
+            <f:if condition="{row.suggestedTarget}">
+                <br/><small>{f:translate(key: '{languageFile}label.suggestedTarget')}: <code>{row.suggestedTarget}</code></small>
+            </f:if>
+            <f:if condition="{row.note}">
+                <br/><small>{f:translate(key: '{languageFile}label.note')}: {row.note}</small>
+            </f:if>
+        </td>
+        <td>
+            <button type="button" class="btn btn-link p-0" data-js="reviewedToggle" data-uid="{row.uid}" data-table="tx_otwebsitecheck_domain_model_observation">
+                <f:variable name="labelYes" value="{f:translate(key: '{languageFile}reviewed.yes')}"/>
+                <f:variable name="labelNo" value="{f:translate(key: '{languageFile}reviewed.no')}"/>
+                <f:if condition="{row.reviewed}">
+                    <f:then><span class="badge badge-success" data-js="reviewedBadge" data-label-yes="{labelYes}" data-label-no="{labelNo}">{labelYes}</span></f:then>
+                    <f:else><span class="badge badge-warning" data-js="reviewedBadge" data-label-yes="{labelYes}" data-label-no="{labelNo}">{labelNo}</span></f:else>
+                </f:if>
+            </button>
+        </td>
+        <td class="text-nowrap">
+            <be:link.editRecord uid="{row.uid}" table="tx_otwebsitecheck_domain_model_observation" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.edit')}</be:link.editRecord>
+        </td>
+    </tr>
+</f:section>
+
+</html>

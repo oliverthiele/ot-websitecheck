@@ -1,0 +1,14 @@
+# ============================================================
+# PHPStan configuration for ot_websitecheck (TYPO3 Extension)
+# ============================================================
+
+parameters:
+  level: 9
+  paths:
+    - Classes/
+  tmpDir: ../../var/cache/phpstan/ot-websitecheck
+  reportUnmatchedIgnoredErrors: false
+  checkUninitializedProperties: true
+  # TYPO3 calls inject*() methods right after construction (AutowireInjectMethodsPass).
+  additionalConstructors:
+    - OliverThiele\OtWebsitecheck\Controller\AbstractModuleController::injectModuleTemplateFactory

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en" target-language="de" datatype="plaintext"
+        original="EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf"
+        product-name="ot-websitecheck">
+    <header/>
+    <body>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check" resname="tx_otwebsitecheck_domain_model_check" approved="yes">
+        <source>Website Check Result</source>
+        <target>Website-Check-Ergebnis</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.page_uid" resname="tx_otwebsitecheck_domain_model_check.page_uid" approved="yes">
+        <source>Page UID</source>
+        <target>Seiten-UID</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.url" resname="tx_otwebsitecheck_domain_model_check.url" approved="yes">
+        <source>URL</source>
+        <target>URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.path" resname="tx_otwebsitecheck_domain_model_check.path" approved="yes">
+        <source>Path</source>
+        <target>Pfad</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.environment" resname="tx_otwebsitecheck_domain_model_check.environment" approved="yes">
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.source" resname="tx_otwebsitecheck_domain_model_check.source" approved="yes">
+        <source>Source sitemap</source>
+        <target>Quell-Sitemap</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.http_status" resname="tx_otwebsitecheck_domain_model_check.http_status" approved="yes">
+        <source>HTTP status</source>
+        <target>HTTP-Status</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.error_marker" resname="tx_otwebsitecheck_domain_model_check.error_marker" approved="yes">
+        <source>Error marker</source>
+        <target>Fehlermerkmal</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.checked_at" resname="tx_otwebsitecheck_domain_model_check.checked_at" approved="yes">
+        <source>Checked at</source>
+        <target>Geprüft am</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.reviewed" resname="tx_otwebsitecheck_domain_model_check.reviewed" approved="yes">
+        <source>Reviewed</source>
+        <target>Geprüft/Bearbeitet</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.note" resname="tx_otwebsitecheck_domain_model_check.note" approved="yes">
+        <source>Note</source>
+        <target>Notiz</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation" resname="tx_otwebsitecheck_domain_model_observation" approved="yes">
+        <source>Migration Check Observation</source>
+        <target>Migrations-Check-Beobachtung</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.tab.observation" resname="tx_otwebsitecheck_domain_model_observation.tab.observation" approved="yes">
+        <source>Observation</source>
+        <target>Beobachtung</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.run_label" resname="tx_otwebsitecheck_domain_model_observation.run_label" approved="yes">
+        <source>Run</source>
+        <target>Lauf</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.environment" resname="tx_otwebsitecheck_domain_model_observation.environment" approved="yes">
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.role" resname="tx_otwebsitecheck_domain_model_observation.role" approved="yes">
+        <source>Role</source>
+        <target>Rolle</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.sitemap_group" resname="tx_otwebsitecheck_domain_model_observation.sitemap_group" approved="yes">
+        <source>Sitemap group</source>
+        <target>Sitemap-Gruppe</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.requested_url" resname="tx_otwebsitecheck_domain_model_observation.requested_url" approved="yes">
+        <source>Requested URL</source>
+        <target>Angefragte URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.requested_path" resname="tx_otwebsitecheck_domain_model_observation.requested_path" approved="yes">
+        <source>Requested path</source>
+        <target>Angefragter Pfad</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.first_status" resname="tx_otwebsitecheck_domain_model_observation.first_status" approved="yes">
+        <source>First HTTP status</source>
+        <target>Erster HTTP-Status</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.final_url" resname="tx_otwebsitecheck_domain_model_observation.final_url" approved="yes">
+        <source>Final URL</source>
+        <target>End-URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.final_path" resname="tx_otwebsitecheck_domain_model_observation.final_path" approved="yes">
+        <source>Final path</source>
+        <target>Endpfad</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.final_status" resname="tx_otwebsitecheck_domain_model_observation.final_status" approved="yes">
+        <source>Final HTTP status</source>
+        <target>End-HTTP-Status</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.hop_count" resname="tx_otwebsitecheck_domain_model_observation.hop_count" approved="yes">
+        <source>Number of redirects</source>
+        <target>Anzahl Weiterleitungen</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.redirect_chain" resname="tx_otwebsitecheck_domain_model_observation.redirect_chain" approved="yes">
+        <source>Redirect chain</source>
+        <target>Weiterleitungskette</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.abort_reason" resname="tx_otwebsitecheck_domain_model_observation.abort_reason" approved="yes">
+        <source>Abort reason</source>
+        <target>Abbruchgrund</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.page_uid" resname="tx_otwebsitecheck_domain_model_observation.page_uid" approved="yes">
+        <source>Page UID</source>
+        <target>Seiten-UID</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.language" resname="tx_otwebsitecheck_domain_model_observation.language" approved="yes">
+        <source>Language</source>
+        <target>Sprache</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.record_table" resname="tx_otwebsitecheck_domain_model_observation.record_table" approved="yes">
+        <source>Record table</source>
+        <target>Datensatz-Tabelle</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.record_uid" resname="tx_otwebsitecheck_domain_model_observation.record_uid" approved="yes">
+        <source>Record UID</source>
+        <target>Datensatz-UID</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.verdict" resname="tx_otwebsitecheck_domain_model_observation.verdict" approved="yes">
+        <source>Verdict</source>
+        <target>Ergebnis</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.warnings" resname="tx_otwebsitecheck_domain_model_observation.warnings" approved="yes">
+        <source>Warnings</source>
+        <target>Warnungen</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.suggested_target" resname="tx_otwebsitecheck_domain_model_observation.suggested_target" approved="yes">
+        <source>Suggested target</source>
+        <target>Vorgeschlagenes Ziel</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.checked_at" resname="tx_otwebsitecheck_domain_model_observation.checked_at" approved="yes">
+        <source>Checked at</source>
+        <target>Geprüft am</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.reviewed" resname="tx_otwebsitecheck_domain_model_observation.reviewed" approved="yes">
+        <source>Reviewed</source>
+        <target>Geprüft</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_observation.note" resname="tx_otwebsitecheck_domain_model_observation.note" approved="yes">
+        <source>Note</source>
+        <target>Notiz</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot" approved="yes">
+        <source>Sitemap snapshot</source>
+        <target>Sitemap-Snapshot</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source" approved="yes">
+        <source>Source</source>
+        <target>Quelle</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.label" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.label" approved="yes">
+        <source>Label</source>
+        <target>Bezeichnung</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.start_url" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.start_url" approved="yes">
+        <source>Start URL</source>
+        <target>Start-URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.fetched_at" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.fetched_at" approved="yes">
+        <source>Fetched at</source>
+        <target>Abgerufen am</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.note" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.note" approved="yes">
+        <source>Note</source>
+        <target>Notiz</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument" resname="tx_otwebsitecheck_domain_model_sitemapdocument" approved="yes">
+        <source>Sitemap file</source>
+        <target>Sitemap-Datei</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.snapshot" resname="tx_otwebsitecheck_domain_model_sitemapdocument.snapshot" approved="yes">
+        <source>Snapshot</source>
+        <target>Snapshot</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.language" resname="tx_otwebsitecheck_domain_model_sitemapdocument.language" approved="yes">
+        <source>Language (hreflang)</source>
+        <target>Sprache (hreflang)</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.url" resname="tx_otwebsitecheck_domain_model_sitemapdocument.url" approved="yes">
+        <source>URL</source>
+        <target>URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.parent_url" resname="tx_otwebsitecheck_domain_model_sitemapdocument.parent_url" approved="yes">
+        <source>Linked from</source>
+        <target>Verlinkt von</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.sitemap_group" resname="tx_otwebsitecheck_domain_model_sitemapdocument.sitemap_group" approved="yes">
+        <source>Sitemap group</source>
+        <target>Sitemap-Gruppe</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.document_type" resname="tx_otwebsitecheck_domain_model_sitemapdocument.document_type" approved="yes">
+        <source>Type</source>
+        <target>Typ</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.http_status" resname="tx_otwebsitecheck_domain_model_sitemapdocument.http_status" approved="yes">
+        <source>HTTP status</source>
+        <target>HTTP-Status</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument.body" resname="tx_otwebsitecheck_domain_model_sitemapdocument.body" approved="yes">
+        <source>Raw content</source>
+        <target>Rohinhalt</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl" resname="tx_otwebsitecheck_domain_model_sitemapurl" approved="yes">
+        <source>Sitemap URL</source>
+        <target>Sitemap-URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.snapshot" resname="tx_otwebsitecheck_domain_model_sitemapurl.snapshot" approved="yes">
+        <source>Snapshot</source>
+        <target>Snapshot</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.document" resname="tx_otwebsitecheck_domain_model_sitemapurl.document" approved="yes">
+        <source>Sitemap file</source>
+        <target>Sitemap-Datei</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.language" resname="tx_otwebsitecheck_domain_model_sitemapurl.language" approved="yes">
+        <source>Language (hreflang)</source>
+        <target>Sprache (hreflang)</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.sitemap_group" resname="tx_otwebsitecheck_domain_model_sitemapurl.sitemap_group" approved="yes">
+        <source>Sitemap group</source>
+        <target>Sitemap-Gruppe</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.url" resname="tx_otwebsitecheck_domain_model_sitemapurl.url" approved="yes">
+        <source>URL</source>
+        <target>URL</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.path" resname="tx_otwebsitecheck_domain_model_sitemapurl.path" approved="yes">
+        <source>Path</source>
+        <target>Pfad</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapurl.lastmod" resname="tx_otwebsitecheck_domain_model_sitemapurl.lastmod" approved="yes">
+        <source>Last modified (as listed)</source>
+        <target>Zuletzt geändert (laut Sitemap)</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.status" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.status" approved="yes">
+        <source>Import status</source>
+        <target>Import-Status</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun" resname="tx_otwebsitecheck_domain_model_migrationrun" approved="yes">
+        <source>Migration check run</source>
+        <target>Lauf des Migrations-Checks</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.run_label" resname="tx_otwebsitecheck_domain_model_migrationrun.run_label" approved="yes">
+        <source>Run</source>
+        <target>Lauf</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.reference_snapshot" resname="tx_otwebsitecheck_domain_model_migrationrun.reference_snapshot" approved="yes">
+        <source>Reference snapshot (before)</source>
+        <target>Referenz-Snapshot (vorher)</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.target_snapshot" resname="tx_otwebsitecheck_domain_model_migrationrun.target_snapshot" approved="yes">
+        <source>Target snapshot (after)</source>
+        <target>Ziel-Snapshot (nachher)</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.target_host" resname="tx_otwebsitecheck_domain_model_migrationrun.target_host" approved="yes">
+        <source>Target host</source>
+        <target>Ziel-Host</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.started_at" resname="tx_otwebsitecheck_domain_model_migrationrun.started_at" approved="yes">
+        <source>Started at</source>
+        <target>Gestartet am</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
