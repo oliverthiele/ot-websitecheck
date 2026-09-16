@@ -10,10 +10,14 @@ namespace OliverThiele\OtWebsitecheck\Domain\ValueObject;
  */
 final readonly class SiteBase
 {
+    /**
+     * @param list<SitemapGroupRoute> $sitemapGroupRoutes Routes that put the sitemap group into the path.
+     */
     public function __construct(
         public string $siteIdentifier,
         public string $url,
         public string $sitemapPath,
+        public array $sitemapGroupRoutes = [],
     ) {}
 
     public function getHost(): string

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] — 2026-09-16
+
+### Fixed
+
+- Fix the sitemap group of sub-sitemaps whose route puts the group into the
+  path, e.g. `/sitemap-type/pages/sitemap.xml` from the EXT:seo site set
+  `typo3/seo-sitemap` (TYPO3 v14.1+); their URLs were stored without a group.
+  The routes are read from the site configuration, site sets included, and
+  from `typo3/seo-sitemap` for hosts outside the configured sites
+
 ## [0.1.0] — 2026-09-15
 
 First alpha release.

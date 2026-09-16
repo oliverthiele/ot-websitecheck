@@ -164,7 +164,8 @@ search engine does:
    it, at the path the site configuration maps to the sitemap page type
    `1533906435` — e.g. `https://www.example.com/de/sitemap.xml`. Without such a
    mapping, `?type=1533906435` is used, which every TYPO3 site with EXT:seo
-   answers. The EXT:seo site set "Sitemap" ships this mapping:
+   answers. The EXT:seo site set `typo3/seo-sitemap` ships this mapping; a
+   site without the set needs it in its own configuration:
 
    ```yaml
    # config/sites/<site>/config.yaml
@@ -180,9 +181,28 @@ search engine does:
 Where a site does not fit this — no hreflang tags, a different sitemap location
 — use the CLI command with `--sitemap`.
 
-Sitemap groups are read from the sub-sitemap URLs: `?sitemap=pages` (TYPO3 v13)
-and `?tx_seo[sitemap]=pages` (TYPO3 v14) both give the group `pages`, so
-snapshots of both versions are comparable.
+Sitemap groups are read from the sub-sitemap URLs, so snapshots of TYPO3 v13
+and v14 are comparable. All of these give the group `pages`:
+
+| Sub-sitemap URL | Where it comes from |
+|-----------------|---------------------|
+| `/sitemap.xml?sitemap=pages` | TYPO3 v13 |
+| `/sitemap.xml?tx_seo[sitemap]=pages` | TYPO3 v14 |
+| `/sitemap-type/pages/sitemap.xml` | TYPO3 v14.1+ with the site set `typo3/seo-sitemap`, whose route enhancer moves the group into the path |
+
+A group in the path is only recognised through a `Simple` route enhancer whose
+`_arguments` map a placeholder to `tx_seo/sitemap` (or `sitemap` in v13) and
+whose `routePath` has a static part besides the placeholder. The enhancers come
+from the site the URL belongs to, site sets included. For a host outside the
+configured sites, the enhancers of `typo3/seo-sitemap` are assumed. A
+`StaticValueMapper` on the placeholder is applied, including its `localeMap`;
+a value it does not list gives no group, as it gives no page in TYPO3. The set
+only maps `pages` — every other provider keeps its group in the query string.
+
+A sub-sitemap whose group cannot be read is listed under "(no sitemap group)"
+in the module, together with the sitemap index. The group is stored at import
+time: a snapshot imported before a routing change keeps the groups it was
+imported with.
 
 A stylesheet warning when opening a sitemap in the browser ("parsing the XSLT
 stylesheet failed") usually means the webserver does not strip the cache-busting

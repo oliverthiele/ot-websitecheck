@@ -7,6 +7,7 @@ namespace OliverThiele\OtWebsitecheck\Tests\Unit\Service;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapDocument;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
+use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
 use OliverThiele\OtWebsitecheck\Service\SitemapDocumentCrawler;
 use OliverThiele\OtWebsitecheck\Service\SitemapGroupExtractor;
 use PHPUnit\Framework\Attributes\Test;
@@ -92,6 +93,8 @@ final class SitemapDocumentCrawlerTest extends UnitTestCase
             static fn(string $url): FetchedPage => $pages[$url] ?? new FetchedPage(404, ''),
         );
 
-        return (new SitemapDocumentCrawler($pageFetcher, new SitemapGroupExtractor()))->crawl('https://www.example.com/sitemap.xml', 5);
+        $sitemapGroupExtractor = new SitemapGroupExtractor(self::createStub(SiteBaseProvider::class));
+
+        return (new SitemapDocumentCrawler($pageFetcher, $sitemapGroupExtractor))->crawl('https://www.example.com/sitemap.xml', 5);
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SiteBase;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapGroupRoute;
+use TYPO3\CMS\Core\Site\Set\SetRegistry;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
 /**
@@ -21,8 +23,20 @@ class SiteBaseProvider
 
     public const string DEFAULT_SITEMAP_PATH = 'sitemap.xml';
 
+    /**
+     * EXT:seo site set whose route enhancers put the sitemap group into the path.
+     */
+    public const string SEO_SITEMAP_SET = 'typo3/seo-sitemap';
+
+    /**
+     * Route arguments that carry the sitemap group: namespaced since TYPO3 v14
+     * (#104422), plain before.
+     */
+    private const array SITEMAP_ROUTE_ARGUMENTS = ['tx_seo/sitemap', 'sitemap'];
+
     public function __construct(
         private readonly SiteFinder $siteFinder,
+        private readonly SetRegistry $setRegistry,
     ) {}
 
     /**
@@ -34,6 +48,8 @@ class SiteBaseProvider
         foreach ($this->siteFinder->getAllSites() as $site) {
             $configuration = $site->getConfiguration();
             $sitemapPath = $this->resolveSitemapPath($configuration);
+            // Contains the route enhancers of the site sets as well — TYPO3 merges them in.
+            $sitemapGroupRoutes = $this->resolveSitemapGroupRoutes($configuration['routeEnhancers'] ?? null);
 
             $urls = [$configuration['base'] ?? null];
             $baseVariants = $configuration['baseVariants'] ?? null;
@@ -43,7 +59,7 @@ class SiteBaseProvider
 
             foreach ($urls as $url) {
                 if (is_string($url) && parse_url($url, PHP_URL_HOST) !== null) {
-                    $bases[$url] = new SiteBase($site->getIdentifier(), $url, $sitemapPath);
+                    $bases[$url] = new SiteBase($site->getIdentifier(), $url, $sitemapPath, $sitemapGroupRoutes);
                 }
             }
         }
@@ -69,6 +85,23 @@ class SiteBaseProvider
     public function resolveSitemapPathForUrl(string $url): string
     {
         return $this->findByHostOf($url)->sitemapPath ?? self::DEFAULT_SITEMAP_PATH;
+    }
+
+    /**
+     * The routes of the site whose base has the host of $url. A URL outside
+     * the configured sites gets the routes of the EXT:seo sitemap set, the
+     * TYPO3 default for sites using it.
+     *
+     * @return list<SitemapGroupRoute>
+     */
+    public function resolveSitemapGroupRoutesForUrl(string $url): array
+    {
+        $base = $this->findByHostOf($url);
+        if ($base !== null) {
+            return $base->sitemapGroupRoutes;
+        }
+
+        return $this->resolveSitemapGroupRoutes($this->setRegistry->getSet(self::SEO_SITEMAP_SET)?->routeEnhancers);
     }
 
     public function isConfiguredHost(string $url): bool
@@ -113,5 +146,94 @@ class SiteBaseProvider
         }
 
         return '?type=' . self::SITEMAP_PAGE_TYPE;
+    }
+
+    /**
+     * Simple route enhancers that map the sitemap argument into the path, like
+     * "sitemap-type/{sitemap}" in the EXT:seo sitemap set.
+     *
+     * @return list<SitemapGroupRoute>
+     */
+    private function resolveSitemapGroupRoutes(mixed $routeEnhancers): array
+    {
+        $routes = [];
+        foreach (is_array($routeEnhancers) ? $routeEnhancers : [] as $routeEnhancer) {
+            if (!is_array($routeEnhancer) || ($routeEnhancer['type'] ?? null) !== 'Simple') {
+                continue;
+            }
+            $routePath = $routeEnhancer['routePath'] ?? null;
+            $arguments = $routeEnhancer['_arguments'] ?? null;
+            if (!is_string($routePath) || !is_array($arguments)) {
+                continue;
+            }
+            foreach ($arguments as $placeholder => $argument) {
+                if (!is_string($placeholder) || !in_array($argument, self::SITEMAP_ROUTE_ARGUMENTS, true)) {
+                    continue;
+                }
+                $pattern = $this->buildRoutePattern($routePath, $placeholder);
+                if ($pattern !== null) {
+                    $routes[] = new SitemapGroupRoute($pattern, $this->resolveValueMap($routeEnhancer['aspects'] ?? null, $placeholder));
+                }
+            }
+        }
+
+        return $routes;
+    }
+
+    /**
+     * Turns "sitemap-type/{sitemap}" into a pattern that finds the route
+     * anywhere in a path — after a language prefix, before the page type
+     * suffix. A route without a static part would match any path segment,
+     * so it is not used.
+     */
+    private function buildRoutePattern(string $routePath, string $placeholder): ?string
+    {
+        $parts = preg_split('/(\{[^}]+\})/', trim($routePath, '/'), -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) ?: [];
+        $pattern = '';
+        $hasGroup = false;
+        $hasStaticPart = false;
+        foreach ($parts as $part) {
+            if ($part === '{' . $placeholder . '}') {
+                $pattern .= '([^/]+)';
+                $hasGroup = true;
+            } elseif (str_starts_with($part, '{')) {
+                $pattern .= '[^/]+';
+            } else {
+                $pattern .= preg_quote($part, '#');
+                $hasStaticPart = true;
+            }
+        }
+
+        return $hasGroup && $hasStaticPart ? '#(?:^|/)' . $pattern . '(?:/|$)#' : null;
+    }
+
+    /**
+     * Route value => sitemap group from a StaticValueMapper aspect, including
+     * its localeMap entries.
+     *
+     * @return array<string, string>
+     */
+    private function resolveValueMap(mixed $aspects, string $placeholder): array
+    {
+        $aspect = is_array($aspects) ? ($aspects[$placeholder] ?? null) : null;
+        if (!is_array($aspect) || ($aspect['type'] ?? null) !== 'StaticValueMapper') {
+            return [];
+        }
+        $maps = [$aspect['map'] ?? null];
+        $localeMaps = $aspect['localeMap'] ?? null;
+        foreach (is_array($localeMaps) ? $localeMaps : [] as $localeMap) {
+            $maps[] = is_array($localeMap) ? ($localeMap['map'] ?? null) : null;
+        }
+
+        $valueMap = [];
+        foreach ($maps as $map) {
+            foreach (is_array($map) ? $map : [] as $routeValue => $group) {
+                if (is_scalar($group)) {
+                    $valueMap[(string)$routeValue] = (string)$group;
+                }
+            }
+        }
+
+        return $valueMap;
     }
 }
