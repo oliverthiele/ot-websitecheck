@@ -56,8 +56,19 @@ URL of the live site still leads to the same page or record on the new one.
 
 ## Installation
 
+The package is not on Packagist yet, so add its repository first:
+
+```json
+"repositories": {
+    "oliverthiele/ot-websitecheck": {
+        "type": "vcs",
+        "url": "https://github.com/oliverthiele/ot-websitecheck.git"
+    }
+}
+```
+
 ```bash
-composer require --dev oliverthiele/ot-websitecheck
+composer require oliverthiele/ot-websitecheck
 ```
 
 Then update the database schema:
@@ -68,8 +79,11 @@ vendor/bin/typo3 database:updateschema
 ddev typo3 database:updateschema
 ```
 
-Intended as a `require-dev` dependency — it is a QA tool and not meant to run
-on a production instance.
+A regular dependency, not `require-dev`: the checks run where the site runs.
+A relaunch is compared on the new environment, and the snapshot of the old site
+has to be imported there **before** the switch — a deployment with `--no-dev`
+would leave the tool out exactly where it is needed. Leave it out of production
+if that instance never runs a check.
 
 ---
 
