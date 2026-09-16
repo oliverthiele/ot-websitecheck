@@ -7,6 +7,7 @@ namespace OliverThiele\OtWebsitecheck\Tests\Unit\Service;
 use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Site\Entity\Site;
+use TYPO3\CMS\Core\Site\Set\SetRegistry;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
@@ -88,6 +89,6 @@ final class SiteBaseProviderTest extends UnitTestCase
         $siteFinder = self::createStub(SiteFinder::class);
         $siteFinder->method('getAllSites')->willReturn(['main' => $site]);
 
-        return new SiteBaseProvider($siteFinder);
+        return new SiteBaseProvider($siteFinder, self::createStub(SetRegistry::class));
     }
 }
