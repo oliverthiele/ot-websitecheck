@@ -35,10 +35,17 @@ CREATE TABLE tx_otwebsitecheck_domain_model_observation
 # Table structure for table 'tx_otwebsitecheck_domain_model_sitemapsnapshot'
 #
 # Columns are generated from TCA; only the indexes need to be declared here.
+# uuid is declared as a nullable string: records created before the column
+# existed have none until they are exported, which TCA type "uuid" (a
+# NOT NULL GUID without default) does not allow on every database. NULL keeps
+# the unique index valid for all of them.
 #
 CREATE TABLE tx_otwebsitecheck_domain_model_sitemapsnapshot
 (
-	KEY label (label)
+	uuid varchar(36) DEFAULT NULL,
+
+	KEY label (label),
+	UNIQUE KEY uuid (uuid)
 );
 
 #
@@ -65,9 +72,12 @@ CREATE TABLE tx_otwebsitecheck_domain_model_sitemapurl
 #
 # Table structure for table 'tx_otwebsitecheck_domain_model_migrationrun'
 #
-# Columns are generated from TCA; only the indexes need to be declared here.
+# Columns are generated from TCA; uuid as for the snapshot table.
 #
 CREATE TABLE tx_otwebsitecheck_domain_model_migrationrun
 (
-	KEY run_label (run_label)
+	uuid varchar(36) DEFAULT NULL,
+
+	KEY run_label (run_label),
+	UNIQUE KEY uuid (uuid)
 );

@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
 use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Remembers which sitemap snapshots a migration check run compared, so the
@@ -16,9 +17,12 @@ class MigrationRunRepository extends AbstractRepository
     public const string TABLE = 'tx_otwebsitecheck_domain_model_migrationrun';
 
     /**
-     * A re-run with the same label replaces the stored snapshots of the run.
+     * A re-run with the same label replaces the stored snapshots of the run
+     * and keeps its uuid.
+     *
+     * @param string $uuid Kept when a run is restored from an export; a new one otherwise.
      */
-    public function storeRun(string $runLabel, int $referenceSnapshotUid, int $targetSnapshotUid, string $targetHost, int $startedAt): void
+    public function storeRun(string $runLabel, int $referenceSnapshotUid, int $targetSnapshotUid, string $targetHost, int $startedAt, string $uuid = ''): void
     {
         $values = [
             'reference_snapshot' => $referenceSnapshotUid,
@@ -28,11 +32,12 @@ class MigrationRunRepository extends AbstractRepository
             'tstamp' => time(),
         ];
 
-        if ($this->findRow($runLabel) === null) {
+        if ($this->findRow('run_label', $runLabel) === null) {
             $this->connectionPool->getConnectionForTable(self::TABLE)->insert(self::TABLE, $values + [
                 'pid' => 0,
                 'crdate' => time(),
                 'run_label' => $runLabel,
+                'uuid' => $uuid !== '' ? $uuid : Uuid::v7()->toRfc4122(),
             ]);
             return;
         }
@@ -47,21 +52,34 @@ class MigrationRunRepository extends AbstractRepository
     }
 
     /**
-     * @return array{referenceSnapshotUid: int, targetSnapshotUid: int, targetHost: string, startedAt: int}|null
+     * @return array{uid: int, uuid: string, runLabel: string, referenceSnapshotUid: int, targetSnapshotUid: int, targetHost: string, startedAt: int}|null
      */
     public function findByLabel(string $runLabel): ?array
     {
-        $row = $this->findRow($runLabel);
-        if ($row === null) {
-            return null;
-        }
+        $row = $this->findRow('run_label', $runLabel);
 
-        return [
-            'referenceSnapshotUid' => RowValue::int($row, 'reference_snapshot'),
-            'targetSnapshotUid' => RowValue::int($row, 'target_snapshot'),
-            'targetHost' => RowValue::string($row, 'target_host'),
-            'startedAt' => RowValue::int($row, 'started_at'),
-        ];
+        return $row === null ? null : $this->mapRow($row);
+    }
+
+    /**
+     * @return array{uid: int, uuid: string, runLabel: string, referenceSnapshotUid: int, targetSnapshotUid: int, targetHost: string, startedAt: int}|null
+     */
+    public function findByUuid(string $uuid): ?array
+    {
+        $row = $this->findRow('uuid', $uuid);
+
+        return $row === null ? null : $this->mapRow($row);
+    }
+
+    /**
+     * Runs created before the uuid column existed get one on first use.
+     *
+     * @param array{uid: int, uuid: string} $run
+     * @return string the uuid of the run
+     */
+    public function ensureUuid(array $run): string
+    {
+        return $this->assignMissingUuid(self::TABLE, $run['uid'], $run['uuid']);
     }
 
     /**
@@ -94,17 +112,36 @@ class MigrationRunRepository extends AbstractRepository
     }
 
     /**
+     * @param array<string, mixed> $row
+     * @return array{uid: int, uuid: string, runLabel: string, referenceSnapshotUid: int, targetSnapshotUid: int, targetHost: string, startedAt: int}
+     */
+    private function mapRow(array $row): array
+    {
+        return [
+            'uid' => RowValue::int($row, 'uid'),
+            'uuid' => RowValue::string($row, 'uuid'),
+            'runLabel' => RowValue::string($row, 'run_label'),
+            'referenceSnapshotUid' => RowValue::int($row, 'reference_snapshot'),
+            'targetSnapshotUid' => RowValue::int($row, 'target_snapshot'),
+            'targetHost' => RowValue::string($row, 'target_host'),
+            'startedAt' => RowValue::int($row, 'started_at'),
+        ];
+    }
+
+    /**
+     * @param 'run_label'|'uuid' $field
      * @return array<string, mixed>|null
      */
-    private function findRow(string $runLabel): ?array
+    private function findRow(string $field, string $value): ?array
     {
-        if ($runLabel === '') {
+        if ($value === '') {
             return null;
         }
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         $row = $queryBuilder->select('*')
             ->from(self::TABLE)
-            ->where($queryBuilder->expr()->eq('run_label', $queryBuilder->createNamedParameter($runLabel)))
+            ->where($queryBuilder->expr()->eq($field, $queryBuilder->createNamedParameter($value)))
+            ->setMaxResults(1)
             ->executeQuery()
             ->fetchAssociative();
 

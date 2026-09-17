@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Add `--reference-run` to `websitecheck:migrationcheck`: the reference rows
+  are copied from an earlier run instead of requested again, so a relaunch can
+  still be compared with the old site once the new one has replaced it
+- Add `websitecheck:exportsnapshots` and `websitecheck:importsnapshots`: sitemap
+  snapshots and migration check runs with their results are written into a
+  gzip-compressed JSON archive and read back into another or a replaced
+  database; records that are already there are skipped
+- Add a unique uuid to sitemap snapshots and migration check runs; existing
+  records get one on their first export. Run `database:updateschema` after the
+  update
+- Add a relaunch workflow to the README: lock and export the live state on
+  staging, and compare the new live site with the stored reference results
+
 ## [0.2.0] — 2026-09-17
 
 ### Added

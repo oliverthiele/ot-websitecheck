@@ -29,6 +29,18 @@ services:
         command: 'websitecheck:cleanupsnapshots'
         description: 'Remove old sitemap snapshots; locked snapshots, snapshots with a note and those used by a migration check run are kept.'
 
+  OliverThiele\OtWebsitecheck\Command\ExportSnapshotsCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:exportsnapshots'
+        description: 'Write sitemap snapshots and migration check runs into an archive file.'
+
+  OliverThiele\OtWebsitecheck\Command\ImportSnapshotsCommand:
+    tags:
+      - name: console.command
+        command: 'websitecheck:importsnapshots'
+        description: 'Read sitemap snapshots and migration check runs from an archive file.'
+
   OliverThiele\OtWebsitecheck\Command\CheckSitemapCommand:
     tags:
       - name: console.command

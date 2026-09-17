@@ -9,6 +9,7 @@ use OliverThiele\OtWebsitecheck\Domain\Model\SitemapSnapshot;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapDocument;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Stores sitemap snapshots with their documents and page URLs. Counts per
@@ -28,7 +29,10 @@ class SitemapSnapshotRepository extends AbstractRepository
         return $this->findByLabel($label) !== null;
     }
 
-    public function createSnapshot(string $label, string $startUrl, string $note, int $fetchedAt): int
+    /**
+     * @param string $uuid Kept when a snapshot is restored from an export; a new one otherwise.
+     */
+    public function createSnapshot(string $label, string $startUrl, string $note, int $fetchedAt, string $uuid = ''): int
     {
         $connection = $this->connectionPool->getConnectionForTable(self::TABLE_SNAPSHOT);
         $now = time();
@@ -36,6 +40,7 @@ class SitemapSnapshotRepository extends AbstractRepository
             'pid' => 0,
             'tstamp' => $now,
             'crdate' => $now,
+            'uuid' => $uuid !== '' ? $uuid : Uuid::v7()->toRfc4122(),
             'label' => $label,
             'start_url' => $startUrl,
             'fetched_at' => $fetchedAt,
@@ -109,6 +114,32 @@ class SitemapSnapshotRepository extends AbstractRepository
             ->fetchAssociative();
 
         return is_array($row) ? SitemapSnapshot::fromRow($row) : null;
+    }
+
+    public function findByUuid(string $uuid): ?SitemapSnapshot
+    {
+        if ($uuid === '') {
+            return null;
+        }
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_SNAPSHOT);
+        $row = $queryBuilder->select('*')
+            ->from(self::TABLE_SNAPSHOT)
+            ->where($queryBuilder->expr()->eq('uuid', $queryBuilder->createNamedParameter($uuid)))
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchAssociative();
+
+        return is_array($row) ? SitemapSnapshot::fromRow($row) : null;
+    }
+
+    /**
+     * Snapshots created before the uuid column existed get one on first use.
+     *
+     * @return string the uuid of the snapshot
+     */
+    public function ensureUuid(SitemapSnapshot $snapshot): string
+    {
+        return $this->assignMissingUuid(self::TABLE_SNAPSHOT, $snapshot->uid, $snapshot->uuid);
     }
 
     public function findByLabel(string $label): ?SitemapSnapshot
@@ -220,6 +251,56 @@ class SitemapSnapshotRepository extends AbstractRepository
                 'type' => RowValue::string($row, 'document_type'),
                 'httpStatus' => RowValue::int($row, 'http_status'),
                 'urlCount' => $urlCounts[$uid] ?? 0,
+            ];
+        }
+
+        return $documents;
+    }
+
+    /**
+     * Every sitemap file of a snapshot with its raw body and its page URLs,
+     * as an export needs them.
+     *
+     * @return list<array{language: string, document: SitemapDocument}> in import order
+     */
+    public function findDocumentsWithUrls(int $snapshotUid): array
+    {
+        $urlQueryBuilder = $this->createQueryBuilder(self::TABLE_URL);
+        $urlRows = $urlQueryBuilder->select('document', 'url', 'lastmod')
+            ->from(self::TABLE_URL)
+            ->where($urlQueryBuilder->expr()->eq('snapshot', $urlQueryBuilder->createNamedParameter($snapshotUid, ParameterType::INTEGER)))
+            ->orderBy('uid', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
+        $entriesByDocument = [];
+        foreach ($urlRows as $urlRow) {
+            $entriesByDocument[RowValue::int($urlRow, 'document')][] = [
+                'url' => RowValue::string($urlRow, 'url'),
+                'lastmod' => RowValue::string($urlRow, 'lastmod'),
+            ];
+        }
+
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_DOCUMENT);
+        $rows = $queryBuilder->select('*')
+            ->from(self::TABLE_DOCUMENT)
+            ->where($queryBuilder->expr()->eq('snapshot', $queryBuilder->createNamedParameter($snapshotUid, ParameterType::INTEGER)))
+            ->orderBy('uid', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $documents = [];
+        foreach ($rows as $row) {
+            $documents[] = [
+                'language' => RowValue::string($row, 'language'),
+                'document' => new SitemapDocument(
+                    url: RowValue::string($row, 'url'),
+                    parentUrl: RowValue::string($row, 'parent_url'),
+                    sitemapGroup: RowValue::string($row, 'sitemap_group'),
+                    type: RowValue::string($row, 'document_type'),
+                    httpStatus: RowValue::int($row, 'http_status'),
+                    body: RowValue::string($row, 'body'),
+                    entries: $entriesByDocument[RowValue::int($row, 'uid')] ?? [],
+                ),
             ];
         }
 
