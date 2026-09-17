@@ -54,6 +54,19 @@ final class SnapshotRetentionPolicyTest extends UnitTestCase
     }
 
     #[Test]
+    public function lockedSnapshotsAreKeptEvenWhenOldOrIncomplete(): void
+    {
+        $snapshots = [
+            $this->snapshot(1, 'https://www.example.com/', self::NOW - 90_000, SitemapSnapshot::STATUS_IMPORTING, locked: true),
+            $this->snapshot(2, 'https://www.example.com/', self::NOW - 400, locked: true),
+            $this->snapshot(3, 'https://www.example.com/', self::NOW - 300),
+            $this->snapshot(4, 'https://www.example.com/', self::NOW - 200),
+        ];
+
+        self::assertSame([3], $this->selectedUids($snapshots, [], 1));
+    }
+
+    #[Test]
     public function keepBelowOneStillKeepsTheNewestSnapshot(): void
     {
         $snapshots = [
@@ -76,8 +89,8 @@ final class SnapshotRetentionPolicyTest extends UnitTestCase
         return array_map(static fn(SitemapSnapshot $snapshot): int => $snapshot->uid, $selected);
     }
 
-    private function snapshot(int $uid, string $startUrl, int $fetchedAt, string $status = SitemapSnapshot::STATUS_COMPLETE, string $note = ''): SitemapSnapshot
+    private function snapshot(int $uid, string $startUrl, int $fetchedAt, string $status = SitemapSnapshot::STATUS_COMPLETE, string $note = '', bool $locked = false): SitemapSnapshot
     {
-        return new SitemapSnapshot($uid, 'snapshot ' . $uid, $startUrl, $fetchedAt, $status, $note);
+        return new SitemapSnapshot($uid, 'snapshot ' . $uid, $startUrl, $fetchedAt, $status, $note, $locked);
     }
 }

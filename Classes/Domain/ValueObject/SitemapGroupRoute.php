@@ -19,7 +19,8 @@ final readonly class SitemapGroupRoute
     public function __construct(
         public string $pattern,
         public array $valueMap = [],
-    ) {}
+    ) {
+    }
 
     /**
      * The sitemap group in $path, or null if the route does not match.

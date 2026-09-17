@@ -22,13 +22,19 @@ use OliverThiele\OtWebsitecheck\Exception\SitemapImportException;
  */
 class SitemapSnapshotImporter
 {
+    /**
+     * The time in a default label; the module does not repeat it next to the label.
+     */
+    public const string DEFAULT_LABEL_DATE_FORMAT = 'Y-m-d H:i';
+
     public const int MAXIMUM_LABEL_LENGTH = 100;
 
     public function __construct(
         private readonly LanguageSitemapDiscovery $languageSitemapDiscovery,
         private readonly SitemapDocumentCrawler $sitemapDocumentCrawler,
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $requestOptions
@@ -46,7 +52,7 @@ class SitemapSnapshotImporter
     {
         $host = parse_url($startUrl, PHP_URL_HOST);
 
-        return (is_string($host) ? $host : 'snapshot') . ' ' . date('Y-m-d H:i', $time);
+        return (is_string($host) ? $host : 'snapshot') . ' ' . date(self::DEFAULT_LABEL_DATE_FORMAT, $time);
     }
 
     /**
@@ -101,10 +107,15 @@ class SitemapSnapshotImporter
      * Completes the snapshot. A snapshot without a single page URL is of no use
      * for any comparison and is removed again.
      *
+     * The lock is only set here, together with the completion: an empty
+     * snapshot is still removed, and an import that never finishes stays
+     * unlocked for the cleanup.
+     *
+     * @param bool $lock Lock the completed snapshot against deletion.
      * @return int number of stored page URLs
      * @throws SitemapImportException
      */
-    public function finishSnapshot(int $snapshotUid): int
+    public function finishSnapshot(int $snapshotUid, bool $lock = false): int
     {
         $this->assertImporting($snapshotUid);
 
@@ -113,7 +124,7 @@ class SitemapSnapshotImporter
             $this->sitemapSnapshotRepository->deleteSnapshot($snapshotUid);
             throw new SitemapImportException(SitemapImportException::REASON_NO_URLS, 'No page URLs found — the snapshot was not stored.');
         }
-        $this->sitemapSnapshotRepository->markComplete($snapshotUid);
+        $this->sitemapSnapshotRepository->markComplete($snapshotUid, $lock);
 
         return $urlCount;
     }

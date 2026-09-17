@@ -15,7 +15,8 @@ class PageFetcher
 {
     public function __construct(
         private readonly RequestFactory $requestFactory,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $requestOptions Additional Guzzle options, e.g. ['auth' => ['user', 'pass']].

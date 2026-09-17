@@ -29,7 +29,8 @@ class PageUidResolver
 {
     public function __construct(
         private readonly SiteFinder $siteFinder,
-    ) {}
+    ) {
+    }
 
     public function resolve(string $url): ?int
     {

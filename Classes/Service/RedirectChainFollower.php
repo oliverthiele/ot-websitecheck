@@ -20,7 +20,8 @@ class RedirectChainFollower
 
     public function __construct(
         private readonly RequestFactory $requestFactory,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $requestOptions Guzzle options. An "auth" entry is only sent to the host of $url,

@@ -21,7 +21,8 @@ class ToggleReviewedAjaxController
         private readonly CheckResultRepository $checkResultRepository,
         private readonly ObservationRepository $observationRepository,
         private readonly BackendAccessGuard $backendAccessGuard,
-    ) {}
+    ) {
+    }
 
     public function toggleAction(ServerRequestInterface $request): ResponseInterface
     {

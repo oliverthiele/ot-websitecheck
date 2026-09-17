@@ -12,7 +12,8 @@ final readonly class FetchedPage
     public function __construct(
         public int $httpStatus,
         public string $body,
-    ) {}
+    ) {
+    }
 
     public function isConnectionError(): bool
     {

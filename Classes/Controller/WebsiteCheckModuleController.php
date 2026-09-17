@@ -20,7 +20,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
     public function __construct(
         private readonly CheckResultRepository $checkResultRepository,
-    ) {}
+    ) {
+    }
 
     public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false): ResponseInterface
     {

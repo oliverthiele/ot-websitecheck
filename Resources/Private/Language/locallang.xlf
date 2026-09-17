@@ -197,6 +197,18 @@
       <trans-unit id="flash.deleteSnapshot.notFound" resname="flash.deleteSnapshot.notFound">
         <source>The snapshot does not exist (any more).</source>
       </trans-unit>
+      <trans-unit id="flash.deleteSnapshot.locked" resname="flash.deleteSnapshot.locked">
+        <source>The snapshot is locked and was not deleted. Unlock it first.</source>
+      </trans-unit>
+      <trans-unit id="button.lock.locked" resname="button.lock.locked">
+        <source>Locked — neither the module nor the cleanup command deletes this snapshot. Click to unlock.</source>
+      </trans-unit>
+      <trans-unit id="button.lock.unlocked" resname="button.lock.unlocked">
+        <source>Not locked. Click to protect this snapshot from deletion.</source>
+      </trans-unit>
+      <trans-unit id="error.lock.requestFailed" resname="error.lock.requestFailed">
+        <source>The lock could not be changed.</source>
+      </trans-unit>
       <trans-unit id="documentType.invalid" resname="documentType.invalid">
         <source>no valid sitemap</source>
       </trans-unit>
@@ -204,7 +216,7 @@
         <source>not reachable</source>
       </trans-unit>
       <trans-unit id="snapshot.summary" resname="snapshot.summary">
-        <source>%1$s languages · %2$s sitemap files · %3$s URLs</source>
+        <source>%1$s languages · %2$s sitemap indexes · %3$s sitemaps · %4$s URLs</source>
       </trans-unit>
       <trans-unit id="snapshot.failedCount" resname="snapshot.failedCount">
         <source>%1$s failed</source>
@@ -215,14 +227,8 @@
       <trans-unit id="snapshot.index" resname="snapshot.index">
         <source>Sitemap index</source>
       </trans-unit>
-      <trans-unit id="snapshot.ok" resname="snapshot.ok">
-        <source>ok</source>
-      </trans-unit>
       <trans-unit id="column.sitemapGroup" resname="column.sitemapGroup">
         <source>Sitemap group</source>
-      </trans-unit>
-      <trans-unit id="column.files" resname="column.files">
-        <source>Files</source>
       </trans-unit>
       <trans-unit id="column.urls" resname="column.urls">
         <source>URLs</source>
@@ -305,17 +311,32 @@
       <trans-unit id="error.import.requestFailed" resname="error.import.requestFailed">
         <source>The request failed. Check the connection and the Basic Auth credentials.</source>
       </trans-unit>
-      <trans-unit id="column.state" resname="column.state">
-        <source>Status</source>
-      </trans-unit>
       <trans-unit id="column.sitemap" resname="column.sitemap">
         <source>Sitemap</source>
       </trans-unit>
       <trans-unit id="button.openSitemap" resname="button.openSitemap">
         <source>Open</source>
       </trans-unit>
-      <trans-unit id="button.showFiles" resname="button.showFiles">
-        <source>%1$s files</source>
+      <trans-unit id="format.thousandsSeparator" resname="format.thousandsSeparator">
+        <source>,</source>
+      </trans-unit>
+      <trans-unit id="column.sitemaps" resname="column.sitemaps">
+        <source>Sitemaps</source>
+      </trans-unit>
+      <trans-unit id="column.sitemapGroups" resname="column.sitemapGroups">
+        <source>Sitemap groups</source>
+      </trans-unit>
+      <trans-unit id="column.actions" resname="column.actions">
+        <source>Actions</source>
+      </trans-unit>
+      <trans-unit id="snapshot.missing" resname="snapshot.missing">
+        <source>missing</source>
+      </trans-unit>
+      <trans-unit id="button.expandAll" resname="button.expandAll">
+        <source>Expand all languages</source>
+      </trans-unit>
+      <trans-unit id="button.collapseAll" resname="button.collapseAll">
+        <source>Collapse all languages</source>
       </trans-unit>
       <trans-unit id="run.snapshots" resname="run.snapshots">
         <source>Compares snapshot "%1$s" (before) with snapshot "%2$s" (after), requested on %3$s</source>

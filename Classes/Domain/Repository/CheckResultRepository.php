@@ -156,7 +156,7 @@ class CheckResultRepository extends AbstractRepository
      */
     public function toggleReviewed(int $uid): ?bool
     {
-        return $this->toggleReviewedFlag(self::TABLE, $uid);
+        return $this->toggleFlag(self::TABLE, 'reviewed', $uid);
     }
 
     public function deleteAll(string $environment = ''): int

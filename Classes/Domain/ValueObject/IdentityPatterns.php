@@ -31,7 +31,8 @@ final readonly class IdentityPatterns
         public string $pageUid = self::DEFAULT_PAGE_UID,
         public string $language = self::DEFAULT_LANGUAGE,
         public string $record = self::DEFAULT_RECORD,
-    ) {}
+    ) {
+    }
 
     /**
      * @return list<string> The patterns PCRE refuses to compile.

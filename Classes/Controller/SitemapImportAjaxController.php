@@ -31,7 +31,8 @@ class SitemapImportAjaxController
         private readonly SitemapSnapshotImporter $sitemapSnapshotImporter,
         private readonly SiteBaseProvider $siteBaseProvider,
         private readonly BackendAccessGuard $backendAccessGuard,
-    ) {}
+    ) {
+    }
 
     public function discoverAction(ServerRequestInterface $request): ResponseInterface
     {

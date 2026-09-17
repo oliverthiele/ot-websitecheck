@@ -1,0 +1,120 @@
+/*
+ * Sitemap snapshot module: collapse chevrons and row actions that stay in the
+ * background until a row is hovered or focused.
+ */
+
+.ot-websitecheck-snapshots {
+    --ot-websitecheck-transition-duration: 0.15s;
+    --ot-websitecheck-reveal-duration: 0.3s;
+    --ot-websitecheck-chevron-rotation: 90deg;
+    --ot-websitecheck-chevron-gap: 0.25rem;
+    --ot-websitecheck-row-hover-mix: 6%;
+    --ot-websitecheck-language-row-mix: 3%;
+    /* the chevron glyph sits inside its icon box; this lines the details up with the glyph */
+    --ot-websitecheck-details-offset: 0.5rem;
+    --ot-websitecheck-details-group-width: 12rem;
+    --ot-websitecheck-overview-padding-end: 0.5rem;
+}
+
+.ot-websitecheck-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ot-websitecheck-chevron-gap);
+}
+
+/* The chevron follows the state Bootstrap's collapse sets on its trigger. */
+.ot-websitecheck-chevron {
+    display: inline-flex;
+    transition: transform var(--ot-websitecheck-transition-duration) ease-in-out;
+}
+
+.ot-websitecheck-toggle[aria-expanded="true"] .ot-websitecheck-chevron {
+    transform: rotate(var(--ot-websitecheck-chevron-rotation));
+}
+
+/*
+ * The details table is pulled out by its own cell padding: its text lines up
+ * with the chevron glyphs on the left and the row content on the right, while
+ * a hovered sitemap row keeps some space around its text.
+ */
+.ot-websitecheck-details {
+    margin-inline-start: calc(var(--ot-websitecheck-details-offset) - var(--typo3-table-sm-padding-x));
+    margin-inline-end: calc(-1 * var(--typo3-table-sm-padding-x));
+}
+
+/*
+ * The same group column width in every language keeps the sitemap URLs of
+ * all languages aligned; a longer group name wraps instead of widening it.
+ * The table selector outranks the core's "th { white-space: nowrap }".
+ */
+.table .ot-websitecheck-details-group {
+    width: var(--ot-websitecheck-details-group-width);
+    min-width: var(--ot-websitecheck-details-group-width);
+    max-width: var(--ot-websitecheck-details-group-width);
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+/*
+ * Language rows are slightly darker than their details. Only they and the
+ * sitemap rows inside the details are highlighted on hover, never the details
+ * row as a whole — the same mix as the core's table-hover, on top.
+ */
+.ot-websitecheck-language-row > * {
+    --typo3-table-bg-type: color-mix(in srgb, var(--typo3-table-bg), var(--typo3-table-color) var(--ot-websitecheck-language-row-mix));
+}
+
+.ot-websitecheck-language-row:hover > * {
+    --typo3-table-bg-state: color-mix(in srgb, var(--typo3-table-bg-type, var(--typo3-table-bg)), var(--typo3-table-color) var(--ot-websitecheck-row-hover-mix));
+}
+
+.ot-websitecheck-details-table {
+    --typo3-table-bg: transparent;
+}
+
+/*
+ * The last row of a table loses its bottom border next to the container's.
+ * Here that row is a collapsed details row, so the language row above keeps
+ * its border — the space keeps the two apart, whichever language the filter
+ * leaves last.
+ */
+.ot-websitecheck-overview {
+    padding-block-end: var(--ot-websitecheck-overview-padding-end);
+}
+
+/* The whole row toggles; its button stays the element for keyboard and screen readers. */
+.ot-websitecheck-row-toggle {
+    cursor: pointer;
+}
+
+/*
+ * Row actions are faded out, not hidden: they stay in the accessibility tree
+ * and reachable by keyboard, and a focused action reveals its row. Devices
+ * without a precise hover pointer always show them.
+ */
+/*
+ * .btn brings its own transition; the fade is added to it, with the higher
+ * specificity so the order of the stylesheets does not matter.
+ */
+.btn.ot-websitecheck-row-action {
+    --typo3-btn-transition: var(--typo3-transition-color), opacity var(--ot-websitecheck-reveal-duration) ease-in-out;
+    transition: var(--typo3-btn-transition);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .ot-websitecheck-row .ot-websitecheck-row-action {
+        opacity: 0;
+    }
+
+    .ot-websitecheck-row:hover .ot-websitecheck-row-action,
+    .ot-websitecheck-row:focus-within .ot-websitecheck-row-action {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ot-websitecheck-chevron,
+    .btn.ot-websitecheck-row-action {
+        transition: none;
+    }
+}

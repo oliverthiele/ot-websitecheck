@@ -26,7 +26,8 @@ final readonly class SitemapDocument
         public int $httpStatus,
         public string $body,
         public array $entries = [],
-    ) {}
+    ) {
+    }
 
     public function isUsable(): bool
     {

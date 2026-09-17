@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-09-17
+
+### Added
+
+- Add a lock per sitemap snapshot: the lock icon in the backend module, or the
+  "Locked" field of the record, protects a snapshot from deletion both in the
+  module and by `websitecheck:cleanupsnapshots`
+- Add `--lock` to `websitecheck:importsitemaps`: locks the snapshot as soon as
+  the import is complete
+
+### Changed
+
+- Show one row per language in a sitemap snapshot, with the URL count per
+  sitemap group as a column (up to five groups) or a list; a group another
+  language has and this one lacks is marked as missing
+- Move the sitemap index into the details of its language instead of listing
+  it as a group with 0 URLs; count sitemap indexes and sitemaps separately
+- Add chevrons to the expandable rows, toggle a row by a click anywhere on it,
+  and add a button that expands or collapses all languages of a snapshot
+- Format URL and sitemap counts with a thousands separator
+- Show the start URL of a snapshot in its expanded area, and the import time
+  next to the label only when the label does not contain it
+- Show a status only for failed sitemaps, and the row actions "Open" and "Raw
+  content" only on hover or focus on devices with a mouse
+
+### Removed
+
+- Remove the sitemap group filter from the sitemap module; the groups are now
+  columns
+
 ## [0.1.1] — 2026-09-16
 
 ### Fixed

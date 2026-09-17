@@ -27,7 +27,8 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly ObservationRepository $observationRepository,
         private readonly MigrationRunRepository $migrationRunRepository,
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
-    ) {}
+    ) {
+    }
 
     public function indexAction(
         string $run = '',

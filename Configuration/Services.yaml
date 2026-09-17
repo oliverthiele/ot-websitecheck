@@ -27,7 +27,7 @@ services:
     tags:
       - name: console.command
         command: 'websitecheck:cleanupsnapshots'
-        description: 'Remove old sitemap snapshots; snapshots with a note or used by a migration check run are kept.'
+        description: 'Remove old sitemap snapshots; locked snapshots, snapshots with a note and those used by a migration check run are kept.'
 
   OliverThiele\OtWebsitecheck\Command\CheckSitemapCommand:
     tags:
@@ -47,4 +47,7 @@ services:
     public: true
 
   OliverThiele\OtWebsitecheck\Controller\SitemapImportAjaxController:
+    public: true
+
+  OliverThiele\OtWebsitecheck\Controller\ToggleLockedAjaxController:
     public: true

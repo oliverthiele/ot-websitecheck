@@ -14,7 +14,7 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'label, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source, start_url, fetched_at, status'],
+        '1' => ['showitem' => 'label, locked, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source, start_url, fetched_at, status'],
     ],
     'columns' => [
         'label' => [
@@ -50,6 +50,15 @@ return [
                 'size' => 20,
                 'max' => 20,
                 'readOnly' => true,
+            ],
+        ],
+        'locked' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.locked',
+            'description' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.locked.description',
+            'config' => [
+                'type' => 'check',
+                'renderType' => 'checkboxToggle',
+                'default' => 0,
             ],
         ],
         'note' => [

@@ -23,7 +23,8 @@ class LanguageSitemapDiscovery
 
     public function __construct(
         private readonly RedirectChainFollower $redirectChainFollower,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $requestOptions

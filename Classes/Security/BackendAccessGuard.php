@@ -17,7 +17,8 @@ class BackendAccessGuard
 {
     public function __construct(
         private readonly Context $context,
-    ) {}
+    ) {
+    }
 
     public function isAllowed(): bool
     {

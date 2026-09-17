@@ -41,6 +41,7 @@ class ImportSitemapsCommand extends Command
         $this->addArgument('startUrl', InputArgument::OPTIONAL, 'Start page of the site, e.g. "https://www.example.com/". Its hreflang links name the languages. Not needed with --sitemap.');
         $this->addOption('label', null, InputOption::VALUE_REQUIRED, 'Unique name of the snapshot, e.g. "live-before-relaunch". Defaults to host and time.', '');
         $this->addOption('note', null, InputOption::VALUE_REQUIRED, 'Free text stored with the snapshot, e.g. what is known to be missing.', '');
+        $this->addOption('lock', null, InputOption::VALUE_NONE, 'Lock the snapshot once the import is complete, so neither the backend module nor websitecheck:cleanupsnapshots deletes it.');
         $this->addOption('sitemap', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Sitemap of one language as "hreflang=url", e.g. "de-DE=https://www.example.com/de/sitemap.xml". Replaces the detection from the start page.');
         $this->addOption('sitemap-path', null, InputOption::VALUE_REQUIRED, 'Sitemap path below the home page of each language, e.g. "sitemap.xml" or "?type=1533906435". Defaults to the path configured for the site of the start URL.');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '20');
@@ -55,6 +56,7 @@ class ImportSitemapsCommand extends Command
         $startUrl = $this->stringValue($input->getArgument('startUrl'));
         $timeout = max(1, $this->intValue($input->getOption('timeout'), 20));
         $fetchedAt = time();
+        $lock = $input->getOption('lock') === true;
 
         $requestOptions = $this->basicAuthResolver->buildRequestOptions(
             $this->stringValue($input->getOption('basic-auth')),
@@ -120,12 +122,12 @@ class ImportSitemapsCommand extends Command
         }
 
         try {
-            $urlCount = $this->sitemapSnapshotImporter->finishSnapshot($snapshotUid);
+            $urlCount = $this->sitemapSnapshotImporter->finishSnapshot($snapshotUid, $lock);
         } catch (SitemapImportException $exception) {
             $io->error($exception->getMessage());
             return self::FAILURE;
         }
-        $io->success(sprintf('Stored the snapshot with %d URLs.', $urlCount));
+        $io->success(sprintf($lock ? 'Stored and locked the snapshot with %d URLs.' : 'Stored the snapshot with %d URLs.', $urlCount));
 
         return self::SUCCESS;
     }

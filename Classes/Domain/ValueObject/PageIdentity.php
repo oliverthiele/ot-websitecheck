@@ -15,7 +15,8 @@ final readonly class PageIdentity
         public string $language = '',
         public string $recordTable = '',
         public int $recordUid = 0,
-    ) {}
+    ) {
+    }
 
     public function hasPage(): bool
     {

@@ -11,6 +11,7 @@ use OliverThiele\OtWebsitecheck\Domain\Model\SitemapSnapshot;
  * does not pile up snapshots forever.
  *
  * Kept, whatever their age:
+ * - locked snapshots — complete or not, they are never removed
  * - the newest complete snapshots per start URL, up to the given number
  * - snapshots a migration check run compared — its results refer to them
  * - snapshots with a note — someone marked them as worth keeping
@@ -36,6 +37,9 @@ class SnapshotRetentionPolicy
         $selected = [];
         $completeCountByStartUrl = [];
         foreach ($snapshots as $snapshot) {
+            if ($snapshot->locked) {
+                continue;
+            }
             if (!$snapshot->isComplete()) {
                 if ($snapshot->fetchedAt < $incompleteBefore && !in_array($snapshot->uid, $protectedSnapshotUids, true)) {
                     $selected[] = $snapshot;

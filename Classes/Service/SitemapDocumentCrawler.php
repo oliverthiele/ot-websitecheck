@@ -16,7 +16,8 @@ class SitemapDocumentCrawler
     public function __construct(
         private readonly PageFetcher $pageFetcher,
         private readonly SitemapGroupExtractor $sitemapGroupExtractor,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $requestOptions Additional Guzzle request options, e.g. ['auth' => ['user', 'pass']].

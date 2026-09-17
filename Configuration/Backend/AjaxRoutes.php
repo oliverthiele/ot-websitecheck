@@ -1,6 +1,7 @@
 <?php
 
 use OliverThiele\OtWebsitecheck\Controller\SitemapImportAjaxController;
+use OliverThiele\OtWebsitecheck\Controller\ToggleLockedAjaxController;
 use OliverThiele\OtWebsitecheck\Controller\ToggleReviewedAjaxController;
 
 return [
@@ -28,5 +29,10 @@ return [
         'path' => '/websitecheck/sitemap/import/finish',
         'methods' => ['POST'],
         'target' => SitemapImportAjaxController::class . '::finishAction',
+    ],
+    'websitecheck_sitemap_toggle_locked' => [
+        'path' => '/websitecheck/sitemap/toggle-locked',
+        'methods' => ['POST'],
+        'target' => ToggleLockedAjaxController::class . '::toggleAction',
     ],
 ];
