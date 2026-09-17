@@ -1,6 +1,7 @@
 <html
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -9,21 +10,137 @@
 <f:section name="Content">
 
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/reviewed-toggle.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/migration-command.js"/>
+    <f:asset.module identifier="@typo3/backend/popover.js"/>
+    <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
     <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
 
     <h1><f:translate key="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.migration.title"/></h1>
 
     <f:if condition="{runOptions}">
         <f:then>
+            <f:render section="CommandBuilder" arguments="{commandBuilder: commandBuilder, expanded: 0, languageFile: languageFile}"/>
             <f:render section="Filter" arguments="{_all}"/>
             <f:render section="Summary" arguments="{_all}"/>
             <f:render section="Results" arguments="{_all}"/>
         </f:then>
         <f:else>
             <f:be.infobox state="-1">{f:translate(key: '{languageFile}empty.noRuns')}</f:be.infobox>
+            <f:render section="CommandBuilder" arguments="{commandBuilder: commandBuilder, expanded: 1, languageFile: languageFile}"/>
         </f:else>
     </f:if>
 
+</f:section>
+
+<f:section name="CommandBuilder">
+    <div class="panel panel-default mb-4 ot-websitecheck-snapshots"
+        data-js="migrationCommand"
+        data-today="{commandBuilder.today}"
+        data-label-same-snapshot="{f:translate(key: '{languageFile}command.warning.sameSnapshot')}"
+        data-label-same-labels="{f:translate(key: '{languageFile}command.warning.sameLabels')}"
+        data-label-label-clash="{f:translate(key: '{languageFile}command.warning.labelClash')}"
+        data-label-missing-value="{f:translate(key: '{languageFile}command.warning.missingValue')}"
+    >
+        <div class="panel-heading">
+            <button type="button" class="btn btn-link p-0 text-start ot-websitecheck-toggle" data-bs-toggle="collapse" data-bs-target="#migrationCommandBody" aria-expanded="{f:if(condition: expanded, then: 'true', else: 'false')}" aria-controls="migrationCommandBody">
+                <span class="ot-websitecheck-chevron" aria-hidden="true"><core:icon identifier="actions-chevron-end" size="small"/></span>
+                <strong>{f:translate(key: '{languageFile}command.title')}</strong>
+            </button>
+        </div>
+        <div class="collapse{f:if(condition: expanded, then: ' show')}" id="migrationCommandBody">
+            <div class="panel-body">
+                <f:if condition="{commandBuilder.snapshots}">
+                    <f:then>
+                        <f:render section="CommandForm" arguments="{commandBuilder: commandBuilder, languageFile: languageFile}"/>
+                    </f:then>
+                    <f:else>
+                        <p>{f:translate(key: '{languageFile}command.noSnapshots')}</p>
+                        <a href="{be:moduleLink(route: 'site_websitecheck_sitemaps')}" class="btn btn-default">{f:translate(key: '{languageFile}command.openSitemaps')}</a>
+                    </f:else>
+                </f:if>
+            </div>
+        </div>
+    </div>
+</f:section>
+
+<f:section name="SnapshotOption">
+    <option value="{snapshot.label}" data-uid="{snapshot.uid}" data-host="{snapshot.host}" data-environment="{snapshot.environment}" data-fetched-at="{snapshot.fetchedAt}" {f:if(condition: '{snapshot.uid} == {selectedUid}', then: 'selected')}>
+        {snapshot.label}<f:if condition="{snapshot.environment}"> · {f:translate(key: '{languageFile}environment.{snapshot.environment}')}</f:if><f:if condition="{snapshot.locked}"> · {f:translate(key: '{languageFile}command.locked')}</f:if>
+    </option>
+</f:section>
+
+<f:section name="CommandForm">
+    <p>{f:translate(key: '{languageFile}command.intro')}</p>
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="migrationCommandReference">{f:translate(key: '{languageFile}command.reference')}</label>
+            <select class="form-select" id="migrationCommandReference" data-js="migrationCommandReference" aria-describedby="migrationCommandReferenceHelp">
+                <f:for each="{commandBuilder.snapshots}" as="snapshot">
+                    <f:render section="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: commandBuilder.referenceUid, languageFile: languageFile}"/>
+                </f:for>
+            </select>
+            <p class="form-text" id="migrationCommandReferenceHelp">{f:translate(key: '{languageFile}command.reference.help')}</p>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="migrationCommandTarget">{f:translate(key: '{languageFile}command.target')}</label>
+            <select class="form-select" id="migrationCommandTarget" data-js="migrationCommandTarget" aria-describedby="migrationCommandTargetHelp">
+                <f:for each="{commandBuilder.snapshots}" as="snapshot">
+                    <f:render section="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: commandBuilder.targetUid, languageFile: languageFile}"/>
+                </f:for>
+            </select>
+            <p class="form-text" id="migrationCommandTargetHelp">{f:translate(key: '{languageFile}command.target.help')}</p>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="migrationCommandReferenceRun">{f:translate(key: '{languageFile}command.referenceRun')}</label>
+            <select class="form-select" id="migrationCommandReferenceRun" data-js="migrationCommandReferenceRun" aria-describedby="migrationCommandReferenceRunHelp">
+                <option value="">{f:translate(key: '{languageFile}command.referenceRun.none')}</option>
+                <f:for each="{commandBuilder.runs}" as="run">
+                    <option value="{run.label}" data-reference-snapshot="{run.referenceSnapshotUid}" data-reference-environments="{run.referenceEnvironments}">{f:translate(key: '{languageFile}command.referenceRun.option', arguments: {0: run.label})}</option>
+                </f:for>
+            </select>
+            <p class="form-text" id="migrationCommandReferenceRunHelp">{f:translate(key: '{languageFile}command.referenceRun.help')}</p>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="migrationCommandRun">{f:translate(key: '{languageFile}command.run')}</label>
+            <input class="form-control" type="text" maxlength="100" id="migrationCommandRun" data-js="migrationCommandRun" aria-describedby="migrationCommandRunHelp"/>
+            <p class="form-text" id="migrationCommandRunHelp">{f:translate(key: '{languageFile}command.run.help')}</p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3" data-js="migrationCommandReferenceLabelField">
+            <label class="form-label" for="migrationCommandReferenceLabel">{f:translate(key: '{languageFile}command.referenceLabel')}</label>
+            <input class="form-control" type="text" maxlength="100" id="migrationCommandReferenceLabel" data-js="migrationCommandReferenceLabel" aria-describedby="migrationCommandLabelsHelp"/>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <label class="form-label" for="migrationCommandTargetLabel">{f:translate(key: '{languageFile}command.targetLabel')}</label>
+            <input class="form-control" type="text" maxlength="100" id="migrationCommandTargetLabel" data-js="migrationCommandTargetLabel" aria-describedby="migrationCommandLabelsHelp"/>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label class="form-label" for="migrationCommandLimit">{f:translate(key: '{languageFile}command.limit')}</label>
+            <input class="form-control" type="number" min="1" step="1" id="migrationCommandLimit" data-js="migrationCommandLimit" aria-describedby="migrationCommandLimitHelp"/>
+            <p class="form-text" id="migrationCommandLimitHelp">{f:translate(key: '{languageFile}command.limit.help')}</p>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label class="form-label" for="migrationCommandPrefix">{f:translate(key: '{languageFile}command.prefix')}</label>
+            <select class="form-select" id="migrationCommandPrefix" data-js="migrationCommandPrefix">
+                <option value="vendor/bin/typo3">vendor/bin/typo3</option>
+                <option value="typo3">typo3</option>
+                <option value="ddev typo3">ddev typo3</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <p class="form-text mt-0" id="migrationCommandLabelsHelp">{f:translate(key: '{languageFile}command.labels.help')}</p>
+        </div>
+    </div>
+
+    <div class="alert alert-warning mt-3 mb-0" role="status" data-js="migrationCommandWarning" hidden></div>
+
+    <label class="form-label mt-3" for="migrationCommandOutput">{f:translate(key: '{languageFile}command.output')}</label>
+    <div class="d-flex gap-2 align-items-start">
+        <output class="ot-websitecheck-command" id="migrationCommandOutput" data-js="migrationCommandOutput"></output>
+        <button type="button" class="btn btn-default" data-js="migrationCommandCopy">
+            <core:icon identifier="actions-clipboard" size="small"/> {f:translate(key: '{languageFile}command.copy')}
+        </button>
+    </div>
+    <p class="form-text mb-0">{f:translate(key: '{languageFile}command.hint')}</p>
 </f:section>
 
 <f:section name="Filter">
@@ -67,12 +184,15 @@
         <p class="mb-2">
             {f:translate(key: '{languageFile}run.snapshots', arguments: {0: runSnapshots.reference, 1: runSnapshots.target, 2: runSnapshots.targetHost})}
             — <f:format.date format="d.m.Y H:i">@{runSnapshots.startedAt}</f:format.date>
+            <f:render partial="EnvironmentBadge" arguments="{environment: runSnapshots.referenceEnvironment}"/>
+            <f:if condition="{runSnapshots.referenceEnvironment} && {runSnapshots.targetEnvironment}">→</f:if>
+            <f:render partial="EnvironmentBadge" arguments="{environment: runSnapshots.targetEnvironment}"/>
         </p>
     </f:if>
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
         <span>{f:translate(key: '{languageFile}summary.title')}:</span>
         <f:for each="{verdictCounts}" as="count" key="verdictName">
-            <span class="badge badge-default">{f:translate(key: '{languageFile}verdict.{verdictName}')}: {count}</span>
+            <f:link.action action="index" arguments="{run: currentRun, verdict: verdictName}" class="badge badge-{f:if(condition: '{verdictName} == {currentVerdict}', then: 'primary', else: 'default')}" title="{f:translate(key: '{languageFile}summary.filterBy')}">{f:translate(key: '{languageFile}verdict.{verdictName}')}: {count}</f:link.action>
         </f:for>
         <f:form action="deleteRun" method="post" class="ms-auto">
             <f:form.hidden name="run" value="{currentRun}"/>
@@ -138,14 +258,47 @@
     <f:if condition="{identity.title}"> — {identity.title}</f:if>
 </f:section>
 
+<f:section name="StatusBadge">
+    <f:if condition="{help}">
+        <f:then>
+            <f:render section="HelpBadge" arguments="{
+                label: status,
+                severity: severity,
+                title: '{f:translate(key: \'{languageFile}status.{help}\', arguments: {0: status})}',
+                content: '{f:translate(key: \'{languageFile}status.{help}.help\')}'
+            }"/>
+        </f:then>
+        <f:else><span class="badge badge-{severity}">{status}</span></f:else>
+    </f:if>
+</f:section>
+
+<f:section name="HelpBadge">
+    <f:comment>
+        A badge that explains itself in a popover. It is a focusable element, so
+        the explanation opens by keyboard as well; focus keeps it open on touch.
+    </f:comment>
+    <a tabindex="0" role="button" class="badge badge-{severity} ot-websitecheck-help-badge"
+        data-bs-toggle="popover"
+        data-bs-trigger="hover focus"
+        data-bs-placement="auto"
+        data-bs-title="{title}"
+        data-bs-content="{content}"
+    >{label}</a>
+</f:section>
+
 <f:section name="Row">
     <tr>
         <td>{row.language}</td>
         <td>{row.environment}</td>
         <td class="text-nowrap">
-            <span class="badge badge-{row.firstStatusSeverity}">{row.firstStatus}</span>
             <f:if condition="{row.hopCount}">
-                → <span class="badge badge-{row.finalStatusSeverity}">{row.finalStatus}</span>
+                <f:then>
+                    <span class="badge badge-{row.firstStatusSeverity}">{row.firstStatus}</span>
+                    → <f:render section="StatusBadge" arguments="{status: row.finalStatus, severity: row.finalStatusSeverity, help: row.finalStatusHelp, languageFile: languageFile}"/>
+                </f:then>
+                <f:else>
+                    <f:render section="StatusBadge" arguments="{status: row.firstStatus, severity: row.firstStatusSeverity, help: row.finalStatusHelp, languageFile: languageFile}"/>
+                </f:else>
             </f:if>
             <f:if condition="{row.abortReason}">
                 <br/><small class="text-danger">{f:translate(key: '{languageFile}abortReason.{row.abortReason}')}</small>
@@ -161,7 +314,12 @@
             </f:for>
         </td>
         <td>
-            <span class="badge badge-{row.verdictSeverity}">{f:translate(key: '{languageFile}verdict.{row.verdict}')}</span>
+            <f:render section="HelpBadge" arguments="{
+                label: '{f:translate(key: \'{languageFile}verdict.{row.verdict}\')}',
+                severity: row.verdictSeverity,
+                title: '{f:translate(key: \'{languageFile}verdict.{row.verdict}\')}',
+                content: '{f:translate(key: \'{languageFile}verdict.{row.verdict}.help\')}'
+            }"/>
             <f:for each="{row.warnings}" as="warning">
                 <span class="badge badge-warning" title="{f:translate(key: '{languageFile}warning.{warning}.description')}">{f:translate(key: '{languageFile}warning.{warning}')}</span>
             </f:for>

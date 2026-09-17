@@ -13,6 +13,7 @@
     /* the chevron glyph sits inside its icon box; this lines the details up with the glyph */
     --ot-websitecheck-details-offset: 0.5rem;
     --ot-websitecheck-details-group-width: 12rem;
+    --ot-websitecheck-command-padding: 0.5rem 0.75rem;
     --ot-websitecheck-overview-padding-end: 0.5rem;
 }
 
@@ -80,6 +81,25 @@
  */
 .ot-websitecheck-overview {
     padding-block-end: var(--ot-websitecheck-overview-padding-end);
+}
+
+/* A generated shell command: monospaced, wrapped anywhere rather than scrolled. */
+.ot-websitecheck-command {
+    display: block;
+    flex-grow: 1;
+    padding: var(--ot-websitecheck-command-padding);
+    border: 1px solid var(--typo3-component-border-color);
+    border-radius: var(--typo3-component-border-radius);
+    font-family: var(--typo3-font-family-code, monospace);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* A badge with an explanation behind it: marked like a term with a definition. */
+.ot-websitecheck-help-badge {
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.15em;
 }
 
 /* The whole row toggles; its button stays the element for keyboard and screen readers. */

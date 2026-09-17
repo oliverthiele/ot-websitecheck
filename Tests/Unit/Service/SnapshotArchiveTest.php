@@ -82,8 +82,33 @@ final class SnapshotArchiveTest extends UnitTestCase
         $snapshotArchive->decode($snapshotArchive->encode($archive));
     }
 
+    #[Test]
+    public function archiveWithoutEnvironmentIsReadAsUnknownEnvironment(): void
+    {
+        $archive = $this->archive();
+        unset($archive['snapshots'][0]['environment']);
+
+        $snapshotArchive = new SnapshotArchive();
+        $decoded = $snapshotArchive->decode($snapshotArchive->encode($archive));
+
+        self::assertSame('', $decoded['snapshots'][0]['environment']);
+    }
+
+    #[Test]
+    public function unknownEnvironmentIsRefused(): void
+    {
+        $archive = $this->archive();
+        $archive['snapshots'][0]['environment'] = 'production';
+
+        $this->expectException(SnapshotArchiveException::class);
+        $this->expectExceptionMessage('"production" is no known environment');
+
+        $snapshotArchive = new SnapshotArchive();
+        $snapshotArchive->decode($snapshotArchive->encode($archive));
+    }
+
     /**
-     * @return array{createdAt: int, snapshots: list<array{uuid: string, label: string, startUrl: string, note: string, locked: bool, fetchedAt: int, documents: list<array{language: string, url: string, parentUrl: string, sitemapGroup: string, type: string, httpStatus: int, body: string, urls: list<array{url: string, lastmod: string}>}>}>, runs: list<array{uuid: string, label: string, referenceSnapshot: string, targetSnapshot: string, targetHost: string, startedAt: int, observations: list<array<string, int|string>>}>}
+     * @return array{createdAt: int, snapshots: list<array{uuid: string, label: string, environment: string, startUrl: string, note: string, locked: bool, fetchedAt: int, documents: list<array{language: string, url: string, parentUrl: string, sitemapGroup: string, type: string, httpStatus: int, body: string, urls: list<array{url: string, lastmod: string}>}>}>, runs: list<array{uuid: string, label: string, referenceSnapshot: string, targetSnapshot: string, targetHost: string, startedAt: int, observations: list<array<string, int|string>>}>}
      */
     private function archive(): array
     {
@@ -112,6 +137,7 @@ final class SnapshotArchiveTest extends UnitTestCase
             'snapshots' => [[
                 'uuid' => self::SNAPSHOT_UUID,
                 'label' => 'live-before-relaunch',
+                'environment' => 'live',
                 'startUrl' => 'https://www.example.com/',
                 'note' => "Line one\nLine two",
                 'locked' => true,

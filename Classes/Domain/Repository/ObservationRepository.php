@@ -220,6 +220,30 @@ class ObservationRepository extends AbstractRepository
     }
 
     /**
+     * The environment labels of the reference rows of every run — what a run
+     * reusing them must not use as its target label.
+     *
+     * @return array<string, list<string>> run label => environment labels
+     */
+    public function findReferenceEnvironmentsByRun(): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('run_label', 'environment')
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->eq('role', $queryBuilder->createNamedParameter(Observation::ROLE_REFERENCE)))
+            ->groupBy('run_label', 'environment')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $environments = [];
+        foreach ($rows as $row) {
+            $environments[RowValue::string($row, 'run_label')][] = RowValue::string($row, 'environment');
+        }
+
+        return $environments;
+    }
+
+    /**
      * @return list<string> Most recently checked run first — the one the module opens.
      */
     public function findDistinctRuns(): array

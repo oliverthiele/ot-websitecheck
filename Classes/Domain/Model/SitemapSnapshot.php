@@ -24,6 +24,7 @@ final readonly class SitemapSnapshot
         public string $note = '',
         public bool $locked = false,
         public string $uuid = '',
+        public string $environment = '',
     ) {
     }
 
@@ -46,6 +47,7 @@ final readonly class SitemapSnapshot
             note: RowValue::string($row, 'note'),
             locked: RowValue::int($row, 'locked') !== 0,
             uuid: RowValue::string($row, 'uuid'),
+            environment: RowValue::string($row, 'environment'),
         );
     }
 }

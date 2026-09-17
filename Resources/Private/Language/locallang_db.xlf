@@ -122,6 +122,12 @@
       <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.label" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.label">
         <source>Label</source>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment">
+        <source>Environment</source>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment.none" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment.none">
+        <source>— not specified —</source>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.start_url" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.start_url">
         <source>Start URL</source>
       </trans-unit>

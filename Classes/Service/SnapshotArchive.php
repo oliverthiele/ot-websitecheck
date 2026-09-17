@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Service;
 
 use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
 
 /**
@@ -21,7 +22,7 @@ use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
  * having the documented type.
  *
  * @phpstan-type ArchivedDocument array{language: string, url: string, parentUrl: string, sitemapGroup: string, type: string, httpStatus: int, body: string, urls: list<array{url: string, lastmod: string}>}
- * @phpstan-type ArchivedSnapshot array{uuid: string, label: string, startUrl: string, note: string, locked: bool, fetchedAt: int, documents: list<ArchivedDocument>}
+ * @phpstan-type ArchivedSnapshot array{uuid: string, label: string, environment: string, startUrl: string, note: string, locked: bool, fetchedAt: int, documents: list<ArchivedDocument>}
  * @phpstan-type ArchivedRun array{uuid: string, label: string, referenceSnapshot: string, targetSnapshot: string, targetHost: string, startedAt: int, observations: list<array<string, int|string>>}
  * @phpstan-type Archive array{createdAt: int, snapshots: list<ArchivedSnapshot>, runs: list<ArchivedRun>}
  */
@@ -91,6 +92,8 @@ class SnapshotArchive
         return [
             'uuid' => $this->uuid($snapshot, 'uuid', $context),
             'label' => $this->string($snapshot, 'label', $context),
+            // Added after the first archives were written; they have none.
+            'environment' => $this->environment($snapshot, $context),
             'startUrl' => $this->string($snapshot, 'startUrl', $context),
             'note' => $this->string($snapshot, 'note', $context),
             'locked' => $this->bool($snapshot, 'locked', $context),
@@ -219,6 +222,22 @@ class SnapshotArchive
         $value = $data[$key] ?? null;
         if (!is_bool($value)) {
             throw $this->invalid($context, sprintf('"%s" is not a boolean', $key));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $data
+     */
+    private function environment(array $data, string $context): string
+    {
+        if (!array_key_exists('environment', $data)) {
+            return '';
+        }
+        $value = $this->string($data, 'environment', $context);
+        if ($value !== '' && SnapshotEnvironment::tryFrom($value) === null) {
+            throw $this->invalid($context, sprintf('"%s" is no known environment', $value));
         }
 
         return $value;

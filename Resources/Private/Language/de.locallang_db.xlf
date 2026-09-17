@@ -161,6 +161,14 @@
         <source>Label</source>
         <target>Bezeichnung</target>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment" approved="yes">
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment.none" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.environment.none" approved="yes">
+        <source>— not specified —</source>
+        <target>— keine Angabe —</target>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.start_url" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.start_url" approved="yes">
         <source>Start URL</source>
         <target>Start-URL</target>

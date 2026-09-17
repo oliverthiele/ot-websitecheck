@@ -12,12 +12,14 @@ final readonly class SiteBase
 {
     /**
      * @param list<SitemapGroupRoute> $sitemapGroupRoutes Routes that put the sitemap group into the path.
+     * @param SnapshotEnvironment|null $environment What the base condition suggests; null when it names nothing.
      */
     public function __construct(
         public string $siteIdentifier,
         public string $url,
         public string $sitemapPath,
         public array $sitemapGroupRoutes = [],
+        public ?SnapshotEnvironment $environment = null,
     ) {
     }
 

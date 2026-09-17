@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Add an environment per sitemap snapshot — live, staging, development or
+  local — shown as a badge; the import form and `websitecheck:importsitemaps`
+  take it from the conditions of the site's base variants, and
+  `--environment` sets it. Run `database:updateschema` after the update
+- Add a form to the migration check module that composes the
+  `websitecheck:migrationcheck` command from the stored snapshots: it suggests
+  the snapshots to compare and the labels from their environments, offers
+  earlier runs for `--reference-run`, warns about label clashes and prints the
+  command, quoted, for `vendor/bin/typo3`, `typo3` or `ddev typo3`
+- Add popovers to the verdicts and failing status codes of the migration check
+  that explain them and name the usual causes
+
+### Changed
+
+- Move the backend module from System to Sites, after Link Management; the
+  former module identifiers `system_websitecheck*` remain as aliases
+- Carry the environment of a snapshot in archives; archives written before are
+  still read
+- List `referenceNotOk` rows under "only problems and warnings": the reference
+  sitemap lists a URL that fails. A verdict chosen in the filter is shown
+  regardless of that option, and the verdict counts of a run link to it
+
 ## [0.3.0] — 2026-09-17
 
 ### Added
