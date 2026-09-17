@@ -65,6 +65,7 @@ class MigrationCheckCommand extends Command
         $this->addOption('page-uid-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the page uid (capture group 1) from the HTML.', IdentityPatterns::DEFAULT_PAGE_UID);
         $this->addOption('language-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the language (capture group 1) from the HTML.', IdentityPatterns::DEFAULT_LANGUAGE);
         $this->addOption('record-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the record table (group 1) and uid (group 2) from the HTML of a detail page.', IdentityPatterns::DEFAULT_RECORD);
+        $this->addOption('reference-run', null, InputOption::VALUE_REQUIRED, 'Take the reference rows from this earlier run instead of requesting the reference again, e.g. after the reference site has been replaced. The run must have compared the same reference snapshot; may equal --run.');
         $this->addOption('analyze-only', null, InputOption::VALUE_NONE, 'Do not request anything; recompute verdicts, warnings and suggestions for the stored rows of --run.');
         $this->addOption('reference-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the reference environment as "user:password". Falls back to WEBSITECHECK_REFERENCE_BASIC_AUTH_USER/_PASS.');
         $this->addOption('target-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the target environment as "user:password". Falls back to WEBSITECHECK_TARGET_BASIC_AUTH_USER/_PASS.');
@@ -135,6 +136,30 @@ class MigrationCheckCommand extends Command
             'WEBSITECHECK_TARGET_BASIC_AUTH',
         );
 
+        $referenceRunLabel = $this->stringValue($input->getOption('reference-run'));
+        $referenceRows = [];
+        if ($referenceRunLabel !== '') {
+            $referenceRun = $this->migrationRunRepository->findByLabel($referenceRunLabel);
+            if ($referenceRun === null) {
+                $io->error(sprintf('--reference-run: there is no run named "%s".', $referenceRunLabel));
+                return self::FAILURE;
+            }
+            if ($referenceRun['referenceSnapshotUid'] !== $referenceSnapshot->uid) {
+                $io->error(sprintf('--reference-run: run "%s" did not compare the reference snapshot "%s".', $referenceRunLabel, $referenceSnapshot->label));
+                return self::FAILURE;
+            }
+            $referenceRows = $this->observationRepository->findRowsByRun($referenceRunLabel, Observation::ROLE_REFERENCE);
+            // The copied rows keep their environment label; a target row with the same label would replace them.
+            $clashingLabels = array_intersect(
+                array_unique(array_map(static fn(array $row): string => (string)$row['environment'], $referenceRows)),
+                [$targetLabel, $targetSitemapLabel],
+            );
+            if ($clashingLabels !== []) {
+                $io->error(sprintf('--reference-run: its reference rows use the environment label "%s"; choose a different --target-label.', implode('", "', $clashingLabels)));
+                return self::FAILURE;
+            }
+        }
+
         $io->title(sprintf('Migration check "%s": "%s" → "%s" (%s)', $runLabel, $referenceSnapshot->label, $targetSnapshot->label, $targetHost));
 
         $referenceUrls = $this->sitemapSnapshotLocator->findUrls($referenceSnapshot, $groups);
@@ -145,14 +170,32 @@ class MigrationCheckCommand extends Command
             $io->error(sprintf('The reference snapshot "%s" has no URLs in the selected groups.', $referenceSnapshot->label));
             return self::FAILURE;
         }
+        if ($referenceRunLabel !== '') {
+            $storedReferenceUrls = $this->takeOverReferenceRows($referenceRows, $referenceRunLabel === $runLabel, $runLabel, $referenceUrls);
+            $skippedCount = count($referenceUrls) - count($storedReferenceUrls);
+            if ($skippedCount > 0) {
+                $io->note(sprintf('%d reference URLs have no row in run "%s" and are skipped.', $skippedCount, $referenceRunLabel));
+            }
+            $referenceUrls = array_intersect_key($referenceUrls, $storedReferenceUrls);
+            if ($referenceUrls === []) {
+                $io->error(sprintf('Run "%s" has no reference rows for the selected URLs.', $referenceRunLabel));
+                return self::FAILURE;
+            }
+        }
         $this->migrationRunRepository->storeRun($runLabel, $referenceSnapshot->uid, $targetSnapshot->uid, $targetHost, time());
 
-        $io->section(sprintf('Checking %d reference URLs on both environments', count($referenceUrls)));
+        $io->section(sprintf(
+            $referenceRunLabel !== '' ? 'Checking %d URLs on the target, reference rows taken from run "%s"' : 'Checking %d reference URLs on both environments',
+            count($referenceUrls),
+            $referenceRunLabel,
+        ));
         $io->progressStart(count($referenceUrls));
         /** @var array<string, bool> $checkedTargetUrls */
         $checkedTargetUrls = [];
         foreach ($referenceUrls as $referenceUrl => $group) {
-            $this->observe($runLabel, $referenceLabel, Observation::ROLE_REFERENCE, $group, $referenceUrl, $timeout, $maximumHops, $referenceRequestOptions, $patterns);
+            if ($referenceRunLabel === '') {
+                $this->observe($runLabel, $referenceLabel, Observation::ROLE_REFERENCE, $group, $referenceUrl, $timeout, $maximumHops, $referenceRequestOptions, $patterns);
+            }
 
             $targetUrl = $this->urlHostRewriter->replace($referenceUrl, $targetHost);
             $this->observe($runLabel, $targetLabel, Observation::ROLE_TARGET, $group, $targetUrl, $timeout, $maximumHops, $targetRequestOptions, $patterns);
@@ -177,6 +220,40 @@ class MigrationCheckCommand extends Command
         $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Copies the reference rows of the given URLs from an earlier run. Their
+     * verdicts are recomputed with the new target rows, and the review state
+     * of the earlier run is not carried over.
+     *
+     * @param list<array<string, int|string>> $referenceRows reference rows of the earlier run
+     * @param bool $sameRun the earlier run is the current one; its rows stay as they are
+     * @param array<string, string> $referenceUrls reference URL => sitemap group
+     * @return array<string, true> the reference URLs a row exists for
+     */
+    private function takeOverReferenceRows(array $referenceRows, bool $sameRun, string $runLabel, array $referenceUrls): array
+    {
+        $found = [];
+        foreach ($referenceRows as $row) {
+            $requestedUrl = (string)$row['requested_url'];
+            if (!isset($referenceUrls[$requestedUrl])) {
+                continue;
+            }
+            $found[$requestedUrl] = true;
+            if ($sameRun) {
+                continue;
+            }
+            $this->observationRepository->storeRow($runLabel, [
+                'verdict' => '',
+                'warnings' => '',
+                'suggested_target' => '',
+                'reviewed' => 0,
+                'note' => '',
+            ] + $row);
+        }
+
+        return $found;
     }
 
     /**

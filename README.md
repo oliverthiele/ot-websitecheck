@@ -22,7 +22,8 @@ URL of the live site still leads to the same page or record on the new one.
   effect
 - **Migration check** — compares a reference environment (usually live) with a
   target environment (a relaunch on staging): which URLs moved without a
-  working redirect, which redirect to different content
+  working redirect, which redirect to different content; the reference
+  results can be reused once the reference site itself is gone
 - **Independent of how redirects are made** — only HTTP answers are evaluated,
   so webserver rules, `.htaccess` and EXT:redirects are all covered
 - **Redirect quality** — redirect chains, temporary redirects, loops and
@@ -41,6 +42,11 @@ URL of the live site still leads to the same page or record on the new one.
 - **Snapshot lock** — one click on the lock icon protects a snapshot from
   deletion, in the module and by the cleanup command, so the last copy of a
   sitemap structure the live site no longer delivers cannot get lost
+- **Archive** — snapshots and migration check runs can be exported into a
+  file and imported again, so they survive a database that is replaced, e.g.
+  by a fresh import of the live database, and move from staging to the new
+  live system; records are identified by uuid, so importing twice doubles
+  nothing
 - **Snapshot cleanup** — a command for scheduled imports that keeps the newest
   snapshots per site and never removes locked snapshots, snapshots with a note
   or snapshots used by a run
@@ -75,7 +81,7 @@ The package is not on Packagist yet, so add its repository first:
 composer require oliverthiele/ot-websitecheck
 ```
 
-Then update the database schema:
+Then update the database schema — also after every update of the extension:
 
 ```bash
 vendor/bin/typo3 database:updateschema
@@ -204,8 +210,8 @@ a value it does not list gives no group, as it gives no page in TYPO3. The set
 only maps `pages` — every other provider keeps its group in the query string.
 
 A sub-sitemap whose group cannot be read is listed under "(no sitemap group)"
-in the module. The group is stored at import time: a snapshot imported before a routing change keeps the groups it was
-imported with.
+in the module. The group is stored at import time: a snapshot imported before a
+routing change keeps the groups it was imported with.
 
 A stylesheet warning when opening a sitemap in the browser ("parsing the XSLT
 stylesheet failed") usually means the webserver does not strip the cache-busting
@@ -291,18 +297,34 @@ URLs are only known to search engines, so their state has to be kept before:
    A label is unique: delete the previous `staging-current` snapshot in the
    module first, or use a new label per run.
 
-3. **After the switch, on the new live system:** request the URLs of the
-   locked snapshot on the new site with the status check.
+3. **Just before the switch, on staging:** export the last run; it brings the
+   live snapshot along. The run holds the reference results — how every old URL
+   answered while the old site was still live — and they cannot be requested
+   again afterwards.
 
    ```bash
-   typo3 websitecheck:checksitemap --snapshot=live-before-relaunch --environment=live-after-relaunch
+   typo3 websitecheck:exportsnapshots --file=var/websitecheck/relaunch.json.gz \
+       --run=relaunch
    ```
 
-   Redirects are followed, so a moved URL is judged by where it ends: this
-   finds every old URL that now ends in an error, not one that leads to
-   different content. Not the migration check: it requests every reference URL
-   again, and under the live domain that is the new site by now — a URL that
-   fails there counts as `referenceNotOk` and is ignored.
+   The same applies whenever the staging database is replaced, e.g. by a fresh
+   import of the live database: export before, import the file with
+   `websitecheck:importsnapshots` afterwards.
+
+4. **After the switch, on the new live system:** copy the archive there,
+   import it, take a snapshot of the new site and compare it with the stored
+   reference results.
+
+   ```bash
+   typo3 websitecheck:importsnapshots --file=var/websitecheck/relaunch.json.gz
+   typo3 websitecheck:importsitemaps 'https://www.example.com/' --label=live-after-relaunch
+   typo3 websitecheck:migrationcheck --run=after-relaunch --reference-run=relaunch \
+       --reference-snapshot=live-before-relaunch --target-snapshot=live-after-relaunch
+   ```
+
+   Without `--reference-run`, the check would request every reference URL
+   again — under the live domain that is the new site by now, and a URL that
+   fails there would count as `referenceNotOk` and be ignored.
 
 ### Migration check results
 
@@ -397,12 +419,13 @@ snapshot is the state before the migration, the target snapshot the state after
 it. Import a fresh target snapshot before a run to check the current state. The
 module shows which snapshots a run compared.
 
-Every URL of the reference snapshot is requested on the reference and, with the
-host replaced by the host of the target snapshot, on the target. The pages of
-the target snapshot are requested as well, to suggest redirect targets.
-Redirects are followed one hop at a time, so each hop is recorded with its
-status code. Verdicts are computed once all URLs are
-checked; until then the module shows the rows as "not analysed yet".
+Every URL of the reference snapshot is requested on the reference — unless
+`--reference-run` supplies those rows — and, with the host replaced by the host
+of the target snapshot, on the target. The pages of the target snapshot are
+requested as well, to suggest redirect targets. Redirects are followed one hop
+at a time, so each hop is recorded with its status code. Verdicts are computed
+once all URLs are checked; until then the module shows the rows as "not
+analysed yet".
 
 A redirect target is only suggested when exactly one path on the target matches.
 Without record markers every record of a detail page shares its page uid, so
@@ -420,7 +443,14 @@ detail pages get no suggestion rather than a wrong one.
 | `--max-hops` | Redirects followed per URL (default: `10`). |
 | `--page-uid-pattern`, `--language-pattern`, `--record-pattern` | Replace the marker patterns, see [Requirements on the checked site](#requirements-on-the-checked-site). |
 | `--reference-basic-auth`, `--target-basic-auth` | `user:password`, see [Environment variables](#environment-variables). |
+| `--reference-run` | Take the reference rows from this earlier run instead of requesting the reference again. The run must have compared the same `--reference-snapshot`; it may be the `--run` itself. |
 | `--analyze-only` | Request nothing; recompute verdicts, warnings and suggestions for the stored rows of `--run`. |
+
+With `--reference-run`, only the target is requested. The reference rows are
+copied from the earlier run with their environment label, which therefore
+must differ from `--target-label`; their verdicts are recomputed and their
+review state starts over. Reference URLs the earlier run has no row for are
+skipped and counted.
 
 ### `websitecheck:checksitemap`
 
@@ -457,9 +487,9 @@ arrive nowhere, the plugin falls back to its default action, and the visitor
 gets a plausible looking wrong page — with HTTP 200.
 
 This command therefore visits every page of the snapshot, reads the links out
-of the rendered HTML, and checks each one **twice**: as it stands, and again with all
-arguments removed. If both responses are the same page, the arguments did
-nothing, and the result is recorded with the marker `argumentsIgnored`.
+of the rendered HTML, and checks each one **twice**: as it stands, and again
+with all arguments removed. If both responses are the same page, the arguments
+did nothing, and the result is recorded with the marker `argumentsIgnored`.
 
 To stay affordable, links are grouped by **shape** — the path plus the argument
 names, values dropped. Links differing only in a record uid exercise the same
@@ -478,6 +508,53 @@ plugin on the same page, so only a couple of samples per shape are checked.
 
 The `source` column holds the page a link was found on, which names the
 template that produced the link.
+
+### `websitecheck:exportsnapshots`
+
+```bash
+typo3 websitecheck:exportsnapshots --file=var/websitecheck/backup.json.gz --locked --run=relaunch
+```
+
+Writes sitemap snapshots and migration check runs into one gzip-compressed JSON
+file with a format version: every snapshot with its label, start URL, note,
+lock and import time, every sitemap file with its raw content and HTTP status,
+every page URL with its group and `lastmod`, and every run with all its result
+rows, reviewed flags and notes included. A run brings the snapshots it
+compared. Snapshots and runs without a uuid get one on export.
+
+Where the file goes is up to the project — the path has no default, and the
+directory has to exist. Keep the file out of version control.
+
+| Option | Description |
+|--------|-------------|
+| `--file` | Required. Path of the archive file. |
+| `--snapshot` | Label of a snapshot. Repeatable. |
+| `--locked` | Every locked snapshot; unfinished imports are skipped with a note. |
+| `--run` | Label of a migration check run, with its results and snapshots. Repeatable. |
+| `--force` | Overwrite an existing file. |
+
+### `websitecheck:importsnapshots`
+
+```bash
+typo3 websitecheck:importsnapshots --file=var/websitecheck/backup.json.gz --dry-run
+```
+
+Reads an archive into this database, in one transaction. A snapshot or run
+whose uuid is here already is skipped — also when it was renamed here since —
+so the same file can be imported after every database replacement. To replace
+such a record with the archived state, delete it first. A label that a
+different record uses already stops the import before anything is written,
+unless `--label-suffix` is given. A run is linked to its snapshots by their
+uuid; a snapshot that is neither in the archive nor here leaves the link empty.
+Locks and notes are restored with the snapshots.
+
+| Option | Description |
+|--------|-------------|
+| `--file` | Required. Path of the archive file. |
+| `--label-suffix` | Appended to each label that is taken by a different record, e.g. `-restored`. |
+| `--dry-run` | Show what would be imported or skipped, write nothing. |
+
+Only archives of the format version this extension writes are read.
 
 ### `websitecheck:cleanupsnapshots`
 

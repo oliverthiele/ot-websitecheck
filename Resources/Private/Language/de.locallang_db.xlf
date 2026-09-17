@@ -253,6 +253,10 @@
         <source>Import status</source>
         <target>Import-Status</target>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.uuid" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.uuid" approved="yes">
+        <source>UUID</source>
+        <target>UUID</target>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun" resname="tx_otwebsitecheck_domain_model_migrationrun" approved="yes">
         <source>Migration check run</source>
         <target>Lauf des Migrations-Checks</target>
@@ -268,6 +272,10 @@
       <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.target_snapshot" resname="tx_otwebsitecheck_domain_model_migrationrun.target_snapshot" approved="yes">
         <source>Target snapshot (after)</source>
         <target>Ziel-Snapshot (nachher)</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.uuid" resname="tx_otwebsitecheck_domain_model_migrationrun.uuid" approved="yes">
+        <source>UUID</source>
+        <target>UUID</target>
       </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_migrationrun.target_host" resname="tx_otwebsitecheck_domain_model_migrationrun.target_host" approved="yes">
         <source>Target host</source>

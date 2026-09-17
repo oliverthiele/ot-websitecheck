@@ -14,9 +14,16 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'run_label, reference_snapshot, target_snapshot, target_host, started_at'],
+        '1' => ['showitem' => 'run_label, reference_snapshot, target_snapshot, target_host, started_at, uuid'],
     ],
     'columns' => [
+        'uuid' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_migrationrun.uuid',
+            'config' => [
+                'type' => 'uuid',
+                'version' => 7,
+            ],
+        ],
         'run_label' => [
             'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_migrationrun.run_label',
             'config' => [

@@ -8,11 +8,43 @@ use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Domain\Model\Observation;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
+use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 
 class ObservationRepository extends AbstractRepository
 {
     public const string TABLE = 'tx_otwebsitecheck_domain_model_observation';
+
+    private const int INSERT_CHUNK_SIZE = 200;
+
+    /**
+     * Everything that describes a row apart from its run: what a copy into
+     * another run or an export carries.
+     */
+    public const array ROW_FIELDS = [
+        'environment' => ParameterType::STRING,
+        'role' => ParameterType::STRING,
+        'sitemap_group' => ParameterType::STRING,
+        'requested_url' => ParameterType::STRING,
+        'requested_path' => ParameterType::STRING,
+        'first_status' => ParameterType::INTEGER,
+        'final_url' => ParameterType::STRING,
+        'final_path' => ParameterType::STRING,
+        'final_status' => ParameterType::INTEGER,
+        'hop_count' => ParameterType::INTEGER,
+        'redirect_chain' => ParameterType::STRING,
+        'abort_reason' => ParameterType::STRING,
+        'page_uid' => ParameterType::INTEGER,
+        'language' => ParameterType::STRING,
+        'record_table' => ParameterType::STRING,
+        'record_uid' => ParameterType::INTEGER,
+        'verdict' => ParameterType::STRING,
+        'warnings' => ParameterType::STRING,
+        'suggested_target' => ParameterType::STRING,
+        'checked_at' => ParameterType::INTEGER,
+        'reviewed' => ParameterType::INTEGER,
+        'note' => ParameterType::STRING,
+    ];
 
     /**
      * Stores what was observed for one requested path on one environment.
@@ -120,6 +152,74 @@ class ObservationRepository extends AbstractRepository
     }
 
     /**
+     * The rows of a run with the fields of ROW_FIELDS, values typed as there.
+     *
+     * @param string $role Only rows of this role; all when empty.
+     * @return list<array<string, int|string>>
+     */
+    public function findRowsByRun(string $runLabel, string $role = ''): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->select(...array_keys(self::ROW_FIELDS))
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->eq('run_label', $queryBuilder->createNamedParameter($runLabel)))
+            ->orderBy('uid', 'ASC');
+        if ($role !== '') {
+            $queryBuilder->andWhere($queryBuilder->expr()->eq('role', $queryBuilder->createNamedParameter($role)));
+        }
+
+        return array_map(self::normalizeRow(...), $queryBuilder->executeQuery()->fetchAllAssociative());
+    }
+
+    /**
+     * Writes a row read by findRowsByRun() into a run, replacing the row of
+     * the same environment and path there.
+     *
+     * @param array<string, mixed> $row
+     */
+    public function storeRow(string $runLabel, array $row): void
+    {
+        $values = self::normalizeRow($row);
+        $existingUid = $this->findUid($runLabel, (string)$values['environment'], (string)$values['requested_path']);
+        if ($existingUid === null) {
+            $this->connectionPool->getConnectionForTable(self::TABLE)->insert(
+                self::TABLE,
+                $values + ['pid' => 0, 'run_label' => $runLabel],
+            );
+            return;
+        }
+
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->update(self::TABLE)
+            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($existingUid, ParameterType::INTEGER)));
+        foreach ($values as $field => $value) {
+            $queryBuilder->set($field, $value, true, self::ROW_FIELDS[$field]);
+        }
+        $queryBuilder->executeStatement();
+    }
+
+    /**
+     * Adds rows read by findRowsByRun() to a run that has none with the same
+     * environment and path.
+     *
+     * @param list<array<string, mixed>> $rows
+     */
+    public function insertRows(string $runLabel, array $rows): void
+    {
+        $columns = ['pid', 'run_label', ...array_keys(self::ROW_FIELDS)];
+        $types = [ParameterType::INTEGER, ParameterType::STRING, ...array_values(self::ROW_FIELDS)];
+        $connection = $this->connectionPool->getConnectionForTable(self::TABLE);
+        foreach (array_chunk($rows, self::INSERT_CHUNK_SIZE) as $chunk) {
+            $connection->bulkInsert(
+                self::TABLE,
+                array_map(static fn(array $row): array => [0, $runLabel, ...array_values(self::normalizeRow($row))], $chunk),
+                $columns,
+                $types,
+            );
+        }
+    }
+
+    /**
      * @return list<string> Most recently checked run first — the one the module opens.
      */
     public function findDistinctRuns(): array
@@ -171,5 +271,19 @@ class ObservationRepository extends AbstractRepository
             ->fetchOne();
 
         return is_numeric($uid) ? (int)$uid : null;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, int|string> exactly the fields of ROW_FIELDS
+     */
+    private static function normalizeRow(array $row): array
+    {
+        $values = [];
+        foreach (self::ROW_FIELDS as $field => $type) {
+            $values[$field] = $type === ParameterType::INTEGER ? RowValue::int($row, $field) : RowValue::string($row, $field);
+        }
+
+        return $values;
     }
 }

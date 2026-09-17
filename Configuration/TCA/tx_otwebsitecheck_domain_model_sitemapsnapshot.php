@@ -14,9 +14,16 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'label, locked, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source, start_url, fetched_at, status'],
+        '1' => ['showitem' => 'label, locked, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source, start_url, fetched_at, status, uuid'],
     ],
     'columns' => [
+        'uuid' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.uuid',
+            'config' => [
+                'type' => 'uuid',
+                'version' => 7,
+            ],
+        ],
         'label' => [
             'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.label',
             'config' => [

@@ -23,6 +23,7 @@ final readonly class SitemapSnapshot
         public string $status = self::STATUS_COMPLETE,
         public string $note = '',
         public bool $locked = false,
+        public string $uuid = '',
     ) {
     }
 
@@ -44,6 +45,7 @@ final readonly class SitemapSnapshot
             status: RowValue::string($row, 'status'),
             note: RowValue::string($row, 'note'),
             locked: RowValue::int($row, 'locked') !== 0,
+            uuid: RowValue::string($row, 'uuid'),
         );
     }
 }

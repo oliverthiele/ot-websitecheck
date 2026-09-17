@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
 use Doctrine\DBAL\ParameterType;
+use Symfony\Component\Uid\Uuid;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 
@@ -53,5 +54,29 @@ abstract class AbstractRepository
             ->executeStatement();
 
         return $newValue === 1;
+    }
+
+    /**
+     * @return string $currentUuid, or the uuid now stored for the record if it had none
+     */
+    protected function assignMissingUuid(string $table, int $uid, string $currentUuid): string
+    {
+        if ($currentUuid !== '') {
+            return $currentUuid;
+        }
+        $uuid = Uuid::v7()->toRfc4122();
+        $queryBuilder = $this->createQueryBuilder($table);
+        $queryBuilder->update($table)
+            ->where(
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, ParameterType::INTEGER)),
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->isNull('uuid'),
+                    $queryBuilder->expr()->eq('uuid', $queryBuilder->createNamedParameter('')),
+                ),
+            )
+            ->set('uuid', $uuid)
+            ->executeStatement();
+
+        return $uuid;
     }
 }
