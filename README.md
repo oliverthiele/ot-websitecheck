@@ -36,8 +36,8 @@ URL of the live site still leads to the same page or record on the new one.
 - **Sitemap snapshots** — stores the sitemaps of every language of a site at
   one point in time, including the raw XML, so a state stays available after
   the site has changed; imported in the backend module or on the CLI, with
-  counts per language and sitemap group and a note per snapshot; every check
-  reads its URLs from a snapshot
+  URL counts per language and sitemap group, missing groups marked, and a
+  note per snapshot; every check reads its URLs from a snapshot
 - **Snapshot lock** — one click on the lock icon protects a snapshot from
   deletion, in the module and by the cleanup command, so the last copy of a
   sitemap structure the live site no longer delivers cannot get lost
@@ -258,12 +258,18 @@ record on the target — taken from the pages of the target snapshot.
     be entered for protected environments; they are used for the import and not
     stored. The form only fetches URLs on hosts of the configured sites — any
     other URL needs the CLI command.
-  - **Snapshots** — a summary per snapshot (languages, sitemap files, URLs,
-    failures); expanded, one row per language and sitemap group with a link to
-    the sitemap and the individual files of a paginated sitemap below it.
-    "Open" shows the sitemap as the site delivers it now; "Raw content" shows
-    what was stored. Filters for language and sitemap group apply to all
-    snapshots. A snapshot whose import was interrupted is marked as incomplete.
+  - **Snapshots** — a summary per snapshot (languages, sitemap indexes,
+    sitemaps, URLs, failures); expanded, one row per language with its URL
+    count per sitemap group — one column per group for up to five groups, a
+    list beyond that. A group that other languages have and this one lacks,
+    or that lists no URL, is marked as missing. Each language expands to its
+    sitemap index and the sitemaps of every group, including every page of a
+    paginated sitemap; a click anywhere on a row expands it, and one button
+    expands or collapses all languages. "Open"
+    shows a sitemap as the site delivers it now; "Raw content" shows what was
+    stored. On devices with a mouse these row actions appear when the row is
+    hovered or focused. The language filter applies to all snapshots. A
+    snapshot whose import was interrupted is marked as incomplete.
 
 ### Verdicts
 

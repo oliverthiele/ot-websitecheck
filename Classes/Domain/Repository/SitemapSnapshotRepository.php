@@ -185,7 +185,7 @@ class SitemapSnapshotRepository extends AbstractRepository
      * Every stored sitemap file without its raw body, with the number of page
      * URLs it lists.
      *
-     * @return array<int, list<array{uid: int, language: string, url: string, sitemapGroup: string, type: string, httpStatus: int, urlCount: int}>> snapshot uid => documents in import order
+     * @return array<int, list<array{uid: int, language: string, url: string, parentUrl: string, sitemapGroup: string, type: string, httpStatus: int, urlCount: int}>> snapshot uid => documents in import order
      */
     public function findDocumentSummaries(): array
     {
@@ -202,7 +202,7 @@ class SitemapSnapshotRepository extends AbstractRepository
         }
 
         $queryBuilder = $this->createQueryBuilder(self::TABLE_DOCUMENT);
-        $rows = $queryBuilder->select('uid', 'snapshot', 'language', 'url', 'sitemap_group', 'document_type', 'http_status')
+        $rows = $queryBuilder->select('uid', 'snapshot', 'language', 'url', 'parent_url', 'sitemap_group', 'document_type', 'http_status')
             ->from(self::TABLE_DOCUMENT)
             ->orderBy('uid', 'ASC')
             ->executeQuery()
@@ -215,6 +215,7 @@ class SitemapSnapshotRepository extends AbstractRepository
                 'uid' => $uid,
                 'language' => RowValue::string($row, 'language'),
                 'url' => RowValue::string($row, 'url'),
+                'parentUrl' => RowValue::string($row, 'parent_url'),
                 'sitemapGroup' => RowValue::string($row, 'sitemap_group'),
                 'type' => RowValue::string($row, 'document_type'),
                 'httpStatus' => RowValue::int($row, 'http_status'),

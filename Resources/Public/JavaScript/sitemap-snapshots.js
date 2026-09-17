@@ -1,29 +1,88 @@
 import AjaxRequest from '@typo3/core/ajax/ajax-request.js';
 import Notification from '@typo3/backend/notification.js';
+import { Collapse } from 'bootstrap';
 
 /**
- * Filters the snapshot rows by language and sitemap group, locks snapshots
- * against deletion, and runs the sitemap import: discover the language
- * sitemaps of a site base, then import them one request per language so a
- * large site does not hit a timeout.
+ * Filters the snapshot languages, expands or collapses all languages of a
+ * snapshot, locks snapshots against deletion, and runs the sitemap import:
+ * discover the language sitemaps of a site base, then import them one request
+ * per language so a large site does not hit a timeout.
  */
 
 const sitemapFilterLanguage = document.querySelector('[data-js="sitemapFilterLanguage"]');
-const sitemapFilterGroup = document.querySelector('[data-js="sitemapFilterGroup"]');
-const sitemapRow = document.querySelectorAll('[data-js="sitemapRow"]');
+const sitemapLanguage = document.querySelectorAll('[data-js="sitemapLanguage"]');
+const sitemapToggleAll = document.querySelectorAll('[data-js="sitemapToggleAll"]');
 
-function applyFilter() {
-  const language = sitemapFilterLanguage?.value ?? '';
-  const group = sitemapFilterGroup?.value ?? '';
-  sitemapRow.forEach((row) => {
-    const languageMatches = language === '' || row.dataset.language === language;
-    const groupMatches = group === '' || row.dataset.group === group;
-    row.hidden = !(languageMatches && groupMatches);
+sitemapFilterLanguage?.addEventListener('change', () => {
+  const language = sitemapFilterLanguage.value;
+  sitemapLanguage.forEach((languageGroup) => {
+    languageGroup.hidden = language !== '' && languageGroup.dataset.language !== language;
   });
+  sitemapToggleAll.forEach(updateToggleAllLabel);
+});
+
+/**
+ * The languages of a snapshot the filter currently shows.
+ */
+function visibleLanguages(button) {
+  const snapshotPanel = button.closest('[data-js="snapshotPanel"]');
+  return [...snapshotPanel.querySelectorAll('[data-js="sitemapLanguage"]')].filter((languageGroup) => !languageGroup.hidden);
 }
 
-sitemapFilterLanguage?.addEventListener('change', applyFilter);
-sitemapFilterGroup?.addEventListener('change', applyFilter);
+// Bootstrap keeps aria-expanded of each language toggle up to date.
+function allExpanded(button) {
+  const languages = visibleLanguages(button);
+  return languages.length > 0 && languages.every(
+    (languageGroup) => languageGroup.querySelector('[data-js="sitemapLanguageToggle"]').getAttribute('aria-expanded') === 'true',
+  );
+}
+
+function showToggleAllLabel(button, expanded) {
+  button.textContent = expanded ? button.dataset.labelCollapse : button.dataset.labelExpand;
+}
+
+function updateToggleAllLabel(button) {
+  showToggleAllLabel(button, allExpanded(button));
+}
+
+sitemapToggleAll.forEach((button) => {
+  button.addEventListener('click', () => {
+    const expand = !allExpanded(button);
+    visibleLanguages(button).forEach((languageGroup) => {
+      const details = Collapse.getOrCreateInstance(languageGroup.querySelector('[data-js="sitemapLanguageDetails"]'), { toggle: false });
+      if (expand) {
+        details.show();
+      } else {
+        details.hide();
+      }
+    });
+    showToggleAllLabel(button, expand);
+  });
+  // A single language opened or closed by hand may change what "all" means.
+  const snapshotPanel = button.closest('[data-js="snapshotPanel"]');
+  snapshotPanel.addEventListener('shown.bs.collapse', () => updateToggleAllLabel(button));
+  snapshotPanel.addEventListener('hidden.bs.collapse', () => updateToggleAllLabel(button));
+});
+
+/**
+ * A click anywhere on a row toggles it, like its chevron button does. Links,
+ * buttons and form fields in the row keep their own action, and selecting
+ * text does not toggle.
+ */
+const rowToggle = document.querySelectorAll('[data-js="rowToggle"]');
+
+rowToggle.forEach((row) => {
+  row.addEventListener('click', (event) => {
+    if (event.target.closest('a, button, input, select, textarea, label, form')) {
+      return;
+    }
+    if (window.getSelection()?.toString() !== '') {
+      return;
+    }
+    // The collapse trigger is identified by Bootstrap's own attribute.
+    row.querySelector('[data-bs-toggle="collapse"]')?.click();
+  });
+});
 
 const snapshotLockToggle = document.querySelectorAll('[data-js="snapshotLockToggle"]');
 

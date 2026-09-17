@@ -15,6 +15,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--lock` to `websitecheck:importsitemaps`: locks the snapshot as soon as
   the import is complete
 
+### Changed
+
+- Show one row per language in a sitemap snapshot, with the URL count per
+  sitemap group as a column (up to five groups) or a list; a group another
+  language has and this one lacks is marked as missing
+- Move the sitemap index into the details of its language instead of listing
+  it as a group with 0 URLs; count sitemap indexes and sitemaps separately
+- Add chevrons to the expandable rows, toggle a row by a click anywhere on it,
+  and add a button that expands or collapses all languages of a snapshot
+- Format URL and sitemap counts with a thousands separator
+- Show the start URL of a snapshot in its expanded area, and the import time
+  next to the label only when the label does not contain it
+- Show a status only for failed sitemaps, and the row actions "Open" and "Raw
+  content" only on hover or focus on devices with a mouse
+
+### Removed
+
+- Remove the sitemap group filter from the sitemap module; the groups are now
+  columns
+
 ## [0.1.1] — 2026-09-16
 
 ### Fixed

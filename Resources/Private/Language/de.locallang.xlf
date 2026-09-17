@@ -286,8 +286,8 @@
         <target>nicht erreichbar</target>
       </trans-unit>
       <trans-unit id="snapshot.summary" resname="snapshot.summary" approved="yes">
-        <source>%1$s languages · %2$s sitemap files · %3$s URLs</source>
-        <target>%1$s Sprachen · %2$s Sitemap-Dateien · %3$s URLs</target>
+        <source>%1$s languages · %2$s sitemap indexes · %3$s sitemaps · %4$s URLs</source>
+        <target>%1$s Sprachen · %2$s Sitemap-Indizes · %3$s Sitemaps · %4$s URLs</target>
       </trans-unit>
       <trans-unit id="snapshot.failedCount" resname="snapshot.failedCount" approved="yes">
         <source>%1$s failed</source>
@@ -301,17 +301,9 @@
         <source>Sitemap index</source>
         <target>Sitemap-Index</target>
       </trans-unit>
-      <trans-unit id="snapshot.ok" resname="snapshot.ok" approved="yes">
-        <source>ok</source>
-        <target>ok</target>
-      </trans-unit>
       <trans-unit id="column.sitemapGroup" resname="column.sitemapGroup" approved="yes">
         <source>Sitemap group</source>
         <target>Sitemap-Gruppe</target>
-      </trans-unit>
-      <trans-unit id="column.files" resname="column.files" approved="yes">
-        <source>Files</source>
-        <target>Dateien</target>
       </trans-unit>
       <trans-unit id="column.urls" resname="column.urls" approved="yes">
         <source>URLs</source>
@@ -421,10 +413,6 @@
         <source>The request failed. Check the connection and the Basic Auth credentials.</source>
         <target>Die Anfrage ist fehlgeschlagen. Verbindung und Basic-Auth-Zugangsdaten prüfen.</target>
       </trans-unit>
-      <trans-unit id="column.state" resname="column.state" approved="yes">
-        <source>Status</source>
-        <target>Status</target>
-      </trans-unit>
       <trans-unit id="column.sitemap" resname="column.sitemap" approved="yes">
         <source>Sitemap</source>
         <target>Sitemap</target>
@@ -433,9 +421,33 @@
         <source>Open</source>
         <target>Öffnen</target>
       </trans-unit>
-      <trans-unit id="button.showFiles" resname="button.showFiles" approved="yes">
-        <source>%1$s files</source>
-        <target>%1$s Dateien</target>
+      <trans-unit id="format.thousandsSeparator" resname="format.thousandsSeparator" approved="yes">
+        <source>,</source>
+        <target>.</target>
+      </trans-unit>
+      <trans-unit id="column.sitemaps" resname="column.sitemaps" approved="yes">
+        <source>Sitemaps</source>
+        <target>Sitemaps</target>
+      </trans-unit>
+      <trans-unit id="column.sitemapGroups" resname="column.sitemapGroups" approved="yes">
+        <source>Sitemap groups</source>
+        <target>Sitemap-Gruppen</target>
+      </trans-unit>
+      <trans-unit id="column.actions" resname="column.actions" approved="yes">
+        <source>Actions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="snapshot.missing" resname="snapshot.missing" approved="yes">
+        <source>missing</source>
+        <target>fehlt</target>
+      </trans-unit>
+      <trans-unit id="button.expandAll" resname="button.expandAll" approved="yes">
+        <source>Expand all languages</source>
+        <target>Alle Sprachen aufklappen</target>
+      </trans-unit>
+      <trans-unit id="button.collapseAll" resname="button.collapseAll" approved="yes">
+        <source>Collapse all languages</source>
+        <target>Alle Sprachen zuklappen</target>
       </trans-unit>
       <trans-unit id="run.snapshots" resname="run.snapshots" approved="yes">
         <source>Compares snapshot "%1$s" (before) with snapshot "%2$s" (after), requested on %3$s</source>

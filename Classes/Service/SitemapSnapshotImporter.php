@@ -22,6 +22,11 @@ use OliverThiele\OtWebsitecheck\Exception\SitemapImportException;
  */
 class SitemapSnapshotImporter
 {
+    /**
+     * The time in a default label; the module does not repeat it next to the label.
+     */
+    public const string DEFAULT_LABEL_DATE_FORMAT = 'Y-m-d H:i';
+
     public const int MAXIMUM_LABEL_LENGTH = 100;
 
     public function __construct(
@@ -47,7 +52,7 @@ class SitemapSnapshotImporter
     {
         $host = parse_url($startUrl, PHP_URL_HOST);
 
-        return (is_string($host) ? $host : 'snapshot') . ' ' . date('Y-m-d H:i', $time);
+        return (is_string($host) ? $host : 'snapshot') . ' ' . date(self::DEFAULT_LABEL_DATE_FORMAT, $time);
     }
 
     /**
