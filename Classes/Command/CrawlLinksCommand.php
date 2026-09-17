@@ -57,7 +57,7 @@ class CrawlLinksCommand extends Command
         $this->setDescription('Follow the plugin links on every page of a sitemap snapshot and check where they actually lead.');
         $this->addOption('snapshot', null, InputOption::VALUE_REQUIRED, 'Label of the sitemap snapshot whose pages are the starting points.');
         $this->addOption('group', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Only start from pages of these sitemap groups, e.g. "pages".');
-        $this->addOption('environment', 'e', InputOption::VALUE_REQUIRED, 'Label for the checked environment, e.g. "ddev-links" or "staging-links".');
+        $this->addOption('environment', 'e', InputOption::VALUE_REQUIRED, 'Label for the checked environment, e.g. "ddev-links" or "staging-links". Defaults to the environment of the snapshot followed by "-links".');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '20');
         $this->addOption('pages-limit', null, InputOption::VALUE_REQUIRED, 'Only read links from the first N sitemap pages.');
         $this->addOption('samples-per-shape', null, InputOption::VALUE_REQUIRED, 'How many links per distinct link shape to check. A shape is the path plus the argument names, so hundreds of links differing only in a record uid collapse into one.', '2');
@@ -71,15 +71,20 @@ class CrawlLinksCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $environment = $this->stringValue($input->getOption('environment'));
-        if ($environment === '') {
-            $io->error('The --environment option is required, e.g. --environment=ddev-links');
-            return self::FAILURE;
-        }
         try {
             $snapshot = $this->sitemapSnapshotLocator->findCompleteSnapshot($this->stringValue($input->getOption('snapshot')));
         } catch (\InvalidArgumentException $exception) {
             $io->error('--snapshot: ' . $exception->getMessage());
+            return self::FAILURE;
+        }
+        $environment = $this->stringValue($input->getOption('environment'));
+        // A distinct label, so link results do not replace those of a status check.
+        if ($environment === '' && $snapshot->environment !== '') {
+            $environment = $snapshot->environment . '-links';
+            $io->note(sprintf('--environment taken from the snapshot: "%s".', $environment));
+        }
+        if ($environment === '') {
+            $io->error('The --environment option is required unless the snapshot has an environment, e.g. --environment=ddev-links');
             return self::FAILURE;
         }
 
