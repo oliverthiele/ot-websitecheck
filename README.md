@@ -83,11 +83,11 @@ vendor/bin/typo3 database:updateschema
 ddev typo3 database:updateschema
 ```
 
-A regular dependency, not `require-dev`: the checks run where the site runs.
-A relaunch is compared on the new environment, and the snapshot of the old site
-has to be imported there **before** the switch — a deployment with `--no-dev`
-would leave the tool out exactly where it is needed. Leave it out of production
-if that instance never runs a check.
+A regular dependency, not `require-dev`: the checks run where the site runs,
+and that is usually a staging system deployed like production, with `--no-dev`.
+A relaunch is prepared and compared there, and the snapshot of the old live site
+has to be imported **before** the switch, while the old site still answers.
+Leave the extension out of production only if that instance never runs a check.
 
 ---
 
@@ -204,8 +204,7 @@ a value it does not list gives no group, as it gives no page in TYPO3. The set
 only maps `pages` — every other provider keeps its group in the query string.
 
 A sub-sitemap whose group cannot be read is listed under "(no sitemap group)"
-in the module, together with the sitemap index. The group is stored at import
-time: a snapshot imported before a routing change keeps the groups it was
+in the module. The group is stored at import time: a snapshot imported before a routing change keeps the groups it was
 imported with.
 
 A stylesheet warning when opening a sitemap in the browser ("parsing the XSLT
@@ -238,18 +237,8 @@ tool:
 
 - **Status check** — results of `checksitemap` and `crawllinks`, filterable by
   environment, only problems and only not yet reviewed
-- **Migration check** — results of `migrationcheck`, one section per sitemap
-  group, inside it one block per page or record, inside that the reference and
-  target row of every language:
-
-| Language | Environment | Code      | Final path    | Redirects                                          | Verdict             |
-|----------|-------------|-----------|---------------|----------------------------------------------------|---------------------|
-| en-us    | reference   | 200       | /old-path/    |                                                    | Reference           |
-| en-us    | target      | 301 → 200 | /new-path/    | /old-path/ → /interim-path/ (301) → /new-path/ (301) | Moved with redirect, Redirect chain |
-
-Where a target URL is missing, the module suggests the path of the same page or
-record on the target — taken from the pages of the target snapshot.
-
+- **Migration check** — results of `migrationcheck`, see
+  [Migration check results](#migration-check-results)
 - **Sitemaps** — import form and the stored snapshots, newest first:
   - **Import** — choose one of the base URLs of the configured sites (`base`
     and every `baseVariants` entry), "Find sitemaps" lists the sitemap of every
@@ -265,11 +254,68 @@ record on the target — taken from the pages of the target snapshot.
     or that lists no URL, is marked as missing. Each language expands to its
     sitemap index and the sitemaps of every group, including every page of a
     paginated sitemap; a click anywhere on a row expands it, and one button
-    expands or collapses all languages. "Open"
-    shows a sitemap as the site delivers it now; "Raw content" shows what was
-    stored. On devices with a mouse these row actions appear when the row is
-    hovered or focused. The language filter applies to all snapshots. A
-    snapshot whose import was interrupted is marked as incomplete.
+    expands or collapses all languages. "Open" shows a sitemap as the site
+    delivers it now; "Raw content" shows what was stored. On devices with a
+    mouse these row actions appear when the row is hovered or focused. The
+    lock icon protects a snapshot from deletion. The language filter applies
+    to all snapshots. A snapshot whose import was interrupted is marked as
+    incomplete.
+
+### Relaunch workflow
+
+A relaunch usually replaces the live site with a new one prepared on staging —
+often a new TYPO3 version with a reworked page tree. Once it is live, the old
+URLs are only known to search engines, so their state has to be kept before:
+
+1. **Before the switch, on staging:** import the sitemaps of the live site and
+   lock the snapshot. It is the only copy of the URL structure search engines
+   know, once the old site is gone. The live site has to render the
+   [markers](#requirements-on-the-checked-site) by then as well.
+
+   ```bash
+   typo3 websitecheck:importsitemaps 'https://www.example.com/' \
+       --label=live-before-relaunch --lock
+   ```
+
+2. **Whenever the new site has changed, while the old one is still live:**
+   import a snapshot of staging and run the migration check against it.
+   Missing redirects show up per page and record, with a suggested target
+   where one can be derived.
+
+   ```bash
+   typo3 websitecheck:importsitemaps 'https://staging.example.com/' --label=staging-current
+   typo3 websitecheck:migrationcheck --run=relaunch \
+       --reference-snapshot=live-before-relaunch --target-snapshot=staging-current
+   ```
+
+   A label is unique: delete the previous `staging-current` snapshot in the
+   module first, or use a new label per run.
+
+3. **After the switch, on the new live system:** request the URLs of the
+   locked snapshot on the new site with the status check.
+
+   ```bash
+   typo3 websitecheck:checksitemap --snapshot=live-before-relaunch --environment=live-after-relaunch
+   ```
+
+   Redirects are followed, so a moved URL is judged by where it ends: this
+   finds every old URL that now ends in an error, not one that leads to
+   different content. Not the migration check: it requests every reference URL
+   again, and under the live domain that is the new site by now — a URL that
+   fails there counts as `referenceNotOk` and is ignored.
+
+### Migration check results
+
+One section per sitemap group, inside it one block per page or record, inside
+that the reference and target row of every language:
+
+| Language | Environment | Code      | Final path    | Redirects                                          | Verdict             |
+|----------|-------------|-----------|---------------|----------------------------------------------------|---------------------|
+| en-us    | reference   | 200       | /old-path/    |                                                    | Reference           |
+| en-us    | target      | 301 → 200 | /new-path/    | /old-path/ → /interim-path/ (301) → /new-path/ (301) | Moved with redirect, Redirect chain |
+
+Where a target URL is missing, the module suggests the path of the same page or
+record on the target — taken from the pages of the target snapshot.
 
 ### Verdicts
 
@@ -353,8 +399,9 @@ module shows which snapshots a run compared.
 
 Every URL of the reference snapshot is requested on the reference and, with the
 host replaced by the host of the target snapshot, on the target. The pages of
-the target snapshot are requested as well, to suggest redirect targets. Redirects are followed one hop at a time, so each
-hop is recorded with its status code. Verdicts are computed once all URLs are
+the target snapshot are requested as well, to suggest redirect targets.
+Redirects are followed one hop at a time, so each hop is recorded with its
+status code. Verdicts are computed once all URLs are
 checked; until then the module shows the rows as "not analysed yet".
 
 A redirect target is only suggested when exactly one path on the target matches.
@@ -409,8 +456,8 @@ different namespace or a different page quietly stops working: the arguments
 arrive nowhere, the plugin falls back to its default action, and the visitor
 gets a plausible looking wrong page — with HTTP 200.
 
-This command therefore visits every page of the snapshot, reads the links out of the
-rendered HTML, and checks each one **twice**: as it stands, and again with all
+This command therefore visits every page of the snapshot, reads the links out
+of the rendered HTML, and checks each one **twice**: as it stands, and again with all
 arguments removed. If both responses are the same page, the arguments did
 nothing, and the result is recorded with the marker `argumentsIgnored`.
 
@@ -448,9 +495,9 @@ imports that never finished. Always kept:
 
 A snapshot is locked with the lock icon in its header in the backend module,
 with the "Locked" field when editing the record, or right away with
-`websitecheck:importsitemaps --lock`. While locked, its delete
-button is disabled and the server refuses the deletion as well; unlock it
-first to delete it.
+`websitecheck:importsitemaps --lock`. While locked, its delete button is
+disabled and the server refuses the deletion as well; unlock it first to
+delete it.
 
 `--dry-run` lists exactly the snapshots a real run would remove.
 
