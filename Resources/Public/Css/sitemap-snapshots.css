@@ -102,6 +102,15 @@
     text-underline-offset: 0.15em;
 }
 
+/* An info icon beside a field label; the label stays the accessible name of the field. */
+.ot-websitecheck-help-icon {
+    display: inline-flex;
+    margin-inline-start: var(--ot-websitecheck-chevron-gap, 0.25rem);
+    color: inherit;
+    cursor: help;
+    vertical-align: text-bottom;
+}
+
 /* The whole row toggles; its button stays the element for keyboard and screen readers. */
 .ot-websitecheck-row-toggle {
     cursor: pointer;

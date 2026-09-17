@@ -1,0 +1,38 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment>
+    The short guide at the top of a module: what the tool is for and the steps
+    in their order, from the labels "guide.{guide}.*". Open while the module
+    has nothing to show yet; module-guide.js remembers what the viewer chose.
+    Arguments: guide, steps (list of step numbers), expanded, documentation (README anchor).
+</f:comment>
+<f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+<div class="panel panel-default mb-3 ot-websitecheck-snapshots" data-js="moduleGuide" data-guide="{guide}">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link p-0 text-start ot-websitecheck-toggle" data-bs-toggle="collapse" data-bs-target="#{guide}Guide" aria-expanded="{f:if(condition: expanded, then: 'true', else: 'false')}" aria-controls="{guide}Guide">
+            <span class="ot-websitecheck-chevron" aria-hidden="true"><core:icon identifier="actions-chevron-end" size="small"/></span>
+            <core:icon identifier="actions-info-circle" size="small"/>
+            <strong>{f:translate(key: '{languageFile}guide.{guide}.title')}</strong>
+        </button>
+    </div>
+    <div class="collapse{f:if(condition: expanded, then: ' show')}" id="{guide}Guide" data-js="moduleGuideBody">
+        <div class="panel-body">
+            <p>{f:translate(key: '{languageFile}guide.{guide}.purpose')}</p>
+            <ol>
+                <f:for each="{steps}" as="step">
+                    <li>{f:translate(key: '{languageFile}guide.{guide}.step{step}')}</li>
+                </f:for>
+            </ol>
+            <p>{f:translate(key: '{languageFile}guide.{guide}.note')}</p>
+            <a href="https://github.com/oliverthiele/ot-websitecheck#{documentation}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm">
+                <core:icon identifier="actions-window-open" size="small"/> {f:translate(key: '{languageFile}guide.documentation')}
+            </a>
+        </div>
+    </div>
+</div>
+
+</html>

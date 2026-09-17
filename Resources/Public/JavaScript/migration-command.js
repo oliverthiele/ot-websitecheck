@@ -1,23 +1,13 @@
-import { copyToClipboard } from '@typo3/backend/copy-to-clipboard.js';
+import { initializeCommandOutput, quote, trackEditedFields } from '@oliverthiele/ot-websitecheck/command-line.js';
 
 /**
  * Composes the websitecheck:migrationcheck call from the chosen snapshots and
  * keeps the suggested labels in step with them until someone types their own.
  */
 
-const PREFIX_STORAGE_KEY = 'ot-websitecheck-command-prefix';
-
 const migrationCommand = document.querySelector('[data-js="migrationCommand"]');
-if (migrationCommand?.querySelector('[data-js="migrationCommandOutput"]')) {
+if (migrationCommand?.querySelector('[data-js="commandOutput"]')) {
   initializeMigrationCommand(migrationCommand);
-}
-
-/**
- * Leaves plain values bare and wraps everything else in single quotes, which
- * a POSIX shell takes literally — default snapshot labels contain spaces.
- */
-function quote(value) {
-  return /^[A-Za-z0-9_.\/:@%+=,-]+$/.test(value) ? value : `'${value.replaceAll("'", "'\\''")}'`;
 }
 
 function initializeMigrationCommand(migrationCommand) {
@@ -30,32 +20,11 @@ function initializeMigrationCommand(migrationCommand) {
   const migrationCommandReferenceLabel = migrationCommand.querySelector('[data-js="migrationCommandReferenceLabel"]');
   const migrationCommandTargetLabel = migrationCommand.querySelector('[data-js="migrationCommandTargetLabel"]');
   const migrationCommandLimit = migrationCommand.querySelector('[data-js="migrationCommandLimit"]');
-  const migrationCommandPrefix = migrationCommand.querySelector('[data-js="migrationCommandPrefix"]');
-  const migrationCommandWarning = migrationCommand.querySelector('[data-js="migrationCommandWarning"]');
-  const migrationCommandOutput = migrationCommand.querySelector('[data-js="migrationCommandOutput"]');
-  const migrationCommandCopy = migrationCommand.querySelector('[data-js="migrationCommandCopy"]');
 
-  // A field someone typed into keeps its value; the others follow the selection.
-  const editedFields = new Set();
-  [migrationCommandRun, migrationCommandReferenceLabel, migrationCommandTargetLabel].forEach((field) => {
-    field.addEventListener('input', () => {
-      if (field.value === '') {
-        editedFields.delete(field);
-      } else {
-        editedFields.add(field);
-      }
-      render();
-    });
-  });
-
-  try {
-    const storedPrefix = window.localStorage.getItem(PREFIX_STORAGE_KEY);
-    if ([...migrationCommandPrefix.options].some((option) => option.value === storedPrefix)) {
-      migrationCommandPrefix.value = storedPrefix;
-    }
-  } catch {
-    // Storage may be unavailable; the first option is a fine default.
-  }
+  const setSuggestion = trackEditedFields(
+    [migrationCommandRun, migrationCommandReferenceLabel, migrationCommandTargetLabel],
+    () => render(),
+  );
 
   function selectedData(select) {
     return select.selectedOptions[0]?.dataset ?? {};
@@ -64,12 +33,6 @@ function initializeMigrationCommand(migrationCommand) {
   function reusedEnvironments() {
     const environments = migrationCommandReferenceRun.selectedOptions[0]?.dataset.referenceEnvironments ?? '';
     return environments === '' ? [] : environments.split(',');
-  }
-
-  function setSuggestion(field, value) {
-    if (!editedFields.has(field)) {
-      field.value = value;
-    }
   }
 
   // Only runs that compared the chosen reference snapshot can lend their rows.
@@ -133,12 +96,11 @@ function initializeMigrationCommand(migrationCommand) {
     return warnings;
   }
 
-  function render() {
+  function build() {
     const reuse = migrationCommandReferenceRun.value !== '';
     migrationCommandReferenceLabelField.hidden = reuse;
 
     const parts = [
-      migrationCommandPrefix.value,
       'websitecheck:migrationcheck',
       `--run=${quote(migrationCommandRun.value.trim())}`,
       `--reference-snapshot=${quote(migrationCommandReference.value)}`,
@@ -154,17 +116,11 @@ function initializeMigrationCommand(migrationCommand) {
     if (limit > 0) {
       parts.push(`--limit=${limit}`);
     }
-    migrationCommandOutput.textContent = parts.join(' ');
 
-    const warnings = collectWarnings(reuse);
-    migrationCommandWarning.replaceChildren(...warnings.map((warning) => {
-      const line = document.createElement('div');
-      line.textContent = warning;
-      return line;
-    }));
-    migrationCommandWarning.hidden = warnings.length === 0;
-    migrationCommandCopy.disabled = warnings.length > 0;
+    return { parts, warnings: collectWarnings(reuse) };
   }
+
+  const render = initializeCommandOutput(migrationCommand, build);
 
   migrationCommandReference.addEventListener('change', () => {
     filterReferenceRuns();
@@ -182,17 +138,6 @@ function initializeMigrationCommand(migrationCommand) {
     render();
   });
   migrationCommandLimit.addEventListener('input', render);
-  migrationCommandPrefix.addEventListener('change', () => {
-    try {
-      window.localStorage.setItem(PREFIX_STORAGE_KEY, migrationCommandPrefix.value);
-    } catch {
-      // Not remembered then; nothing else depends on it.
-    }
-    render();
-  });
-  migrationCommandCopy.addEventListener('click', () => {
-    copyToClipboard(migrationCommandOutput.textContent);
-  });
 
   filterReferenceRuns();
   suggestReferenceRun();

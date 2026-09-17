@@ -169,6 +169,170 @@
         <source>Fill in the run label and both environment labels.</source>
         <target>Bitte Lauf-Label und beide Umgebungs-Labels ausfüllen.</target>
       </trans-unit>
+      <trans-unit id="statusCommand.title" resname="statusCommand.title" approved="yes">
+        <source>Compose a status or link check</source>
+        <target>Status- oder Link-Check zusammenstellen</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.intro" resname="statusCommand.intro" approved="yes">
+        <source>Both checks run on the command line. The status check requests every URL of a snapshot and records its HTTP status and TYPO3 error pages; the link check follows the plugin links on those pages.</source>
+        <target>Beide Checks laufen auf der Kommandozeile. Der Status-Check fragt jede URL eines Snapshots ab und speichert HTTP-Status und TYPO3-Fehlerseiten; der Link-Check folgt den Plugin-Links auf diesen Seiten.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.type" resname="statusCommand.type" approved="yes">
+        <source>Check</source>
+        <target>Check</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.type.checksitemap" resname="statusCommand.type.checksitemap" approved="yes">
+        <source>Status of the sitemap URLs (websitecheck:checksitemap)</source>
+        <target>Status der Sitemap-URLs (websitecheck:checksitemap)</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.type.crawllinks" resname="statusCommand.type.crawllinks" approved="yes">
+        <source>Plugin links on the pages (websitecheck:crawllinks)</source>
+        <target>Plugin-Links auf den Seiten (websitecheck:crawllinks)</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.snapshot" resname="statusCommand.snapshot" approved="yes">
+        <source>Snapshot</source>
+        <target>Snapshot</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.snapshot.help" resname="statusCommand.snapshot.help" approved="yes">
+        <source>Its URLs are requested — on its own host, unless another host is given.</source>
+        <target>Seine URLs werden abgefragt — auf dem eigenen Host, sofern kein anderer angegeben ist.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.environment" resname="statusCommand.environment" approved="yes">
+        <source>Environment label</source>
+        <target>Umgebungs-Label</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.environment.help" resname="statusCommand.environment.help" approved="yes">
+        <source>Stored with every result and offered in the filter below. Link checks get a label of their own, so they do not replace the results of a status check.</source>
+        <target>Wird mit jedem Ergebnis gespeichert und unten im Filter angeboten. Link-Checks bekommen ein eigenes Label, damit sie die Ergebnisse eines Status-Checks nicht ersetzen.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.host" resname="statusCommand.host" approved="yes">
+        <source>Other host (optional)</source>
+        <target>Anderer Host (optional)</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.host.help" resname="statusCommand.host.help" approved="yes">
+        <source>Requests the paths of the snapshot on this host, e.g. to check the URLs of live against staging.</source>
+        <target>Fragt die Pfade des Snapshots auf diesem Host ab, z. B. um die URLs von Live gegen Staging zu prüfen.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.groups" resname="statusCommand.groups" approved="yes">
+        <source>Sitemap groups (optional)</source>
+        <target>Sitemap-Gruppen (optional)</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.groups.help" resname="statusCommand.groups.help" approved="yes">
+        <source>Separated by commas. All groups when empty.</source>
+        <target>Durch Kommas getrennt. Leer bedeutet alle Gruppen.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.limit.help" resname="statusCommand.limit.help" approved="yes">
+        <source>Only the first URLs — or, for links, pages — for a test run.</source>
+        <target>Nur die ersten URLs — bei Links: Seiten — für einen Testlauf.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.samples" resname="statusCommand.samples" approved="yes">
+        <source>Links per shape</source>
+        <target>Links pro Form</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.samples.help" resname="statusCommand.samples.help" approved="yes">
+        <source>Links that differ only in a record uid share a shape; this many of each are checked.</source>
+        <target>Links, die sich nur in einer Datensatz-uid unterscheiden, haben dieselbe Form; davon werden so viele geprüft.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.maxLinks" resname="statusCommand.maxLinks" approved="yes">
+        <source>Maximum links</source>
+        <target>Höchstzahl Links</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.allLinks" resname="statusCommand.allLinks" approved="yes">
+        <source>Also follow links without plugin arguments</source>
+        <target>Auch Links ohne Plugin-Argumente prüfen</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.hint" resname="statusCommand.hint" approved="yes">
+        <source>Run it in the project root, then reload this page. Protected environments: add --basic-auth, or use the environment variables described in the README.</source>
+        <target>Im Projektverzeichnis ausführen und danach diese Seite neu laden. Geschützte Umgebungen: --basic-auth ergänzen oder die in der README beschriebenen Umgebungsvariablen nutzen.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.noSnapshots" resname="statusCommand.noSnapshots" approved="yes">
+        <source>Both checks read their URLs from a sitemap snapshot. Import one first.</source>
+        <target>Beide Checks lesen ihre URLs aus einem Sitemap-Snapshot. Importieren Sie zuerst einen.</target>
+      </trans-unit>
+      <trans-unit id="statusCommand.warning.missingEnvironment" resname="statusCommand.warning.missingEnvironment" approved="yes">
+        <source>Enter an environment label.</source>
+        <target>Bitte ein Umgebungs-Label eintragen.</target>
+      </trans-unit>
+      <trans-unit id="statusResults.empty" resname="statusResults.empty" approved="yes">
+        <source>No status or link check has been run yet. Compose one above and run it on the command line.</source>
+        <target>Es wurde noch kein Status- oder Link-Check ausgeführt. Stellen Sie oben einen zusammen und führen Sie ihn auf der Kommandozeile aus.</target>
+      </trans-unit>
+      <trans-unit id="statusResults.summary" resname="statusResults.summary" approved="yes">
+        <source>%1$s results — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
+        <target>%1$s Ergebnisse — %2$s ohne HTTP 200 oder mit Fehlermarker, davon %3$s noch nicht geprüft.</target>
+      </trans-unit>
+      <trans-unit id="statusResults.summaryForEnvironment" resname="statusResults.summaryForEnvironment" approved="yes">
+        <source>%1$s results for "%4$s" — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
+        <target>%1$s Ergebnisse für „%4$s“ — %2$s ohne HTTP 200 oder mit Fehlermarker, davon %3$s noch nicht geprüft.</target>
+      </trans-unit>
+      <trans-unit id="statusResults.sources" resname="statusResults.sources" approved="yes">
+        <source>Sources — the snapshot, or the page a link was found on:</source>
+        <target>Quellen — der Snapshot oder die Seite, auf der ein Link gefunden wurde:</target>
+      </trans-unit>
+      <trans-unit id="statusResults.allEnvironments" resname="statusResults.allEnvironments" approved="yes">
+        <source>— all environments —</source>
+        <target>— alle Umgebungen —</target>
+      </trans-unit>
+      <trans-unit id="statusResults.onlyProblems" resname="statusResults.onlyProblems" approved="yes">
+        <source>only problems (no HTTP 200, or an error marker)</source>
+        <target>nur Probleme (kein HTTP 200 oder ein Fehlermarker)</target>
+      </trans-unit>
+      <trans-unit id="statusResults.deleteAll" resname="statusResults.deleteAll" approved="yes">
+        <source>Delete all results (every environment)</source>
+        <target>Alle Ergebnisse löschen (alle Umgebungen)</target>
+      </trans-unit>
+      <trans-unit id="statusResults.deleteEnvironment" resname="statusResults.deleteEnvironment" approved="yes">
+        <source>Delete all results for "%1$s"</source>
+        <target>Alle Ergebnisse für „%1$s“ löschen</target>
+      </trans-unit>
+      <trans-unit id="statusResults.column.pageUid" resname="statusResults.column.pageUid" approved="yes">
+        <source>Page uid</source>
+        <target>Seiten-uid</target>
+      </trans-unit>
+      <trans-unit id="statusResults.column.path" resname="statusResults.column.path" approved="yes">
+        <source>Path</source>
+        <target>Pfad</target>
+      </trans-unit>
+      <trans-unit id="statusResults.column.errorMarker" resname="statusResults.column.errorMarker" approved="yes">
+        <source>Error marker</source>
+        <target>Fehlermarker</target>
+      </trans-unit>
+      <trans-unit id="statusResults.column.checkedAt" resname="statusResults.column.checkedAt" approved="yes">
+        <source>Checked at</source>
+        <target>Geprüft am</target>
+      </trans-unit>
+      <trans-unit id="flash.deleteResult.success" resname="flash.deleteResult.success" approved="yes">
+        <source>The result was deleted.</source>
+        <target>Das Ergebnis wurde gelöscht.</target>
+      </trans-unit>
+      <trans-unit id="flash.deleteResults.success" resname="flash.deleteResults.success" approved="yes">
+        <source>%1$s results deleted.</source>
+        <target>%1$s Ergebnisse gelöscht.</target>
+      </trans-unit>
+      <trans-unit id="errorMarker.productionException" resname="errorMarker.productionException" approved="yes">
+        <source>TYPO3 error page ("Oops, an error occurred")</source>
+        <target>TYPO3-Fehlerseite („Oops, an error occurred“)</target>
+      </trans-unit>
+      <trans-unit id="errorMarker.developmentException" resname="errorMarker.developmentException" approved="yes">
+        <source>TYPO3 exception (development)</source>
+        <target>TYPO3-Exception (Entwicklung)</target>
+      </trans-unit>
+      <trans-unit id="errorMarker.pageNotFound" resname="errorMarker.pageNotFound" approved="yes">
+        <source>TYPO3 "page not found"</source>
+        <target>TYPO3 „Seite nicht gefunden“</target>
+      </trans-unit>
+      <trans-unit id="errorMarker.accessDenied" resname="errorMarker.accessDenied" approved="yes">
+        <source>TYPO3 "access denied"</source>
+        <target>TYPO3 „Zugriff verweigert“</target>
+      </trans-unit>
+      <trans-unit id="errorMarker.connectionError" resname="errorMarker.connectionError" approved="yes">
+        <source>No connection</source>
+        <target>Keine Verbindung</target>
+      </trans-unit>
+      <trans-unit id="errorMarker.argumentsIgnored" resname="errorMarker.argumentsIgnored" approved="yes">
+        <source>Link arguments have no effect</source>
+        <target>Link-Argumente ohne Wirkung</target>
+      </trans-unit>
       <trans-unit id="empty.noResults" resname="empty.noResults" approved="yes">
         <source>No results match the current filters.</source>
         <target>Keine Ergebnisse für die aktuellen Filter.</target>
@@ -429,10 +593,6 @@
         <source>connection error</source>
         <target>Verbindungsfehler</target>
       </trans-unit>
-      <trans-unit id="snapshot.intro" resname="snapshot.intro" approved="yes">
-        <source>Sitemaps of every language of a site, stored at one point in time — imported here or with the websitecheck:importsitemaps command. A snapshot stays available after the site itself has changed.</source>
-        <target>Sitemaps aller Sprachen einer Website, zu einem Zeitpunkt gespeichert — hier importiert oder mit dem Command websitecheck:importsitemaps. Ein Snapshot bleibt verfügbar, auch wenn sich die Website selbst inzwischen geändert hat.</target>
-      </trans-unit>
       <trans-unit id="snapshot.noLanguage" resname="snapshot.noLanguage" approved="yes">
         <source>(no language)</source>
         <target>(ohne Sprache)</target>
@@ -676,6 +836,150 @@
       <trans-unit id="run.snapshotDeleted" resname="run.snapshotDeleted" approved="yes">
         <source>(deleted snapshot)</source>
         <target>(gelöschter Snapshot)</target>
+      </trans-unit>
+          <trans-unit id="guide.documentation" resname="guide.documentation" approved="yes">
+        <source>Documentation</source>
+        <target>Dokumentation</target>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.title" resname="guide.sitemaps.title" approved="yes">
+        <source>How sitemap snapshots work</source>
+        <target>So funktionieren Sitemap-Snapshots</target>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.purpose" resname="guide.sitemaps.purpose" approved="yes">
+        <source>A snapshot stores the sitemaps of every language of a site at one point in time, raw XML included. It is the URL list every check works with, and it stays available after the site itself has changed.</source>
+        <target>Ein Snapshot speichert die Sitemaps aller Sprachen einer Website zu einem Zeitpunkt, samt rohem XML. Er ist die URL-Liste, mit der jeder Check arbeitet, und bleibt erhalten, auch wenn sich die Website inzwischen geändert hat.</target>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.step1" resname="guide.sitemaps.step1" approved="yes">
+        <source>Choose a base URL of a configured site and find its sitemaps. The environment is suggested from the site configuration.</source>
+        <target>Eine Basis-URL einer konfigurierten Site wählen und deren Sitemaps suchen. Die Umgebung wird aus der Site-Konfiguration vorgeschlagen.</target>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.step2" resname="guide.sitemaps.step2" approved="yes">
+        <source>Select the languages, give the snapshot a label if you like, and import it.</source>
+        <target>Die Sprachen auswählen, dem Snapshot bei Bedarf ein Label geben und importieren.</target>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.step3" resname="guide.sitemaps.step3" approved="yes">
+        <source>Lock every snapshot you must not lose, e.g. the live state before a relaunch: the lock icon protects it from deletion, also by the cleanup command.</source>
+        <target>Jeden Snapshot sperren, der nicht verloren gehen darf, z. B. den Live-Stand vor einem Relaunch: Das Schloss schützt ihn vor dem Löschen, auch durch den Aufräumbefehl.</target>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.note" resname="guide.sitemaps.note" approved="yes">
+        <source>URLs outside the configured sites, scheduled imports and backups of snapshots need the command line: websitecheck:importsitemaps and websitecheck:exportsnapshots.</source>
+        <target>URLs außerhalb der konfigurierten Sites, regelmäßige Importe und Sicherungen von Snapshots laufen über die Kommandozeile: websitecheck:importsitemaps und websitecheck:exportsnapshots.</target>
+      </trans-unit>
+      <trans-unit id="guide.status.title" resname="guide.status.title" approved="yes">
+        <source>How the status check works</source>
+        <target>So funktioniert der Status-Check</target>
+      </trans-unit>
+      <trans-unit id="guide.status.purpose" resname="guide.status.purpose" approved="yes">
+        <source>Checks whether every URL of a sitemap snapshot works: the HTTP status and TYPO3 error pages per URL. The link check also follows the plugin links on those pages, which no sitemap lists, and reports links whose arguments have no effect.</source>
+        <target>Prüft, ob jede URL eines Sitemap-Snapshots funktioniert: HTTP-Status und TYPO3-Fehlerseiten je URL. Der Link-Check folgt außerdem den Plugin-Links auf diesen Seiten, die in keiner Sitemap stehen, und meldet Links, deren Argumente nichts bewirken.</target>
+      </trans-unit>
+      <trans-unit id="guide.status.step1" resname="guide.status.step1" approved="yes">
+        <source>Import a sitemap snapshot of the environment to check in the Sitemaps module.</source>
+        <target>Im Modul „Sitemaps“ einen Snapshot der zu prüfenden Umgebung importieren.</target>
+      </trans-unit>
+      <trans-unit id="guide.status.step2" resname="guide.status.step2" approved="yes">
+        <source>Compose the check below and run the command on the command line. Every URL is requested, which can take a while.</source>
+        <target>Den Check unten zusammenstellen und den Befehl auf der Kommandozeile ausführen. Jede URL wird abgefragt, das kann eine Weile dauern.</target>
+      </trans-unit>
+      <trans-unit id="guide.status.step3" resname="guide.status.step3" approved="yes">
+        <source>Reload this page and review the results: filter by environment and problems, mark findings as reviewed and add a note where needed.</source>
+        <target>Diese Seite neu laden und die Ergebnisse prüfen: nach Umgebung und Problemen filtern, Befunde als geprüft markieren und bei Bedarf eine Notiz ergänzen.</target>
+      </trans-unit>
+      <trans-unit id="guide.status.note" resname="guide.status.note" approved="yes">
+        <source>Moved URLs and redirects are the job of the migration check: it compares two environments page by page.</source>
+        <target>Umgezogene URLs und Weiterleitungen prüft der Migrations-Check: Er vergleicht zwei Umgebungen Seite für Seite.</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.title" resname="guide.migration.title" approved="yes">
+        <source>How the migration check works</source>
+        <target>So funktioniert der Migrations-Check</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.purpose" resname="guide.migration.purpose" approved="yes">
+        <source>Checks whether the URLs search engines know from the old site still lead to the same page or record on the new one — directly or through a redirect.</source>
+        <target>Prüft, ob die URLs, die Suchmaschinen von der alten Website kennen, auf der neuen noch zur selben Seite bzw. zum selben Datensatz führen — direkt oder über eine Weiterleitung.</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.step1" resname="guide.migration.step1" approved="yes">
+        <source>Before the switch: import the sitemaps of the live site and lock the snapshot.</source>
+        <target>Vor dem Livegang: die Sitemaps der Live-Website importieren und den Snapshot sperren.</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.step2" resname="guide.migration.step2" approved="yes">
+        <source>Import a snapshot of the new site, e.g. staging, compose the check below and run it. Repeat after every change to the new site.</source>
+        <target>Einen Snapshot der neuen Website importieren, z. B. Staging, den Check unten zusammenstellen und ausführen. Nach jeder Änderung an der neuen Website wiederholen.</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.step3" resname="guide.migration.step3" approved="yes">
+        <source>Review the results: missing redirects per page and record, with a suggested target where one can be derived.</source>
+        <target>Die Ergebnisse prüfen: fehlende Weiterleitungen je Seite und Datensatz, mit einem Zielvorschlag, wo einer ableitbar ist.</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.step4" resname="guide.migration.step4" approved="yes">
+        <source>After the switch: import a snapshot of the new live site and reuse the reference results of the last run — the old site no longer answers. Export the last run beforehand if the database gets replaced.</source>
+        <target>Nach dem Livegang: einen Snapshot der neuen Live-Website importieren und die Referenz-Ergebnisse des letzten Laufs übernehmen — die alte Website antwortet nicht mehr. Wird die Datenbank ersetzt, den letzten Lauf vorher exportieren.</target>
+      </trans-unit>
+      <trans-unit id="guide.migration.note" resname="guide.migration.note" approved="yes">
+        <source>Both sites have to render the page and record markers described in the documentation; without them pages cannot be compared.</source>
+        <target>Beide Websites müssen die in der Dokumentation beschriebenen Seiten- und Datensatz-Marker ausgeben; ohne sie lassen sich Seiten nicht vergleichen.</target>
+      </trans-unit>
+      <trans-unit id="help.statusHost.title" resname="help.statusHost.title" approved="yes">
+        <source>Other host</source>
+        <target>Anderer Host</target>
+      </trans-unit>
+      <trans-unit id="help.statusHost" resname="help.statusHost" approved="yes">
+        <source>Requests the paths of the snapshot on another host. Example: the snapshot was taken on www.example.com, the host is staging.example.com — you see before the switch whether every URL search engines know answers on the new system. Or the other way round: a sitemap provider only exists on staging while the pages are live already. Redirects and content are compared by the migration check.</source>
+        <target>Fragt die Pfade des Snapshots auf einem anderen Host ab. Beispiel: Der Snapshot stammt von www.example.com, als Host steht staging.example.com — so sehen Sie vor dem Livegang, ob jede URL, die Suchmaschinen kennen, auf dem neuen System antwortet. Oder umgekehrt: Ein Sitemap-Provider existiert nur auf Staging, die Seiten sind aber schon live. Weiterleitungen und Inhalte vergleicht der Migrations-Check.</target>
+      </trans-unit>
+      <trans-unit id="help.statusEnvironment.title" resname="help.statusEnvironment.title" approved="yes">
+        <source>Environment label</source>
+        <target>Umgebungs-Label</target>
+      </trans-unit>
+      <trans-unit id="help.statusEnvironment" resname="help.statusEnvironment" approved="yes">
+        <source>Results are stored per environment label and URL; a new run with the same label replaces them. Use one label per environment and check, e.g. "staging" for the status check and "staging-links" for the link check of the same site.</source>
+        <target>Ergebnisse werden je Umgebungs-Label und URL gespeichert; ein neuer Lauf mit demselben Label ersetzt sie. Verwenden Sie ein Label je Umgebung und Check, z. B. „staging“ für den Status-Check und „staging-links“ für den Link-Check derselben Website.</target>
+      </trans-unit>
+      <trans-unit id="help.statusSamples.title" resname="help.statusSamples.title" approved="yes">
+        <source>Links per shape</source>
+        <target>Links pro Form</target>
+      </trans-unit>
+      <trans-unit id="help.statusSamples" resname="help.statusSamples" approved="yes">
+        <source>A shape is the path of a link plus the names of its arguments. /news/detail?tx_news_pi1[news]=12 and …[news]=13 share one shape, so a list of a hundred news items is checked with this many links, not a hundred.</source>
+        <target>Eine Form ist der Pfad eines Links plus die Namen seiner Argumente. /news/detail?tx_news_pi1[news]=12 und …[news]=13 haben dieselbe Form; eine Liste mit hundert News wird also mit so vielen Links geprüft, nicht mit hundert.</target>
+      </trans-unit>
+      <trans-unit id="help.migrationReference.title" resname="help.migrationReference.title" approved="yes">
+        <source>Reference snapshot</source>
+        <target>Referenz-Snapshot</target>
+      </trans-unit>
+      <trans-unit id="help.migrationReference" resname="help.migrationReference" approved="yes">
+        <source>The URLs of the old site as search engines know them. Take the locked live snapshot from before the switch — a newer live snapshot already lists the URLs of the new site.</source>
+        <target>Die URLs der alten Website, wie Suchmaschinen sie kennen. Nehmen Sie den gesperrten Live-Snapshot von vor dem Livegang — ein neuerer Live-Snapshot listet schon die URLs der neuen Website.</target>
+      </trans-unit>
+      <trans-unit id="help.migrationReferenceRun.title" resname="help.migrationReferenceRun.title" approved="yes">
+        <source>Reference results</source>
+        <target>Referenz-Ergebnisse</target>
+      </trans-unit>
+      <trans-unit id="help.migrationReferenceRun" resname="help.migrationReferenceRun" approved="yes">
+        <source>Before the switch, both sites answer and every run requests both. After it, www.example.com shows the new site: a run named "relaunch" from before the switch still knows how every old URL answered, and a run "after-relaunch" reuses those rows and only requests the new site.</source>
+        <target>Vor dem Livegang antworten beide Websites, und jeder Lauf fragt beide ab. Danach zeigt www.example.com die neue Website: Ein Lauf „relaunch“ von vor dem Livegang weiß noch, wie jede alte URL geantwortet hat, und ein Lauf „after-relaunch“ übernimmt diese Zeilen und fragt nur noch die neue Website ab.</target>
+      </trans-unit>
+      <trans-unit id="help.migrationLabels.title" resname="help.migrationLabels.title" approved="yes">
+        <source>Environment labels</source>
+        <target>Umgebungs-Labels</target>
+      </trans-unit>
+      <trans-unit id="help.migrationLabels" resname="help.migrationLabels" approved="yes">
+        <source>They name the two sides in the results, e.g. "live" and "staging". After the switch both are live: "live-before" and "live-after" keep them apart.</source>
+        <target>Sie benennen die beiden Seiten in den Ergebnissen, z. B. „live“ und „staging“. Nach dem Livegang sind beide live: „live-before“ und „live-after“ halten sie auseinander.</target>
+      </trans-unit>
+      <trans-unit id="help.sitemapsEnvironment.title" resname="help.sitemapsEnvironment.title" approved="yes">
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </trans-unit>
+      <trans-unit id="help.sitemapsEnvironment" resname="help.sitemapsEnvironment" approved="yes">
+        <source>Says where the snapshot comes from. The migration check suggests the locked live snapshot as reference and the newest staging, development or local one as target — so tag live snapshots as live.</source>
+        <target>Gibt an, woher der Snapshot stammt. Der Migrations-Check schlägt den gesperrten Live-Snapshot als Referenz vor und den neuesten Staging-, Entwicklungs- oder lokalen Snapshot als Ziel — markieren Sie Live-Snapshots daher als Live.</target>
+      </trans-unit>
+      <trans-unit id="help.sitemapsLabel.title" resname="help.sitemapsLabel.title" approved="yes">
+        <source>Label</source>
+        <target>Label</target>
+      </trans-unit>
+      <trans-unit id="help.sitemapsLabel" resname="help.sitemapsLabel" approved="yes">
+        <source>The name the checks use to find the snapshot, e.g. "live-before-relaunch". It has to be unique. Left empty, it is the host and the time, e.g. "www.example.com 2026-01-31 14:05".</source>
+        <target>Der Name, unter dem die Checks den Snapshot finden, z. B. „live-before-relaunch“. Er muss eindeutig sein. Leer gelassen, besteht er aus Host und Zeitpunkt, z. B. „www.example.com 2026-01-31 14:05“.</target>
       </trans-unit>
     </body>
   </file>

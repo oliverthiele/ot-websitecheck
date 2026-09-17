@@ -10,6 +10,7 @@ use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
 use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\MigrationCheckSuggestion;
+use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
@@ -29,6 +30,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly MigrationRunRepository $migrationRunRepository,
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
         private readonly MigrationCheckSuggestion $migrationCheckSuggestion,
+        private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
     ) {
     }
 
@@ -160,24 +162,8 @@ class MigrationCheckModuleController extends AbstractModuleController
      */
     private function buildCommandBuilder(): array
     {
-        $allSnapshots = $this->sitemapSnapshotRepository->findAll();
-        $suggestion = $this->migrationCheckSuggestion->suggest($allSnapshots);
-
-        $snapshots = [];
-        foreach ($allSnapshots as $snapshot) {
-            if (!$snapshot->isComplete()) {
-                continue;
-            }
-            $host = parse_url($snapshot->startUrl, PHP_URL_HOST);
-            $snapshots[] = [
-                'uid' => $snapshot->uid,
-                'label' => $snapshot->label,
-                'host' => is_string($host) ? $host : '',
-                'environment' => $snapshot->environment,
-                'locked' => $snapshot->locked,
-                'fetchedAt' => $snapshot->fetchedAt,
-            ];
-        }
+        $suggestion = $this->migrationCheckSuggestion->suggest($this->sitemapSnapshotRepository->findAll());
+        $snapshots = $this->snapshotOptionsProvider->getCompleteSnapshots();
 
         $referenceEnvironments = $this->observationRepository->findReferenceEnvironmentsByRun();
         $runs = [];

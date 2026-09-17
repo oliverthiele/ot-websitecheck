@@ -1,0 +1,12 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment>One snapshot in a command form, with what a script needs to suggest values.</f:comment>
+<f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+<option value="{snapshot.label}" data-uid="{snapshot.uid}" data-host="{snapshot.host}" data-environment="{snapshot.environment}" data-fetched-at="{snapshot.fetchedAt}" {f:if(condition: '{snapshot.uid} == {selectedUid}', then: 'selected')}>
+    {snapshot.label}<f:if condition="{snapshot.environment}"> · {f:translate(key: '{languageFile}environment.{snapshot.environment}')}</f:if><f:if condition="{snapshot.locked}"> · {f:translate(key: '{languageFile}command.locked')}</f:if>
+</option>
+
+</html>

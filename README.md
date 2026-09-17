@@ -262,8 +262,11 @@ redirect leads to.
 The backend module **Sites > Website Check** (admin-only) shows one card per
 tool:
 
-- **Status check** — results of `checksitemap` and `crawllinks`, filterable by
-  environment, only problems and only not yet reviewed
+- **Status check** — a form that composes the `checksitemap` or `crawllinks`
+  command for a snapshot, and the results, filterable by environment, only
+  problems and only not yet reviewed. The form suggests the newest snapshot
+  and an environment label from it — with `-links` for a link check, so its
+  results do not replace those of a status check.
 - **Migration check** — a form that composes the `migrationcheck` command, and
   the results, see [Migration check results](#migration-check-results). The
   form offers every complete snapshot and suggests the pair to compare: a
@@ -504,7 +507,7 @@ typo3 websitecheck:checksitemap --snapshot=dev-current --environment=live-paths 
 | Option | Description |
 |--------|-------------|
 | `--snapshot` | Required. Label of the sitemap snapshot whose URLs are checked. |
-| `--environment` / `-e` | Required. Label stored with every result row, e.g. `staging` or `live`. |
+| `--environment` / `-e` | Label stored with every result row, e.g. `staging` or `live`. Defaults to the environment of the snapshot; required with `--host` or for a snapshot without one. |
 | `--host` | Request the paths of the snapshot on this host — e.g. when a sitemap provider only exists on the source environment while the pages already exist on the target. |
 | `--group` | Only URLs from these sitemap groups, e.g. `pages`. Repeatable. |
 | `--timeout` | HTTP timeout per request in seconds (default: `10`). |
@@ -537,7 +540,7 @@ plugin on the same page, so only a couple of samples per shape are checked.
 | Option | Description |
 |--------|-------------|
 | `--snapshot` | Required. Label of the sitemap snapshot whose pages are the starting points. |
-| `--environment` / `-e` | Required. Use a distinct label (`…-links`) so a link run does not overwrite the rows of a sitemap run. |
+| `--environment` / `-e` | Use a distinct label (`…-links`) so a link run does not overwrite the rows of a sitemap run. Defaults to the environment of the snapshot followed by `-links`; required for a snapshot without one. |
 | `--group` | Only start from pages of these sitemap groups. Repeatable. |
 | `--samples-per-shape` | How many links per distinct shape to check (default: `2`). |
 | `--max-links` | Upper bound on links checked (default: `2000`). |

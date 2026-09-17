@@ -42,7 +42,7 @@ class CheckSitemapCommand extends Command
     {
         $this->setDescription('Request every URL of a sitemap snapshot and record the HTTP status and error markers.');
         $this->addOption('snapshot', null, InputOption::VALUE_REQUIRED, 'Label of the sitemap snapshot whose URLs are checked.');
-        $this->addOption('environment', 'e', InputOption::VALUE_REQUIRED, 'Label for the checked environment, e.g. "staging" or "live".');
+        $this->addOption('environment', 'e', InputOption::VALUE_REQUIRED, 'Label for the checked environment, e.g. "staging" or "live". Defaults to the environment of the snapshot, unless --host is given.');
         $this->addOption('host', null, InputOption::VALUE_REQUIRED, 'Request the paths of the snapshot on this host instead, e.g. "www.example.com" — to check a URL list collected on one environment against another one.');
         $this->addOption('group', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Only check URLs from these sitemap groups, e.g. "pages".');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '10');
@@ -55,15 +55,22 @@ class CheckSitemapCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $environment = $this->stringValue($input->getOption('environment'));
-        if ($environment === '') {
-            $io->error('The --environment option is required, e.g. --environment=staging');
-            return self::FAILURE;
-        }
         try {
             $snapshot = $this->sitemapSnapshotLocator->findCompleteSnapshot($this->stringValue($input->getOption('snapshot')));
         } catch (\InvalidArgumentException $exception) {
             $io->error('--snapshot: ' . $exception->getMessage());
+            return self::FAILURE;
+        }
+        $environment = $this->stringValue($input->getOption('environment'));
+        // The tag describes the host of the snapshot; with --host another one is requested.
+        if ($environment === '' && $snapshot->environment !== '' && $this->stringValue($input->getOption('host')) === '') {
+            $environment = $snapshot->environment;
+            $io->note(sprintf('--environment taken from the snapshot: "%s".', $environment));
+        }
+        if ($environment === '') {
+            $io->error($snapshot->environment !== ''
+                ? 'With --host, the --environment option is required, e.g. --environment=staging'
+                : 'The --environment option is required unless the snapshot has an environment, e.g. --environment=staging');
             return self::FAILURE;
         }
 
