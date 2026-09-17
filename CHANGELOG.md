@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Add a form to the status check module that composes the
+  `websitecheck:checksitemap` or `websitecheck:crawllinks` command for a
+  snapshot, with an environment label suggested from it
+- Add a collapsible guide to each backend module — what the tool is for, the
+  steps in their order and a link to the documentation — open while the
+  module has nothing to show, and remembered per viewer
+- Add info icons with examples to the fields that need one: other host,
+  environment labels and links per shape of the status check, reference
+  snapshot, reference results and labels of the migration check, label and
+  environment of the sitemap import
+
+### Changed
+
+- Default `--environment` of `websitecheck:checksitemap` to the environment of
+  the snapshot, unless `--host` is given, and of `websitecheck:crawllinks` to
+  that environment followed by `-links`
+- Translate the status check module, including the known error markers, and
+  keep its filter visible when the chosen environment has no results
+- Submit the status filter from a module script instead of inline handlers
+
 ## [0.4.0] — 2026-09-17
 
 ### Added

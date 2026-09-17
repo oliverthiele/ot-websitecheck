@@ -1,0 +1,21 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment>
+    An info icon next to a field label that explains the field with an example
+    in a popover; focusable, so the explanation opens by keyboard as well.
+    Needs @typo3/backend/popover.js on the page. Arguments: title, content.
+</f:comment>
+<a tabindex="0" role="button" class="ot-websitecheck-help-icon"
+    aria-label="{title}"
+    data-bs-toggle="popover"
+    data-bs-trigger="hover focus"
+    data-bs-placement="auto"
+    data-bs-title="{title}"
+    data-bs-content="{content}"
+><core:icon identifier="actions-info-circle" size="small"/></a>
+
+</html>

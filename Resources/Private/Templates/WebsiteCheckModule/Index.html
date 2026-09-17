@@ -1,6 +1,7 @@
 <html
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -9,106 +10,246 @@
 <f:section name="Content">
 
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/reviewed-toggle.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/status-command.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/status-filter.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/module-guide.js"/>
+    <f:asset.module identifier="@typo3/backend/popover.js"/>
+    <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
+    <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
 
+    <h1><f:translate key="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.status.title"/></h1>
+
+    <f:render partial="ModuleGuide" arguments="{guide: 'status', steps: {0: 1, 1: 2, 2: 3}, expanded: '{f:if(condition: hasResults, then: 0, else: 1)}', documentation: 'websitecheckchecksitemap'}"/>
+
+    <f:render section="CommandBuilder" arguments="{snapshots: commandSnapshots, expanded: '{f:if(condition: hasResults, then: 0, else: 1)}', languageFile: languageFile}"/>
+
+    <f:if condition="{hasResults}">
+        <f:then>
+            <f:render section="Summary" arguments="{_all}"/>
+            <f:render section="Filter" arguments="{_all}"/>
+            <f:render section="Results" arguments="{_all}"/>
+        </f:then>
+        <f:else>
+            <f:be.infobox state="-1">{f:translate(key: '{languageFile}statusResults.empty')}</f:be.infobox>
+        </f:else>
+    </f:if>
+
+</f:section>
+
+<f:section name="Summary">
     <div class="callout callout-info">
         <div class="callout-body">
-            {summary.total} result(s){f:if(condition: currentEnvironment, then: ' for "{currentEnvironment}"')} —
-            {summary.notOk} without HTTP 200 or with an error marker,
-            {summary.unreviewedNotOk} of those not yet reviewed.
+            <f:if condition="{currentEnvironment}">
+                <f:then>{f:translate(key: '{languageFile}statusResults.summaryForEnvironment', arguments: {0: summary.total, 1: summary.notOk, 2: summary.unreviewedNotOk, 3: currentEnvironment})}</f:then>
+                <f:else>{f:translate(key: '{languageFile}statusResults.summary', arguments: {0: summary.total, 1: summary.notOk, 2: summary.unreviewedNotOk})}</f:else>
+            </f:if>
             <f:if condition="{sources}">
-                <br />
-                Source(s) — snapshot, or the page a link was found on:
+                <br/>
+                {f:translate(key: '{languageFile}statusResults.sources')}
                 <f:for each="{sources}" as="source" iteration="sourceIteration">
                     <code>{source}</code><f:if condition="{sourceIteration.isLast}"><f:else>, </f:else></f:if>
                 </f:for>
             </f:if>
         </div>
     </div>
+</f:section>
 
-    <f:form action="index" method="get" class="mb-3">
-        <f:form.hidden name="token" value="{moduleToken}" />
-        <div class="row g-2 align-items-center">
-            <div class="col-auto">
-                <f:form.select name="environment" options="{environmentOptions}" value="{currentEnvironment}" class="form-select" onchange="this.form.submit()" />
+<f:section name="Filter">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <f:form action="index" method="get">
+            <f:form.hidden name="token" value="{moduleToken}"/>
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label class="visually-hidden" for="statusFilterEnvironment">{f:translate(key: '{languageFile}column.environment')}</label>
+                    <f:form.select name="environment" id="statusFilterEnvironment" options="{environmentOptions}" value="{currentEnvironment}" class="form-select" data="{js: 'statusFilterAutoSubmit'}"/>
+                </div>
+                <div class="col-auto form-check">
+                    <f:form.checkbox name="onlyProblems" id="statusFilterOnlyProblems" value="1" checked="{onlyProblems}" class="form-check-input" data="{js: 'statusFilterAutoSubmit'}"/>
+                    <label class="form-check-label" for="statusFilterOnlyProblems">{f:translate(key: '{languageFile}statusResults.onlyProblems')}</label>
+                </div>
+                <div class="col-auto form-check">
+                    <f:form.checkbox name="onlyUnreviewed" id="statusFilterOnlyUnreviewed" value="1" checked="{onlyUnreviewed}" class="form-check-input" data="{js: 'statusFilterAutoSubmit'}"/>
+                    <label class="form-check-label" for="statusFilterOnlyUnreviewed">{f:translate(key: '{languageFile}filter.onlyUnreviewed')}</label>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-default">{f:translate(key: '{languageFile}filter.submit')}</button>
+                </div>
             </div>
-            <div class="col-auto form-check">
-                <f:form.checkbox name="onlyProblems" id="onlyProblems" value="1" checked="{onlyProblems}" class="form-check-input" onchange="this.form.submit()" />
-                <label class="form-check-label" for="onlyProblems">only problems (not HTTP 200 or error marker)</label>
-            </div>
-            <div class="col-auto form-check">
-                <f:form.checkbox name="onlyUnreviewed" id="onlyUnreviewed" value="1" checked="{onlyUnreviewed}" class="form-check-input" onchange="this.form.submit()" />
-                <label class="form-check-label" for="onlyUnreviewed">only not yet reviewed</label>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-default">Filter</button>
+        </f:form>
+        <f:form action="deleteAll" method="post" class="ms-auto">
+            <f:form.hidden name="environment" value="{currentEnvironment}"/>
+            <button type="submit" class="btn btn-danger btn-sm">
+                <f:if condition="{currentEnvironment}">
+                    <f:then>{f:translate(key: '{languageFile}statusResults.deleteEnvironment', arguments: {0: currentEnvironment})}</f:then>
+                    <f:else>{f:translate(key: '{languageFile}statusResults.deleteAll')}</f:else>
+                </f:if>
+            </button>
+        </f:form>
+    </div>
+</f:section>
+
+<f:section name="Results">
+    <f:variable name="labelYes" value="{f:translate(key: '{languageFile}reviewed.yes')}"/>
+    <f:variable name="labelNo" value="{f:translate(key: '{languageFile}reviewed.no')}"/>
+    <div class="table-fit">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>{f:translate(key: '{languageFile}statusResults.column.pageUid')}</th>
+                    <th>{f:translate(key: '{languageFile}statusResults.column.path')}</th>
+                    <th>{f:translate(key: '{languageFile}column.environment')}</th>
+                    <th>{f:translate(key: '{languageFile}column.status')}</th>
+                    <th>{f:translate(key: '{languageFile}statusResults.column.errorMarker')}</th>
+                    <th>{f:translate(key: '{languageFile}statusResults.column.checkedAt')}</th>
+                    <th>{f:translate(key: '{languageFile}column.reviewed')}</th>
+                    <th>{f:translate(key: '{languageFile}label.note')}</th>
+                    <th><span class="visually-hidden">{f:translate(key: '{languageFile}column.actions')}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <f:for each="{results}" as="result">
+                    <tr>
+                        <td>
+                            <f:if condition="{result.page_uid}">
+                                <f:then>{result.page_uid}</f:then>
+                                <f:else><span class="text-muted">—</span></f:else>
+                            </f:if>
+                        </td>
+                        <td><a href="{result.url}" target="_blank" rel="noreferrer" title="{result.url}">{result.path}</a></td>
+                        <td>{result.environment}</td>
+                        <td>
+                            <f:if condition="{result.http_status} == 200">
+                                <f:then><span class="badge badge-success">{result.http_status}</span></f:then>
+                                <f:else><span class="badge badge-danger">{result.http_status}</span></f:else>
+                            </f:if>
+                        </td>
+                        <td>
+                            <f:if condition="{result.error_marker}">
+                                <span title="{result.error_marker}">{f:translate(key: '{languageFile}errorMarker.{result.error_marker}', default: result.error_marker)}</span>
+                            </f:if>
+                        </td>
+                        <td class="text-nowrap"><f:format.date format="d.m.Y H:i">@{result.checked_at}</f:format.date></td>
+                        <td>
+                            <button type="button" class="btn btn-link p-0" data-js="reviewedToggle" data-uid="{result.uid}">
+                                <f:if condition="{result.reviewed}">
+                                    <f:then><span class="badge badge-success" data-js="reviewedBadge" data-label-yes="{labelYes}" data-label-no="{labelNo}">{labelYes}</span></f:then>
+                                    <f:else><span class="badge badge-warning" data-js="reviewedBadge" data-label-yes="{labelYes}" data-label-no="{labelNo}">{labelNo}</span></f:else>
+                                </f:if>
+                            </button>
+                        </td>
+                        <td>{result.note}</td>
+                        <td class="text-nowrap">
+                            <div class="d-flex gap-2">
+                                <be:link.editRecord uid="{result.uid}" table="tx_otwebsitecheck_domain_model_check" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.edit')}</be:link.editRecord>
+                                <f:form action="delete" method="post">
+                                    <f:form.hidden name="uid" value="{result.uid}"/>
+                                    <button type="submit" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.delete')}</button>
+                                </f:form>
+                            </div>
+                        </td>
+                    </tr>
+                </f:for>
+            </tbody>
+        </table>
+    </div>
+    <f:if condition="{results}">
+        <f:else>
+            <f:be.infobox state="-1">{f:translate(key: '{languageFile}empty.noResults')}</f:be.infobox>
+        </f:else>
+    </f:if>
+</f:section>
+
+<f:section name="CommandBuilder">
+    <div class="panel panel-default mb-4 ot-websitecheck-snapshots"
+        data-js="statusCommand"
+        data-label-missing-environment="{f:translate(key: '{languageFile}statusCommand.warning.missingEnvironment')}"
+    >
+        <div class="panel-heading">
+            <button type="button" class="btn btn-link p-0 text-start ot-websitecheck-toggle" data-bs-toggle="collapse" data-bs-target="#statusCommandBody" aria-expanded="{f:if(condition: expanded, then: 'true', else: 'false')}" aria-controls="statusCommandBody">
+                <span class="ot-websitecheck-chevron" aria-hidden="true"><core:icon identifier="actions-chevron-end" size="small"/></span>
+                <strong>{f:translate(key: '{languageFile}statusCommand.title')}</strong>
+            </button>
+        </div>
+        <div class="collapse{f:if(condition: expanded, then: ' show')}" id="statusCommandBody">
+            <div class="panel-body">
+                <f:if condition="{snapshots}">
+                    <f:then>
+                        <f:render section="CommandForm" arguments="{snapshots: snapshots, languageFile: languageFile}"/>
+                    </f:then>
+                    <f:else>
+                        <p>{f:translate(key: '{languageFile}statusCommand.noSnapshots')}</p>
+                        <a href="{be:moduleLink(route: 'site_websitecheck_sitemaps')}" class="btn btn-default">{f:translate(key: '{languageFile}command.openSitemaps')}</a>
+                    </f:else>
+                </f:if>
             </div>
         </div>
-    </f:form>
+    </div>
+</f:section>
 
-    <f:form action="deleteAll" method="post" class="mb-3">
-        <f:form.hidden name="environment" value="{currentEnvironment}" />
-        <button type="submit" class="btn btn-danger">
-            <f:if condition="{currentEnvironment}">
-                <f:then>Delete all results for "{currentEnvironment}"</f:then>
-                <f:else>Delete all results (every environment)</f:else>
-            </f:if>
-        </button>
-    </f:form>
+<f:section name="CommandForm">
+    <p>{f:translate(key: '{languageFile}statusCommand.intro')}</p>
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="statusCommandType">{f:translate(key: '{languageFile}statusCommand.type')}</label>
+            <select class="form-select" id="statusCommandType" data-js="statusCommandType">
+                <option value="checksitemap">{f:translate(key: '{languageFile}statusCommand.type.checksitemap')}</option>
+                <option value="crawllinks">{f:translate(key: '{languageFile}statusCommand.type.crawllinks')}</option>
+            </select>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="statusCommandSnapshot">{f:translate(key: '{languageFile}statusCommand.snapshot')}</label>
+            <select class="form-select" id="statusCommandSnapshot" data-js="statusCommandSnapshot" aria-describedby="statusCommandSnapshotHelp">
+                <f:for each="{snapshots}" as="snapshot" iteration="snapshotIteration">
+                    <f:render partial="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: '{f:if(condition: snapshotIteration.isFirst, then: snapshot.uid, else: 0)}'}"/>
+                </f:for>
+            </select>
+            <p class="form-text" id="statusCommandSnapshotHelp">{f:translate(key: '{languageFile}statusCommand.snapshot.help')}</p>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="statusCommandEnvironment">{f:translate(key: '{languageFile}statusCommand.environment')}</label>
+            <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.statusEnvironment.title\')}', content: '{f:translate(key: \'{languageFile}help.statusEnvironment\')}'}"/>
+            <input class="form-control" type="text" maxlength="100" id="statusCommandEnvironment" data-js="statusCommandEnvironment" aria-describedby="statusCommandEnvironmentHelp"/>
+            <p class="form-text" id="statusCommandEnvironmentHelp">{f:translate(key: '{languageFile}statusCommand.environment.help')}</p>
+        </div>
+        <div class="col-12 col-lg-6" data-js="statusCommandHostField">
+            <label class="form-label" for="statusCommandHost">{f:translate(key: '{languageFile}statusCommand.host')}</label>
+            <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.statusHost.title\')}', content: '{f:translate(key: \'{languageFile}help.statusHost\')}'}"/>
+            <input class="form-control" type="text" placeholder="www.example.com" id="statusCommandHost" data-js="statusCommandHost" aria-describedby="statusCommandHostHelp"/>
+            <p class="form-text" id="statusCommandHostHelp">{f:translate(key: '{languageFile}statusCommand.host.help')}</p>
+        </div>
+        <div class="col-12 col-lg-6">
+            <label class="form-label" for="statusCommandGroups">{f:translate(key: '{languageFile}statusCommand.groups')}</label>
+            <input class="form-control" type="text" placeholder="pages, news" id="statusCommandGroups" data-js="statusCommandGroups" aria-describedby="statusCommandGroupsHelp"/>
+            <p class="form-text" id="statusCommandGroupsHelp">{f:translate(key: '{languageFile}statusCommand.groups.help')}</p>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label class="form-label" for="statusCommandLimit">{f:translate(key: '{languageFile}command.limit')}</label>
+            <input class="form-control" type="number" min="1" step="1" id="statusCommandLimit" data-js="statusCommandLimit" aria-describedby="statusCommandLimitHelp"/>
+            <p class="form-text" id="statusCommandLimitHelp">{f:translate(key: '{languageFile}statusCommand.limit.help')}</p>
+        </div>
+        <div class="col-12" data-js="statusCommandLinkFields" hidden>
+            <div class="row g-3">
+                <div class="col-6 col-lg-3">
+                    <label class="form-label" for="statusCommandSamples">{f:translate(key: '{languageFile}statusCommand.samples')}</label>
+                    <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.statusSamples.title\')}', content: '{f:translate(key: \'{languageFile}help.statusSamples\')}'}"/>
+                    <input class="form-control" type="number" min="1" step="1" value="2" id="statusCommandSamples" data-js="statusCommandSamples" aria-describedby="statusCommandSamplesHelp"/>
+                    <p class="form-text" id="statusCommandSamplesHelp">{f:translate(key: '{languageFile}statusCommand.samples.help')}</p>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label class="form-label" for="statusCommandMaxLinks">{f:translate(key: '{languageFile}statusCommand.maxLinks')}</label>
+                    <input class="form-control" type="number" min="1" step="1" value="2000" id="statusCommandMaxLinks" data-js="statusCommandMaxLinks"/>
+                </div>
+                <div class="col-12 col-lg-6 d-flex align-items-center">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="statusCommandAllLinks" data-js="statusCommandAllLinks"/>
+                        <label class="form-check-label" for="statusCommandAllLinks">{f:translate(key: '{languageFile}statusCommand.allLinks')}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>Page UID</th>
-                <th>Path</th>
-                <th>Environment</th>
-                <th>Status</th>
-                <th>Error marker</th>
-                <th>Checked at</th>
-                <th>Reviewed</th>
-                <th>Note</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            <f:for each="{results}" as="result">
-                <tr>
-                    <td>
-                        <f:if condition="{result.page_uid}">
-                            <f:then>{result.page_uid}</f:then>
-                            <f:else><span class="text-muted">—</span></f:else>
-                        </f:if>
-                    </td>
-                    <td><a href="{result.url}" target="_blank" rel="noreferrer" title="{result.url}">{result.path}</a></td>
-                    <td>{result.environment}</td>
-                    <td>
-                        <f:if condition="{result.http_status} == 200">
-                            <f:then><span class="badge badge-success">{result.http_status}</span></f:then>
-                            <f:else><span class="badge badge-danger">{result.http_status}</span></f:else>
-                        </f:if>
-                    </td>
-                    <td>{result.error_marker}</td>
-                    <td><f:format.date format="d.m.Y H:i">@{result.checked_at}</f:format.date></td>
-                    <td>
-                        <button type="button" class="btn btn-link p-0" data-js="reviewedToggle" data-uid="{result.uid}">
-                            <f:if condition="{result.reviewed}">
-                                <f:then><span class="badge badge-success" data-js="reviewedBadge" data-label-yes="yes" data-label-no="no">yes</span></f:then>
-                                <f:else><span class="badge badge-warning" data-js="reviewedBadge" data-label-yes="yes" data-label-no="no">no</span></f:else>
-                            </f:if>
-                        </button>
-                    </td>
-                    <td>{result.note}</td>
-                    <td class="text-nowrap">
-                        <be:link.editRecord uid="{result.uid}" table="tx_otwebsitecheck_domain_model_check" class="btn btn-default btn-sm">Edit</be:link.editRecord>
-                        <f:form action="delete" method="post" style="display:inline">
-                            <f:form.hidden name="uid" value="{result.uid}" />
-                            <button type="submit" class="btn btn-default btn-sm">Delete</button>
-                        </f:form>
-                    </td>
-                </tr>
-            </f:for>
-        </tbody>
-    </table>
-
+    <f:render partial="CommandOutput" arguments="{idPrefix: 'statusCommand', hint: '{f:translate(key: \'{languageFile}statusCommand.hint\')}'}"/>
 </f:section>
 
 </html>

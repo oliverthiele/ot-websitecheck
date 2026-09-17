@@ -1,0 +1,35 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment>
+    The call, the printed command, its warnings and the copy button of a command
+    form; command-line.js fills them. "idPrefix" keeps the ids unique per form.
+</f:comment>
+<f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+<div class="alert alert-warning mt-3 mb-0" role="status" data-js="commandWarning" hidden></div>
+
+<div class="row g-2 align-items-end mt-1">
+    <div class="col-12 col-md-auto">
+        <label class="form-label" for="{idPrefix}Prefix">{f:translate(key: '{languageFile}command.prefix')}</label>
+        <select class="form-select" id="{idPrefix}Prefix" data-js="commandPrefix">
+            <option value="vendor/bin/typo3">vendor/bin/typo3</option>
+            <option value="typo3">typo3</option>
+            <option value="ddev typo3">ddev typo3</option>
+        </select>
+    </div>
+    <div class="col">
+        <label class="form-label" for="{idPrefix}Output">{f:translate(key: '{languageFile}command.output')}</label>
+        <div class="d-flex gap-2 align-items-start">
+            <output class="ot-websitecheck-command" id="{idPrefix}Output" data-js="commandOutput"></output>
+            <button type="button" class="btn btn-default" data-js="commandCopy">
+                <core:icon identifier="actions-clipboard" size="small"/> {f:translate(key: '{languageFile}command.copy')}
+            </button>
+        </div>
+    </div>
+</div>
+<p class="form-text mb-0">{hint}</p>
+
+</html>

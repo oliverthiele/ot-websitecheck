@@ -10,13 +10,15 @@
 <f:section name="Content">
 
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/sitemap-snapshots.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/module-guide.js"/>
+    <f:asset.module identifier="@typo3/backend/popover.js"/>
     <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
     <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
     <f:variable name="thousandsSeparator" value="{f:translate(key: '{languageFile}format.thousandsSeparator')}"/>
 
     <h1><f:translate key="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.title"/></h1>
 
-    <p>{f:translate(key: '{languageFile}snapshot.intro')}</p>
+    <f:render partial="ModuleGuide" arguments="{guide: 'sitemaps', steps: {0: 1, 1: 2, 2: 3}, expanded: '{f:if(condition: snapshots, then: 0, else: 1)}', documentation: 'requirements-for-sitemap-snapshots'}"/>
 
     <f:render section="Import" arguments="{bases: bases, environments: environments, languageFile: languageFile}"/>
 
@@ -84,10 +86,12 @@
                         <div class="row g-3">
                             <div class="col-12 col-lg-4">
                                 <label class="form-label" for="sitemapImportLabel">{f:translate(key: '{languageFile}import.label')}</label>
+                                <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.sitemapsLabel.title\')}', content: '{f:translate(key: \'{languageFile}help.sitemapsLabel\')}'}"/>
                                 <input class="form-control" type="text" maxlength="100" id="sitemapImportLabel" data-js="sitemapImportLabel"/>
                             </div>
                             <div class="col-12 col-lg-2">
                                 <label class="form-label" for="sitemapImportEnvironment">{f:translate(key: '{languageFile}import.environment')}</label>
+                                <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.sitemapsEnvironment.title\')}', content: '{f:translate(key: \'{languageFile}help.sitemapsEnvironment\')}'}"/>
                                 <select class="form-select" id="sitemapImportEnvironment" data-js="sitemapImportEnvironment">
                                     <option value="">{f:translate(key: '{languageFile}import.environmentNone')}</option>
                                     <f:for each="{environments}" as="environment">

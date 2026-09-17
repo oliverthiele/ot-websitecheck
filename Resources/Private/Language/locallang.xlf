@@ -128,6 +128,129 @@
       <trans-unit id="command.warning.missingValue" resname="command.warning.missingValue">
         <source>Fill in the run label and both environment labels.</source>
       </trans-unit>
+      <trans-unit id="statusCommand.title" resname="statusCommand.title">
+        <source>Compose a status or link check</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.intro" resname="statusCommand.intro">
+        <source>Both checks run on the command line. The status check requests every URL of a snapshot and records its HTTP status and TYPO3 error pages; the link check follows the plugin links on those pages.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.type" resname="statusCommand.type">
+        <source>Check</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.type.checksitemap" resname="statusCommand.type.checksitemap">
+        <source>Status of the sitemap URLs (websitecheck:checksitemap)</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.type.crawllinks" resname="statusCommand.type.crawllinks">
+        <source>Plugin links on the pages (websitecheck:crawllinks)</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.snapshot" resname="statusCommand.snapshot">
+        <source>Snapshot</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.snapshot.help" resname="statusCommand.snapshot.help">
+        <source>Its URLs are requested — on its own host, unless another host is given.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.environment" resname="statusCommand.environment">
+        <source>Environment label</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.environment.help" resname="statusCommand.environment.help">
+        <source>Stored with every result and offered in the filter below. Link checks get a label of their own, so they do not replace the results of a status check.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.host" resname="statusCommand.host">
+        <source>Other host (optional)</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.host.help" resname="statusCommand.host.help">
+        <source>Requests the paths of the snapshot on this host, e.g. to check the URLs of live against staging.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.groups" resname="statusCommand.groups">
+        <source>Sitemap groups (optional)</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.groups.help" resname="statusCommand.groups.help">
+        <source>Separated by commas. All groups when empty.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.limit.help" resname="statusCommand.limit.help">
+        <source>Only the first URLs — or, for links, pages — for a test run.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.samples" resname="statusCommand.samples">
+        <source>Links per shape</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.samples.help" resname="statusCommand.samples.help">
+        <source>Links that differ only in a record uid share a shape; this many of each are checked.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.maxLinks" resname="statusCommand.maxLinks">
+        <source>Maximum links</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.allLinks" resname="statusCommand.allLinks">
+        <source>Also follow links without plugin arguments</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.hint" resname="statusCommand.hint">
+        <source>Run it in the project root, then reload this page. Protected environments: add --basic-auth, or use the environment variables described in the README.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.noSnapshots" resname="statusCommand.noSnapshots">
+        <source>Both checks read their URLs from a sitemap snapshot. Import one first.</source>
+      </trans-unit>
+      <trans-unit id="statusCommand.warning.missingEnvironment" resname="statusCommand.warning.missingEnvironment">
+        <source>Enter an environment label.</source>
+      </trans-unit>
+      <trans-unit id="statusResults.empty" resname="statusResults.empty">
+        <source>No status or link check has been run yet. Compose one above and run it on the command line.</source>
+      </trans-unit>
+      <trans-unit id="statusResults.summary" resname="statusResults.summary">
+        <source>%1$s results — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
+      </trans-unit>
+      <trans-unit id="statusResults.summaryForEnvironment" resname="statusResults.summaryForEnvironment">
+        <source>%1$s results for "%4$s" — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
+      </trans-unit>
+      <trans-unit id="statusResults.sources" resname="statusResults.sources">
+        <source>Sources — the snapshot, or the page a link was found on:</source>
+      </trans-unit>
+      <trans-unit id="statusResults.allEnvironments" resname="statusResults.allEnvironments">
+        <source>— all environments —</source>
+      </trans-unit>
+      <trans-unit id="statusResults.onlyProblems" resname="statusResults.onlyProblems">
+        <source>only problems (no HTTP 200, or an error marker)</source>
+      </trans-unit>
+      <trans-unit id="statusResults.deleteAll" resname="statusResults.deleteAll">
+        <source>Delete all results (every environment)</source>
+      </trans-unit>
+      <trans-unit id="statusResults.deleteEnvironment" resname="statusResults.deleteEnvironment">
+        <source>Delete all results for "%1$s"</source>
+      </trans-unit>
+      <trans-unit id="statusResults.column.pageUid" resname="statusResults.column.pageUid">
+        <source>Page uid</source>
+      </trans-unit>
+      <trans-unit id="statusResults.column.path" resname="statusResults.column.path">
+        <source>Path</source>
+      </trans-unit>
+      <trans-unit id="statusResults.column.errorMarker" resname="statusResults.column.errorMarker">
+        <source>Error marker</source>
+      </trans-unit>
+      <trans-unit id="statusResults.column.checkedAt" resname="statusResults.column.checkedAt">
+        <source>Checked at</source>
+      </trans-unit>
+      <trans-unit id="flash.deleteResult.success" resname="flash.deleteResult.success">
+        <source>The result was deleted.</source>
+      </trans-unit>
+      <trans-unit id="flash.deleteResults.success" resname="flash.deleteResults.success">
+        <source>%1$s results deleted.</source>
+      </trans-unit>
+      <trans-unit id="errorMarker.productionException" resname="errorMarker.productionException">
+        <source>TYPO3 error page ("Oops, an error occurred")</source>
+      </trans-unit>
+      <trans-unit id="errorMarker.developmentException" resname="errorMarker.developmentException">
+        <source>TYPO3 exception (development)</source>
+      </trans-unit>
+      <trans-unit id="errorMarker.pageNotFound" resname="errorMarker.pageNotFound">
+        <source>TYPO3 "page not found"</source>
+      </trans-unit>
+      <trans-unit id="errorMarker.accessDenied" resname="errorMarker.accessDenied">
+        <source>TYPO3 "access denied"</source>
+      </trans-unit>
+      <trans-unit id="errorMarker.connectionError" resname="errorMarker.connectionError">
+        <source>No connection</source>
+      </trans-unit>
+      <trans-unit id="errorMarker.argumentsIgnored" resname="errorMarker.argumentsIgnored">
+        <source>Link arguments have no effect</source>
+      </trans-unit>
       <trans-unit id="empty.noResults" resname="empty.noResults">
         <source>No results match the current filters.</source>
       </trans-unit>
@@ -323,9 +446,6 @@
       <trans-unit id="abortReason.connectionError" resname="abortReason.connectionError">
         <source>connection error</source>
       </trans-unit>
-      <trans-unit id="snapshot.intro" resname="snapshot.intro">
-        <source>Sitemaps of every language of a site, stored at one point in time — imported here or with the websitecheck:importsitemaps command. A snapshot stays available after the site itself has changed.</source>
-      </trans-unit>
       <trans-unit id="snapshot.noLanguage" resname="snapshot.noLanguage">
         <source>(no language)</source>
       </trans-unit>
@@ -508,6 +628,114 @@
       </trans-unit>
       <trans-unit id="run.snapshotDeleted" resname="run.snapshotDeleted">
         <source>(deleted snapshot)</source>
+      </trans-unit>
+          <trans-unit id="guide.documentation" resname="guide.documentation">
+        <source>Documentation</source>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.title" resname="guide.sitemaps.title">
+        <source>How sitemap snapshots work</source>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.purpose" resname="guide.sitemaps.purpose">
+        <source>A snapshot stores the sitemaps of every language of a site at one point in time, raw XML included. It is the URL list every check works with, and it stays available after the site itself has changed.</source>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.step1" resname="guide.sitemaps.step1">
+        <source>Choose a base URL of a configured site and find its sitemaps. The environment is suggested from the site configuration.</source>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.step2" resname="guide.sitemaps.step2">
+        <source>Select the languages, give the snapshot a label if you like, and import it.</source>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.step3" resname="guide.sitemaps.step3">
+        <source>Lock every snapshot you must not lose, e.g. the live state before a relaunch: the lock icon protects it from deletion, also by the cleanup command.</source>
+      </trans-unit>
+      <trans-unit id="guide.sitemaps.note" resname="guide.sitemaps.note">
+        <source>URLs outside the configured sites, scheduled imports and backups of snapshots need the command line: websitecheck:importsitemaps and websitecheck:exportsnapshots.</source>
+      </trans-unit>
+      <trans-unit id="guide.status.title" resname="guide.status.title">
+        <source>How the status check works</source>
+      </trans-unit>
+      <trans-unit id="guide.status.purpose" resname="guide.status.purpose">
+        <source>Checks whether every URL of a sitemap snapshot works: the HTTP status and TYPO3 error pages per URL. The link check also follows the plugin links on those pages, which no sitemap lists, and reports links whose arguments have no effect.</source>
+      </trans-unit>
+      <trans-unit id="guide.status.step1" resname="guide.status.step1">
+        <source>Import a sitemap snapshot of the environment to check in the Sitemaps module.</source>
+      </trans-unit>
+      <trans-unit id="guide.status.step2" resname="guide.status.step2">
+        <source>Compose the check below and run the command on the command line. Every URL is requested, which can take a while.</source>
+      </trans-unit>
+      <trans-unit id="guide.status.step3" resname="guide.status.step3">
+        <source>Reload this page and review the results: filter by environment and problems, mark findings as reviewed and add a note where needed.</source>
+      </trans-unit>
+      <trans-unit id="guide.status.note" resname="guide.status.note">
+        <source>Moved URLs and redirects are the job of the migration check: it compares two environments page by page.</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.title" resname="guide.migration.title">
+        <source>How the migration check works</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.purpose" resname="guide.migration.purpose">
+        <source>Checks whether the URLs search engines know from the old site still lead to the same page or record on the new one — directly or through a redirect.</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.step1" resname="guide.migration.step1">
+        <source>Before the switch: import the sitemaps of the live site and lock the snapshot.</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.step2" resname="guide.migration.step2">
+        <source>Import a snapshot of the new site, e.g. staging, compose the check below and run it. Repeat after every change to the new site.</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.step3" resname="guide.migration.step3">
+        <source>Review the results: missing redirects per page and record, with a suggested target where one can be derived.</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.step4" resname="guide.migration.step4">
+        <source>After the switch: import a snapshot of the new live site and reuse the reference results of the last run — the old site no longer answers. Export the last run beforehand if the database gets replaced.</source>
+      </trans-unit>
+      <trans-unit id="guide.migration.note" resname="guide.migration.note">
+        <source>Both sites have to render the page and record markers described in the documentation; without them pages cannot be compared.</source>
+      </trans-unit>
+      <trans-unit id="help.statusHost.title" resname="help.statusHost.title">
+        <source>Other host</source>
+      </trans-unit>
+      <trans-unit id="help.statusHost" resname="help.statusHost">
+        <source>Requests the paths of the snapshot on another host. Example: the snapshot was taken on www.example.com, the host is staging.example.com — you see before the switch whether every URL search engines know answers on the new system. Or the other way round: a sitemap provider only exists on staging while the pages are live already. Redirects and content are compared by the migration check.</source>
+      </trans-unit>
+      <trans-unit id="help.statusEnvironment.title" resname="help.statusEnvironment.title">
+        <source>Environment label</source>
+      </trans-unit>
+      <trans-unit id="help.statusEnvironment" resname="help.statusEnvironment">
+        <source>Results are stored per environment label and URL; a new run with the same label replaces them. Use one label per environment and check, e.g. "staging" for the status check and "staging-links" for the link check of the same site.</source>
+      </trans-unit>
+      <trans-unit id="help.statusSamples.title" resname="help.statusSamples.title">
+        <source>Links per shape</source>
+      </trans-unit>
+      <trans-unit id="help.statusSamples" resname="help.statusSamples">
+        <source>A shape is the path of a link plus the names of its arguments. /news/detail?tx_news_pi1[news]=12 and …[news]=13 share one shape, so a list of a hundred news items is checked with this many links, not a hundred.</source>
+      </trans-unit>
+      <trans-unit id="help.migrationReference.title" resname="help.migrationReference.title">
+        <source>Reference snapshot</source>
+      </trans-unit>
+      <trans-unit id="help.migrationReference" resname="help.migrationReference">
+        <source>The URLs of the old site as search engines know them. Take the locked live snapshot from before the switch — a newer live snapshot already lists the URLs of the new site.</source>
+      </trans-unit>
+      <trans-unit id="help.migrationReferenceRun.title" resname="help.migrationReferenceRun.title">
+        <source>Reference results</source>
+      </trans-unit>
+      <trans-unit id="help.migrationReferenceRun" resname="help.migrationReferenceRun">
+        <source>Before the switch, both sites answer and every run requests both. After it, www.example.com shows the new site: a run named "relaunch" from before the switch still knows how every old URL answered, and a run "after-relaunch" reuses those rows and only requests the new site.</source>
+      </trans-unit>
+      <trans-unit id="help.migrationLabels.title" resname="help.migrationLabels.title">
+        <source>Environment labels</source>
+      </trans-unit>
+      <trans-unit id="help.migrationLabels" resname="help.migrationLabels">
+        <source>They name the two sides in the results, e.g. "live" and "staging". After the switch both are live: "live-before" and "live-after" keep them apart.</source>
+      </trans-unit>
+      <trans-unit id="help.sitemapsEnvironment.title" resname="help.sitemapsEnvironment.title">
+        <source>Environment</source>
+      </trans-unit>
+      <trans-unit id="help.sitemapsEnvironment" resname="help.sitemapsEnvironment">
+        <source>Says where the snapshot comes from. The migration check suggests the locked live snapshot as reference and the newest staging, development or local one as target — so tag live snapshots as live.</source>
+      </trans-unit>
+      <trans-unit id="help.sitemapsLabel.title" resname="help.sitemapsLabel.title">
+        <source>Label</source>
+      </trans-unit>
+      <trans-unit id="help.sitemapsLabel" resname="help.sitemapsLabel">
+        <source>The name the checks use to find the snapshot, e.g. "live-before-relaunch". It has to be unique. Left empty, it is the host and the time, e.g. "www.example.com 2026-01-31 14:05".</source>
       </trans-unit>
     </body>
   </file>

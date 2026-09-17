@@ -12,10 +12,13 @@
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/reviewed-toggle.js"/>
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/migration-command.js"/>
     <f:asset.module identifier="@typo3/backend/popover.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/module-guide.js"/>
     <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
     <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
 
     <h1><f:translate key="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.migration.title"/></h1>
+
+    <f:render partial="ModuleGuide" arguments="{guide: 'migration', steps: {0: 1, 1: 2, 2: 3, 3: 4}, expanded: '{f:if(condition: runOptions, then: 0, else: 1)}', documentation: 'relaunch-workflow'}"/>
 
     <f:if condition="{runOptions}">
         <f:then>
@@ -63,20 +66,15 @@
     </div>
 </f:section>
 
-<f:section name="SnapshotOption">
-    <option value="{snapshot.label}" data-uid="{snapshot.uid}" data-host="{snapshot.host}" data-environment="{snapshot.environment}" data-fetched-at="{snapshot.fetchedAt}" {f:if(condition: '{snapshot.uid} == {selectedUid}', then: 'selected')}>
-        {snapshot.label}<f:if condition="{snapshot.environment}"> · {f:translate(key: '{languageFile}environment.{snapshot.environment}')}</f:if><f:if condition="{snapshot.locked}"> · {f:translate(key: '{languageFile}command.locked')}</f:if>
-    </option>
-</f:section>
-
 <f:section name="CommandForm">
     <p>{f:translate(key: '{languageFile}command.intro')}</p>
     <div class="row g-3">
         <div class="col-12 col-lg-6">
             <label class="form-label" for="migrationCommandReference">{f:translate(key: '{languageFile}command.reference')}</label>
+            <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.migrationReference.title\')}', content: '{f:translate(key: \'{languageFile}help.migrationReference\')}'}"/>
             <select class="form-select" id="migrationCommandReference" data-js="migrationCommandReference" aria-describedby="migrationCommandReferenceHelp">
                 <f:for each="{commandBuilder.snapshots}" as="snapshot">
-                    <f:render section="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: commandBuilder.referenceUid, languageFile: languageFile}"/>
+                    <f:render partial="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: commandBuilder.referenceUid}"/>
                 </f:for>
             </select>
             <p class="form-text" id="migrationCommandReferenceHelp">{f:translate(key: '{languageFile}command.reference.help')}</p>
@@ -85,13 +83,14 @@
             <label class="form-label" for="migrationCommandTarget">{f:translate(key: '{languageFile}command.target')}</label>
             <select class="form-select" id="migrationCommandTarget" data-js="migrationCommandTarget" aria-describedby="migrationCommandTargetHelp">
                 <f:for each="{commandBuilder.snapshots}" as="snapshot">
-                    <f:render section="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: commandBuilder.targetUid, languageFile: languageFile}"/>
+                    <f:render partial="SnapshotOption" arguments="{snapshot: snapshot, selectedUid: commandBuilder.targetUid}"/>
                 </f:for>
             </select>
             <p class="form-text" id="migrationCommandTargetHelp">{f:translate(key: '{languageFile}command.target.help')}</p>
         </div>
         <div class="col-12 col-lg-6">
             <label class="form-label" for="migrationCommandReferenceRun">{f:translate(key: '{languageFile}command.referenceRun')}</label>
+            <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.migrationReferenceRun.title\')}', content: '{f:translate(key: \'{languageFile}help.migrationReferenceRun\')}'}"/>
             <select class="form-select" id="migrationCommandReferenceRun" data-js="migrationCommandReferenceRun" aria-describedby="migrationCommandReferenceRunHelp">
                 <option value="">{f:translate(key: '{languageFile}command.referenceRun.none')}</option>
                 <f:for each="{commandBuilder.runs}" as="run">
@@ -111,6 +110,7 @@
         </div>
         <div class="col-12 col-md-6 col-lg-3">
             <label class="form-label" for="migrationCommandTargetLabel">{f:translate(key: '{languageFile}command.targetLabel')}</label>
+            <f:render partial="HelpIcon" arguments="{title: '{f:translate(key: \'{languageFile}help.migrationLabels.title\')}', content: '{f:translate(key: \'{languageFile}help.migrationLabels\')}'}"/>
             <input class="form-control" type="text" maxlength="100" id="migrationCommandTargetLabel" data-js="migrationCommandTargetLabel" aria-describedby="migrationCommandLabelsHelp"/>
         </div>
         <div class="col-6 col-lg-3">
@@ -118,29 +118,12 @@
             <input class="form-control" type="number" min="1" step="1" id="migrationCommandLimit" data-js="migrationCommandLimit" aria-describedby="migrationCommandLimitHelp"/>
             <p class="form-text" id="migrationCommandLimitHelp">{f:translate(key: '{languageFile}command.limit.help')}</p>
         </div>
-        <div class="col-6 col-lg-3">
-            <label class="form-label" for="migrationCommandPrefix">{f:translate(key: '{languageFile}command.prefix')}</label>
-            <select class="form-select" id="migrationCommandPrefix" data-js="migrationCommandPrefix">
-                <option value="vendor/bin/typo3">vendor/bin/typo3</option>
-                <option value="typo3">typo3</option>
-                <option value="ddev typo3">ddev typo3</option>
-            </select>
-        </div>
         <div class="col-12">
             <p class="form-text mt-0" id="migrationCommandLabelsHelp">{f:translate(key: '{languageFile}command.labels.help')}</p>
         </div>
     </div>
 
-    <div class="alert alert-warning mt-3 mb-0" role="status" data-js="migrationCommandWarning" hidden></div>
-
-    <label class="form-label mt-3" for="migrationCommandOutput">{f:translate(key: '{languageFile}command.output')}</label>
-    <div class="d-flex gap-2 align-items-start">
-        <output class="ot-websitecheck-command" id="migrationCommandOutput" data-js="migrationCommandOutput"></output>
-        <button type="button" class="btn btn-default" data-js="migrationCommandCopy">
-            <core:icon identifier="actions-clipboard" size="small"/> {f:translate(key: '{languageFile}command.copy')}
-        </button>
-    </div>
-    <p class="form-text mb-0">{f:translate(key: '{languageFile}command.hint')}</p>
+    <f:render partial="CommandOutput" arguments="{idPrefix: 'migrationCommand', hint: '{f:translate(key: \'{languageFile}command.hint\')}'}"/>
 </f:section>
 
 <f:section name="Filter">
