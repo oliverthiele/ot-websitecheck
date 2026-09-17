@@ -18,7 +18,8 @@ final readonly class SiteBase
         public string $url,
         public string $sitemapPath,
         public array $sitemapGroupRoutes = [],
-    ) {}
+    ) {
+    }
 
     public function getHost(): string
     {

@@ -43,7 +43,8 @@ final readonly class Observation
         public bool $reviewed = false,
         public string $note = '',
         public int $checkedAt = 0,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $row

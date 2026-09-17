@@ -26,7 +26,8 @@ final readonly class RedirectChain
         public array $steps,
         public string $finalBody,
         public string $abortReason = self::ABORT_NONE,
-    ) {}
+    ) {
+    }
 
     public function getRequestedUrl(): string
     {

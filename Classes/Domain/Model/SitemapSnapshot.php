@@ -22,7 +22,8 @@ final readonly class SitemapSnapshot
         public int $fetchedAt,
         public string $status = self::STATUS_COMPLETE,
         public string $note = '',
-    ) {}
+    ) {
+    }
 
     public function isComplete(): bool
     {

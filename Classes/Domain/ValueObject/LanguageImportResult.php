@@ -19,7 +19,8 @@ final readonly class LanguageImportResult
         public int $fileCount,
         public array $urlCountsByGroup,
         public array $failedDocuments,
-    ) {}
+    ) {
+    }
 
     public function getUrlCount(): int
     {

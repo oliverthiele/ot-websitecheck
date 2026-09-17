@@ -15,7 +15,8 @@ class SitemapSnapshotLocator
 {
     public function __construct(
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * @throws \InvalidArgumentException when there is no usable snapshot with this label

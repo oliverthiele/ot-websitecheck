@@ -12,7 +12,8 @@ abstract class AbstractRepository
 {
     public function __construct(
         protected readonly ConnectionPool $connectionPool,
-    ) {}
+    ) {
+    }
 
     /**
      * The tables of this extension are tool data on the root level without

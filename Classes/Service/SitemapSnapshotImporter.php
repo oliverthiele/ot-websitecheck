@@ -28,7 +28,8 @@ class SitemapSnapshotImporter
         private readonly LanguageSitemapDiscovery $languageSitemapDiscovery,
         private readonly SitemapDocumentCrawler $sitemapDocumentCrawler,
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $requestOptions

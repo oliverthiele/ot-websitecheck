@@ -23,7 +23,8 @@ class SitemapSnapshotModuleController extends AbstractModuleController
     public function __construct(
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
         private readonly SiteBaseProvider $siteBaseProvider,
-    ) {}
+    ) {
+    }
 
     public function indexAction(): ResponseInterface
     {

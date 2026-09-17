@@ -37,7 +37,8 @@ class SiteBaseProvider
     public function __construct(
         private readonly SiteFinder $siteFinder,
         private readonly SetRegistry $setRegistry,
-    ) {}
+    ) {
+    }
 
     /**
      * @return list<SiteBase>

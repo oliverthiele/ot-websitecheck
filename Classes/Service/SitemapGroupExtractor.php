@@ -18,7 +18,8 @@ class SitemapGroupExtractor
 {
     public function __construct(
         private readonly SiteBaseProvider $siteBaseProvider,
-    ) {}
+    ) {
+    }
 
     public function extract(string $sitemapUrl): string
     {
