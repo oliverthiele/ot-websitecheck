@@ -12,6 +12,7 @@
     --ot-websitecheck-language-row-mix: 3%;
     /* the chevron glyph sits inside its icon box; this lines the details up with the glyph */
     --ot-websitecheck-details-offset: 0.5rem;
+    --ot-websitecheck-details-group-width: 12rem;
     --ot-websitecheck-overview-padding-end: 0.5rem;
 }
 
@@ -39,6 +40,19 @@
 .ot-websitecheck-details {
     margin-inline-start: calc(var(--ot-websitecheck-details-offset) - var(--typo3-table-sm-padding-x));
     margin-inline-end: calc(-1 * var(--typo3-table-sm-padding-x));
+}
+
+/*
+ * The same group column width in every language keeps the sitemap URLs of
+ * all languages aligned; a longer group name wraps instead of widening it.
+ * The table selector outranks the core's "th { white-space: nowrap }".
+ */
+.table .ot-websitecheck-details-group {
+    width: var(--ot-websitecheck-details-group-width);
+    min-width: var(--ot-websitecheck-details-group-width);
+    max-width: var(--ot-websitecheck-details-group-width);
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 /*

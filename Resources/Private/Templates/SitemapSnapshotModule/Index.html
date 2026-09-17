@@ -275,7 +275,7 @@
                     <table class="table table-sm table-hover mb-0 w-100 ot-websitecheck-details-table">
                         <thead>
                             <tr>
-                                <th>{f:translate(key: '{languageFile}column.sitemapGroup')}</th>
+                                <th class="ot-websitecheck-details-group">{f:translate(key: '{languageFile}column.sitemapGroup')}</th>
                                 <th>{f:translate(key: '{languageFile}column.sitemap')}</th>
                                 <th class="text-end">{f:translate(key: '{languageFile}column.urls')}</th>
                                 <th><span class="visually-hidden">{f:translate(key: '{languageFile}column.actions')}</span></th>
@@ -301,7 +301,7 @@
 
 <f:section name="File">
     <tr class="ot-websitecheck-row">
-        <td class="text-nowrap">
+        <td class="ot-websitecheck-details-group">
             <f:if condition="{showGroup}">
                 <f:then>{groupLabel}</f:then>
                 <f:else><span class="visually-hidden">{groupLabel}</span></f:else>
