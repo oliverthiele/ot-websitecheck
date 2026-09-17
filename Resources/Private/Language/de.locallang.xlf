@@ -261,6 +261,22 @@
         <source>The snapshot does not exist (any more).</source>
         <target>Der Snapshot existiert nicht (mehr).</target>
       </trans-unit>
+      <trans-unit id="flash.deleteSnapshot.locked" resname="flash.deleteSnapshot.locked" approved="yes">
+        <source>The snapshot is locked and was not deleted. Unlock it first.</source>
+        <target>Der Snapshot ist gesperrt und wurde nicht gelöscht. Zuerst entsperren.</target>
+      </trans-unit>
+      <trans-unit id="button.lock.locked" resname="button.lock.locked" approved="yes">
+        <source>Locked — neither the module nor the cleanup command deletes this snapshot. Click to unlock.</source>
+        <target>Gesperrt — weder das Modul noch der Aufräumbefehl löscht diesen Snapshot. Klicken zum Entsperren.</target>
+      </trans-unit>
+      <trans-unit id="button.lock.unlocked" resname="button.lock.unlocked" approved="yes">
+        <source>Not locked. Click to protect this snapshot from deletion.</source>
+        <target>Nicht gesperrt. Klicken, um diesen Snapshot vor dem Löschen zu schützen.</target>
+      </trans-unit>
+      <trans-unit id="error.lock.requestFailed" resname="error.lock.requestFailed" approved="yes">
+        <source>The lock could not be changed.</source>
+        <target>Die Sperre konnte nicht geändert werden.</target>
+      </trans-unit>
       <trans-unit id="documentType.invalid" resname="documentType.invalid" approved="yes">
         <source>no valid sitemap</source>
         <target>keine gültige Sitemap</target>

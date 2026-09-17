@@ -1,9 +1,11 @@
 import AjaxRequest from '@typo3/core/ajax/ajax-request.js';
+import Notification from '@typo3/backend/notification.js';
 
 /**
- * Filters the snapshot rows by language and sitemap group, and runs the
- * sitemap import: discover the language sitemaps of a site base, then import
- * them one request per language so a large site does not hit a timeout.
+ * Filters the snapshot rows by language and sitemap group, locks snapshots
+ * against deletion, and runs the sitemap import: discover the language
+ * sitemaps of a site base, then import them one request per language so a
+ * large site does not hit a timeout.
  */
 
 const sitemapFilterLanguage = document.querySelector('[data-js="sitemapFilterLanguage"]');
@@ -22,6 +24,39 @@ function applyFilter() {
 
 sitemapFilterLanguage?.addEventListener('change', applyFilter);
 sitemapFilterGroup?.addEventListener('change', applyFilter);
+
+const snapshotLockToggle = document.querySelectorAll('[data-js="snapshotLockToggle"]');
+
+snapshotLockToggle.forEach((button) => {
+  button.addEventListener('click', async () => {
+    const labels = button.dataset;
+    button.disabled = true;
+    try {
+      const response = await new AjaxRequest(TYPO3.settings.ajaxUrls.websitecheck_sitemap_toggle_locked).post({ uid: labels.uid });
+      const data = await response.resolve();
+      showLockState(button, data.locked === true);
+    } catch (error) {
+      const body = await error.response?.json().catch(() => null);
+      Notification.error(labels.labelRequestFailed, body?.error ?? '');
+    } finally {
+      button.disabled = false;
+    }
+  });
+});
+
+function showLockState(button, locked) {
+  const label = locked ? button.dataset.labelLocked : button.dataset.labelUnlocked;
+  button.setAttribute('aria-pressed', locked ? 'true' : 'false');
+  button.title = label;
+  button.querySelector('[data-js="snapshotLockIconLocked"]').hidden = !locked;
+  button.querySelector('[data-js="snapshotLockIconUnlocked"]').hidden = locked;
+  button.querySelector('[data-js="snapshotLockLabel"]').textContent = label;
+  // The server refuses to delete a locked snapshot anyway; this only spares the round trip.
+  const snapshotDelete = button.closest('[data-js="snapshotPanel"]')?.querySelector('[data-js="snapshotDelete"]');
+  if (snapshotDelete) {
+    snapshotDelete.disabled = locked;
+  }
+}
 
 const sitemapImport = document.querySelector('[data-js="sitemapImport"]');
 if (sitemapImport) {

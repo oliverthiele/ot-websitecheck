@@ -33,7 +33,7 @@ class CleanupSnapshotsCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Remove old sitemap snapshots; snapshots with a note or used by a migration check run are kept.');
+        $this->setDescription('Remove old sitemap snapshots; locked snapshots, snapshots with a note and those used by a migration check run are kept.');
         $this->addOption('keep', null, InputOption::VALUE_REQUIRED, 'Number of complete snapshots kept per start URL.', '10');
         $this->addOption('incomplete-hours', null, InputOption::VALUE_REQUIRED, 'Remove unfinished imports older than this many hours.', '24');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'List the snapshots that would be removed, remove nothing.');
@@ -71,10 +71,12 @@ class CleanupSnapshotsCommand extends Command
             return self::SUCCESS;
         }
 
+        // A snapshot locked while this command ran is refused by the repository.
+        $removed = 0;
         foreach ($selected as $snapshot) {
-            $this->sitemapSnapshotRepository->deleteSnapshot($snapshot->uid);
+            $removed += $this->sitemapSnapshotRepository->deleteSnapshot($snapshot->uid) ? 1 : 0;
         }
-        $io->success(sprintf('Removed %d snapshots.', count($selected)));
+        $io->success(sprintf('Removed %d snapshots.', $removed));
 
         return self::SUCCESS;
     }

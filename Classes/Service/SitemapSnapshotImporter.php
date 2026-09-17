@@ -102,10 +102,15 @@ class SitemapSnapshotImporter
      * Completes the snapshot. A snapshot without a single page URL is of no use
      * for any comparison and is removed again.
      *
+     * The lock is only set here, together with the completion: an empty
+     * snapshot is still removed, and an import that never finishes stays
+     * unlocked for the cleanup.
+     *
+     * @param bool $lock Lock the completed snapshot against deletion.
      * @return int number of stored page URLs
      * @throws SitemapImportException
      */
-    public function finishSnapshot(int $snapshotUid): int
+    public function finishSnapshot(int $snapshotUid, bool $lock = false): int
     {
         $this->assertImporting($snapshotUid);
 
@@ -114,7 +119,7 @@ class SitemapSnapshotImporter
             $this->sitemapSnapshotRepository->deleteSnapshot($snapshotUid);
             throw new SitemapImportException(SitemapImportException::REASON_NO_URLS, 'No page URLs found — the snapshot was not stored.');
         }
-        $this->sitemapSnapshotRepository->markComplete($snapshotUid);
+        $this->sitemapSnapshotRepository->markComplete($snapshotUid, $lock);
 
         return $urlCount;
     }

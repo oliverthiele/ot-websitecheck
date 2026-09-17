@@ -145,14 +145,28 @@ class SitemapSnapshotRepository extends AbstractRepository
         return $urls;
     }
 
-    public function markComplete(int $snapshotUid): void
+    /**
+     * @param bool $lock Also lock the snapshot; false leaves the lock as it is.
+     */
+    public function markComplete(int $snapshotUid, bool $lock = false): void
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_SNAPSHOT);
         $queryBuilder->update(self::TABLE_SNAPSHOT)
             ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($snapshotUid, ParameterType::INTEGER)))
             ->set('status', SitemapSnapshot::STATUS_COMPLETE)
-            ->set('tstamp', time(), true, ParameterType::INTEGER)
-            ->executeStatement();
+            ->set('tstamp', time(), true, ParameterType::INTEGER);
+        if ($lock) {
+            $queryBuilder->set('locked', 1, true, ParameterType::INTEGER);
+        }
+        $queryBuilder->executeStatement();
+    }
+
+    /**
+     * @return bool|null The new "locked" state, or null if no snapshot with this uid exists.
+     */
+    public function toggleLocked(int $snapshotUid): ?bool
+    {
+        return $this->toggleFlag(self::TABLE_SNAPSHOT, 'locked', $snapshotUid);
     }
 
     public function countUrlsOfSnapshot(int $snapshotUid): int
@@ -212,13 +226,15 @@ class SitemapSnapshotRepository extends AbstractRepository
     }
 
     /**
-     * Deletes the snapshot together with its documents and URLs.
+     * Deletes the snapshot together with its documents and URLs. A locked
+     * snapshot is never deleted, whoever asks — it may be the only remaining
+     * copy of a state the live site no longer delivers.
      *
-     * @return bool false if no snapshot with this uid exists.
+     * @return bool false if no snapshot with this uid exists or it is locked.
      */
     public function deleteSnapshot(int $snapshotUid): bool
     {
-        if ($snapshotUid <= 0) {
+        if ($snapshotUid <= 0 || ($this->findByUid($snapshotUid)->locked ?? true)) {
             return false;
         }
 

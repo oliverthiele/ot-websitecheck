@@ -197,6 +197,18 @@
       <trans-unit id="flash.deleteSnapshot.notFound" resname="flash.deleteSnapshot.notFound">
         <source>The snapshot does not exist (any more).</source>
       </trans-unit>
+      <trans-unit id="flash.deleteSnapshot.locked" resname="flash.deleteSnapshot.locked">
+        <source>The snapshot is locked and was not deleted. Unlock it first.</source>
+      </trans-unit>
+      <trans-unit id="button.lock.locked" resname="button.lock.locked">
+        <source>Locked — neither the module nor the cleanup command deletes this snapshot. Click to unlock.</source>
+      </trans-unit>
+      <trans-unit id="button.lock.unlocked" resname="button.lock.unlocked">
+        <source>Not locked. Click to protect this snapshot from deletion.</source>
+      </trans-unit>
+      <trans-unit id="error.lock.requestFailed" resname="error.lock.requestFailed">
+        <source>The lock could not be changed.</source>
+      </trans-unit>
       <trans-unit id="documentType.invalid" resname="documentType.invalid">
         <source>no valid sitemap</source>
       </trans-unit>

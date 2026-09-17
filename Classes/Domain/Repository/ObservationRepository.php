@@ -141,7 +141,7 @@ class ObservationRepository extends AbstractRepository
      */
     public function toggleReviewed(int $uid): ?bool
     {
-        return $this->toggleReviewedFlag(self::TABLE, $uid);
+        return $this->toggleFlag(self::TABLE, 'reviewed', $uid);
     }
 
     public function deleteRun(string $runLabel): int

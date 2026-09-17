@@ -173,6 +173,14 @@
         <source>Note</source>
         <target>Notiz</target>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked" approved="yes">
+        <source>Locked</source>
+        <target>Gesperrt</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked.description" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked.description" approved="yes">
+        <source>A locked snapshot is deleted neither in the backend module nor by the websitecheck:cleanupsnapshots command.</source>
+        <target>Ein gesperrter Snapshot wird weder im Backend-Modul noch vom Befehl websitecheck:cleanupsnapshots gelöscht.</target>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument" resname="tx_otwebsitecheck_domain_model_sitemapdocument" approved="yes">
         <source>Sitemap file</source>
         <target>Sitemap-Datei</target>

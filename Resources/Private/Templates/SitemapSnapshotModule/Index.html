@@ -139,7 +139,7 @@
 </f:section>
 
 <f:section name="Snapshot">
-    <div class="panel panel-default mb-3">
+    <div class="panel panel-default mb-3" data-js="snapshotPanel">
         <div class="panel-heading d-flex flex-wrap align-items-center gap-2">
             <button type="button" class="btn btn-link p-0 text-start" data-bs-toggle="collapse" data-bs-target="#snapshot{snapshot.uid}" aria-expanded="false" aria-controls="snapshot{snapshot.uid}">
                 <strong>{snapshot.label}</strong>
@@ -156,10 +156,25 @@
                 </f:else>
             </f:if>
             <span class="ms-auto d-flex gap-2">
+                <f:variable name="labelLocked" value="{f:translate(key: '{languageFile}button.lock.locked')}"/>
+                <f:variable name="labelUnlocked" value="{f:translate(key: '{languageFile}button.lock.unlocked')}"/>
+                <button type="button" class="btn btn-default btn-sm"
+                    data-js="snapshotLockToggle"
+                    data-uid="{snapshot.uid}"
+                    data-label-locked="{labelLocked}"
+                    data-label-unlocked="{labelUnlocked}"
+                    data-label-request-failed="{f:translate(key: '{languageFile}error.lock.requestFailed')}"
+                    aria-pressed="{f:if(condition: snapshot.locked, then: 'true', else: 'false')}"
+                    title="{f:if(condition: snapshot.locked, then: labelLocked, else: labelUnlocked)}"
+                >
+                    <span data-js="snapshotLockIconLocked" {f:if(condition: snapshot.locked, else: 'hidden')}><core:icon identifier="actions-lock" size="small"/></span>
+                    <span data-js="snapshotLockIconUnlocked" {f:if(condition: snapshot.locked, then: 'hidden')}><core:icon identifier="actions-unlock" size="small"/></span>
+                    <span class="visually-hidden" data-js="snapshotLockLabel">{f:if(condition: snapshot.locked, then: labelLocked, else: labelUnlocked)}</span>
+                </button>
                 <be:link.editRecord uid="{snapshot.uid}" table="tx_otwebsitecheck_domain_model_sitemapsnapshot" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.editNote')}</be:link.editRecord>
                 <f:form action="delete" method="post">
                     <f:form.hidden name="snapshot" value="{snapshot.uid}"/>
-                    <button type="submit" class="btn btn-danger btn-sm">{f:translate(key: '{languageFile}button.delete')}</button>
+                    <button type="submit" class="btn btn-danger btn-sm" data-js="snapshotDelete" {f:if(condition: snapshot.locked, then: 'disabled')}>{f:translate(key: '{languageFile}button.delete')}</button>
                 </f:form>
             </span>
         </div>

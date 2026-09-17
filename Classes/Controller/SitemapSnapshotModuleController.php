@@ -47,6 +47,7 @@ class SitemapSnapshotModuleController extends AbstractModuleController
                 'startUrl' => $snapshot->startUrl,
                 'fetchedAt' => $snapshot->fetchedAt,
                 'note' => $snapshot->note,
+                'locked' => $snapshot->locked,
                 'complete' => $snapshot->isComplete(),
                 'rows' => $rows,
                 'languageCount' => count($languages),
@@ -76,6 +77,12 @@ class SitemapSnapshotModuleController extends AbstractModuleController
 
     public function deleteAction(int $snapshot): ResponseInterface
     {
+        if ($this->sitemapSnapshotRepository->findByUid($snapshot)?->locked === true) {
+            $this->addFlashMessage($this->translate('flash.deleteSnapshot.locked'), '', ContextualFeedbackSeverity::WARNING);
+
+            return $this->redirect('index');
+        }
+
         $deleted = $this->sitemapSnapshotRepository->deleteSnapshot($snapshot);
         $this->addFlashMessage(
             $this->translate($deleted ? 'flash.deleteSnapshot.success' : 'flash.deleteSnapshot.notFound'),

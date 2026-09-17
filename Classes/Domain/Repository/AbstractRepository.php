@@ -28,12 +28,15 @@ abstract class AbstractRepository
     }
 
     /**
-     * @return bool|null The new "reviewed" state, or null if the record does not exist.
+     * Flips a 0/1 column of one record.
+     *
+     * @param string $field A column name of this extension, never user input.
+     * @return bool|null The new state, or null if the record does not exist.
      */
-    protected function toggleReviewedFlag(string $table, int $uid): ?bool
+    protected function toggleFlag(string $table, string $field, int $uid): ?bool
     {
         $queryBuilder = $this->createQueryBuilder($table);
-        $currentValue = $queryBuilder->select('reviewed')
+        $currentValue = $queryBuilder->select($field)
             ->from($table)
             ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, ParameterType::INTEGER)))
             ->executeQuery()
@@ -46,7 +49,7 @@ abstract class AbstractRepository
         $updateQueryBuilder = $this->createQueryBuilder($table);
         $updateQueryBuilder->update($table)
             ->where($updateQueryBuilder->expr()->eq('uid', $updateQueryBuilder->createNamedParameter($uid, ParameterType::INTEGER)))
-            ->set('reviewed', $newValue, true, ParameterType::INTEGER)
+            ->set($field, $newValue, true, ParameterType::INTEGER)
             ->executeStatement();
 
         return $newValue === 1;

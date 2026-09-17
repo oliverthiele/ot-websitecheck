@@ -38,8 +38,12 @@ URL of the live site still leads to the same page or record on the new one.
   the site has changed; imported in the backend module or on the CLI, with
   counts per language and sitemap group and a note per snapshot; every check
   reads its URLs from a snapshot
+- **Snapshot lock** — one click on the lock icon protects a snapshot from
+  deletion, in the module and by the cleanup command, so the last copy of a
+  sitemap structure the live site no longer delivers cannot get lost
 - **Snapshot cleanup** — a command for scheduled imports that keeps the newest
-  snapshots per site and never removes snapshots with a note or used by a run
+  snapshots per site and never removes locked snapshots, snapshots with a note
+  or snapshots used by a run
 - **HTTP Basic Auth** — for environments protected at the webserver level,
   separately for reference and target
 
@@ -293,7 +297,7 @@ record on the target — taken from the pages of the target snapshot.
 
 ```bash
 typo3 websitecheck:importsitemaps 'https://www.example.com/' \
-    --label=live-before-relaunch --note='Sitemap for news not configured yet.'
+    --label=live-before-relaunch --note='Sitemap for news not configured yet.' --lock
 
 # languages given explicitly instead of read from the start page
 typo3 websitecheck:importsitemaps \
@@ -315,6 +319,7 @@ not skipped. A snapshot without a single page URL is not kept.
 |--------|-------------|
 | `--label` | Unique name of the snapshot (default: host and time, e.g. `www.example.com 2026-01-31 14:05`). |
 | `--note` | Free text stored with the snapshot; editable in the module afterwards. |
+| `--lock` | Lock the snapshot once the import is complete, so it is deleted neither in the module nor by `websitecheck:cleanupsnapshots`. An import that does not finish stays unlocked. |
 | `--sitemap` | `hreflang=url` for one language. Repeatable. Replaces the detection from the start page. |
 | `--sitemap-path` | Sitemap path below each language's home page, e.g. `sitemap.xml` or `?type=1533906435` (default: the path configured for the site of the start URL, `sitemap.xml` for any other URL). |
 | `--timeout` | HTTP timeout per request in seconds (default: `20`). |
@@ -430,9 +435,16 @@ typo3 websitecheck:cleanupsnapshots --keep=10 --dry-run
 The counterpart of a scheduled import. Removes old sitemap snapshots and
 imports that never finished. Always kept:
 
+- locked snapshots — complete or not
 - the newest complete snapshots per start URL, up to `--keep`
 - snapshots a migration check run compared — its results refer to them
 - snapshots with a note
+
+A snapshot is locked with the lock icon in its header in the backend module,
+with the "Locked" field when editing the record, or right away with
+`websitecheck:importsitemaps --lock`. While locked, its delete
+button is disabled and the server refuses the deletion as well; unlock it
+first to delete it.
 
 `--dry-run` lists exactly the snapshots a real run would remove.
 

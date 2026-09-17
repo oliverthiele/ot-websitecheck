@@ -22,6 +22,7 @@ final readonly class SitemapSnapshot
         public int $fetchedAt,
         public string $status = self::STATUS_COMPLETE,
         public string $note = '',
+        public bool $locked = false,
     ) {
     }
 
@@ -42,6 +43,7 @@ final readonly class SitemapSnapshot
             fetchedAt: RowValue::int($row, 'fetched_at'),
             status: RowValue::string($row, 'status'),
             note: RowValue::string($row, 'note'),
+            locked: RowValue::int($row, 'locked') !== 0,
         );
     }
 }

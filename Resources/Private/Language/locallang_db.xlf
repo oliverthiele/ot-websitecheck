@@ -131,6 +131,12 @@
       <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.note" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.note">
         <source>Note</source>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked">
+        <source>Locked</source>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked.description" resname="tx_otwebsitecheck_domain_model_sitemapsnapshot.locked.description">
+        <source>A locked snapshot is deleted neither in the backend module nor by the websitecheck:cleanupsnapshots command.</source>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_sitemapdocument" resname="tx_otwebsitecheck_domain_model_sitemapdocument">
         <source>Sitemap file</source>
       </trans-unit>
