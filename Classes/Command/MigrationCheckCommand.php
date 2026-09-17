@@ -270,7 +270,7 @@ class MigrationCheckCommand extends Command
             ['Verdict of the target rows', 'Count'],
             array_map(static fn(string $verdict, int $count): array => [$verdict, (string)$count], array_keys($verdictCounts), $verdictCounts),
         );
-        $io->writeln('Review the results in the backend module System > Website Check > Migration check.');
+        $io->writeln('Review the results in the backend module Sites > Website Check > Migration check.');
     }
 
     /**
