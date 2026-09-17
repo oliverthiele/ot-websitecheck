@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotImporter;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOverviewBuilder;
@@ -52,6 +53,7 @@ class SitemapSnapshotModuleController extends AbstractModuleController
                 'labelContainsFetchedAt' => str_contains($snapshot->label, date(SitemapSnapshotImporter::DEFAULT_LABEL_DATE_FORMAT, $snapshot->fetchedAt)),
                 'note' => $snapshot->note,
                 'locked' => $snapshot->locked,
+                'environment' => $snapshot->environment,
                 'complete' => $snapshot->isComplete(),
                 'overview' => $overview,
                 'matrix' => $matrix,
@@ -66,6 +68,7 @@ class SitemapSnapshotModuleController extends AbstractModuleController
             'snapshots' => $snapshots,
             'bases' => $this->siteBaseProvider->getBases(),
             'languageOptions' => array_map('strval', array_keys($languageOptions)),
+            'environments' => array_column(SnapshotEnvironment::cases(), 'value'),
         ]);
 
         return $moduleTemplate->renderResponse('SitemapSnapshotModule/Index');

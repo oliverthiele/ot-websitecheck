@@ -8,6 +8,7 @@ use OliverThiele\OtWebsitecheck\Domain\Model\SitemapSnapshot;
 use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\LanguageImportResult;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapDocument;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use OliverThiele\OtWebsitecheck\Exception\SitemapImportException;
 
 /**
@@ -57,10 +58,11 @@ class SitemapSnapshotImporter
 
     /**
      * @param string $label Empty for the default label.
+     * @param SnapshotEnvironment|null $environment null when unknown
      * @return int uid of the new snapshot
      * @throws SitemapImportException
      */
-    public function startSnapshot(string $label, string $startUrl, string $note, int $fetchedAt): int
+    public function startSnapshot(string $label, string $startUrl, string $note, int $fetchedAt, ?SnapshotEnvironment $environment = null): int
     {
         $label = trim($label) !== '' ? trim($label) : $this->buildDefaultLabel($startUrl, $fetchedAt);
         if (mb_strlen($label) > self::MAXIMUM_LABEL_LENGTH) {
@@ -76,7 +78,7 @@ class SitemapSnapshotImporter
             );
         }
 
-        return $this->sitemapSnapshotRepository->createSnapshot($label, $startUrl, trim($note), $fetchedAt);
+        return $this->sitemapSnapshotRepository->createSnapshot($label, $startUrl, trim($note), $fetchedAt, $environment->value ?? '');
     }
 
     /**

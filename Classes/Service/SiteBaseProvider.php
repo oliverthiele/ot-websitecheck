@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SiteBase;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapGroupRoute;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use TYPO3\CMS\Core\Site\Set\SetRegistry;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
@@ -52,15 +53,24 @@ class SiteBaseProvider
             // Contains the route enhancers of the site sets as well — TYPO3 merges them in.
             $sitemapGroupRoutes = $this->resolveSitemapGroupRoutes($configuration['routeEnhancers'] ?? null);
 
-            $urls = [$configuration['base'] ?? null];
+            // The main base usually is the production one; a variant says what it is in its condition.
+            $candidates = [[$configuration['base'] ?? null, SnapshotEnvironment::Live]];
             $baseVariants = $configuration['baseVariants'] ?? null;
             foreach (is_array($baseVariants) ? $baseVariants : [] as $baseVariant) {
-                $urls[] = is_array($baseVariant) ? ($baseVariant['base'] ?? null) : null;
+                if (!is_array($baseVariant)) {
+                    continue;
+                }
+                $condition = $baseVariant['condition'] ?? '';
+                $candidates[] = [
+                    $baseVariant['base'] ?? null,
+                    is_string($condition) ? SnapshotEnvironment::fromBaseCondition($condition) : null,
+                ];
             }
 
-            foreach ($urls as $url) {
+            foreach ($candidates as [$url, $environment]) {
                 if (is_string($url) && parse_url($url, PHP_URL_HOST) !== null) {
-                    $bases[$url] = new SiteBase($site->getIdentifier(), $url, $sitemapPath, $sitemapGroupRoutes);
+                    // A URL listed twice keeps what its first entry says.
+                    $bases[$url] ??= new SiteBase($site->getIdentifier(), $url, $sitemapPath, $sitemapGroupRoutes, $environment);
                 }
             }
         }
@@ -103,6 +113,15 @@ class SiteBaseProvider
         }
 
         return $this->resolveSitemapGroupRoutes($this->setRegistry->getSet(self::SEO_SITEMAP_SET)?->routeEnhancers);
+    }
+
+    /**
+     * What the site configuration says about the environment of $url, if its
+     * host belongs to a configured base.
+     */
+    public function suggestEnvironmentForUrl(string $url): ?SnapshotEnvironment
+    {
+        return $this->findByHostOf($url)?->environment;
     }
 
     public function isConfiguredHost(string $url): bool

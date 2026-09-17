@@ -30,9 +30,10 @@ class SitemapSnapshotRepository extends AbstractRepository
     }
 
     /**
+     * @param string $environment A SnapshotEnvironment value, or '' when unknown.
      * @param string $uuid Kept when a snapshot is restored from an export; a new one otherwise.
      */
-    public function createSnapshot(string $label, string $startUrl, string $note, int $fetchedAt, string $uuid = ''): int
+    public function createSnapshot(string $label, string $startUrl, string $note, int $fetchedAt, string $environment = '', string $uuid = ''): int
     {
         $connection = $this->connectionPool->getConnectionForTable(self::TABLE_SNAPSHOT);
         $now = time();
@@ -42,6 +43,7 @@ class SitemapSnapshotRepository extends AbstractRepository
             'crdate' => $now,
             'uuid' => $uuid !== '' ? $uuid : Uuid::v7()->toRfc4122(),
             'label' => $label,
+            'environment' => $environment,
             'start_url' => $startUrl,
             'fetched_at' => $fetchedAt,
             'status' => SitemapSnapshot::STATUS_IMPORTING,

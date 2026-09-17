@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Controller;
 
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use OliverThiele\OtWebsitecheck\Exception\SitemapImportException;
 use OliverThiele\OtWebsitecheck\Security\BackendAccessGuard;
 use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
@@ -76,6 +77,7 @@ class SitemapImportAjaxController
                 $base->url,
                 $this->bodyString($request, 'note'),
                 time(),
+                SnapshotEnvironment::tryFrom($this->bodyString($request, 'environment')),
             );
         } catch (SitemapImportException $exception) {
             return $this->importErrorResponse($exception);

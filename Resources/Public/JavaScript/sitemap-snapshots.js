@@ -133,6 +133,7 @@ function initializeImport(sitemapImport) {
   const sitemapImportLanguageTemplate = sitemapImport.querySelector('[data-js="sitemapImportLanguageTemplate"]');
   const sitemapImportLabel = sitemapImport.querySelector('[data-js="sitemapImportLabel"]');
   const sitemapImportNote = sitemapImport.querySelector('[data-js="sitemapImportNote"]');
+  const sitemapImportEnvironment = sitemapImport.querySelector('[data-js="sitemapImportEnvironment"]');
   const sitemapImportStart = sitemapImport.querySelector('[data-js="sitemapImportStart"]');
   const sitemapImportError = sitemapImport.querySelector('[data-js="sitemapImportError"]');
   if (!sitemapImportDiscover || !sitemapImportStart) {
@@ -176,6 +177,8 @@ function initializeImport(sitemapImport) {
     try {
       const data = await post('websitecheck_sitemap_discover', { base: sitemapImportBase.value, ...credentials() });
       discoveredBase = sitemapImportBase.value;
+      // What the site configuration says about this base; the editor may still change it.
+      sitemapImportEnvironment.value = sitemapImportBase.selectedOptions[0]?.dataset.environment ?? '';
       sitemapImportLanguages.replaceChildren(...data.sitemaps.map(renderLanguage));
       sitemapImportLabel.value = '';
       sitemapImportLabel.placeholder = data.defaultLabel;
@@ -226,6 +229,7 @@ function initializeImport(sitemapImport) {
         base: discoveredBase,
         label: sitemapImportLabel.value,
         note: sitemapImportNote.value,
+        environment: sitemapImportEnvironment.value,
       });
       for (const item of selectedItems) {
         setStatus(item, 'badge-info', labels.labelRunning);

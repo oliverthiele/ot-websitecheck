@@ -23,7 +23,8 @@ URL of the live site still leads to the same page or record on the new one.
 - **Migration check** — compares a reference environment (usually live) with a
   target environment (a relaunch on staging): which URLs moved without a
   working redirect, which redirect to different content; the reference
-  results can be reused once the reference site itself is gone
+  results can be reused once the reference site itself is gone. The module
+  composes the command from the stored snapshots, ready to copy
 - **Independent of how redirects are made** — only HTTP answers are evaluated,
   so webserver rules, `.htaccess` and EXT:redirects are all covered
 - **Redirect quality** — redirect chains, temporary redirects, loops and
@@ -38,7 +39,8 @@ URL of the live site still leads to the same page or record on the new one.
   one point in time, including the raw XML, so a state stays available after
   the site has changed; imported in the backend module or on the CLI, with
   URL counts per language and sitemap group, missing groups marked, and a
-  note per snapshot; every check reads its URLs from a snapshot
+  note and an environment (live, staging, development, local) per snapshot;
+  every check reads its URLs from a snapshot
 - **Snapshot lock** — one click on the lock icon protects a snapshot from
   deletion, in the module and by the cleanup command, so the last copy of a
   sitemap structure the live site no longer delivers cannot get lost
@@ -219,6 +221,25 @@ timestamp from `Sitemap.<timestamp>.xsl`: the rewrite rule for versioned file
 names has to include `xsl`. Search engines ignore the stylesheet; the snapshot is
 not affected.
 
+### Snapshot environments
+
+Every snapshot can carry one of four environments: `live`, `staging`,
+`development` or `local`. The module shows it as a badge and uses it to
+suggest what a migration check compares.
+
+For a URL of a configured site, the environment is taken from the site
+configuration: `base` counts as live, a `baseVariants` entry by its condition.
+
+| Condition of the base variant | Environment |
+|-------------------------------|-------------|
+| `applicationContext == "Production/Staging"` (or `…/Stage`) | `staging` |
+| `applicationContext == "Production"` and other `Production/…` | `live` |
+| `applicationContext == "Development/Local"` (or `…/Ddev`) | `local` |
+| `applicationContext == "Development"` and other `Development/…` | `development` |
+| anything else | none |
+
+The import form and `websitecheck:importsitemaps --environment` override it.
+
 ### Environment variables
 
 Basic Auth credentials can be passed as options or read from the environment.
@@ -238,34 +259,43 @@ redirect leads to.
 
 ## Usage
 
-The backend module **System > Website Check** (admin-only) shows one card per
+The backend module **Sites > Website Check** (admin-only) shows one card per
 tool:
 
 - **Status check** — results of `checksitemap` and `crawllinks`, filterable by
   environment, only problems and only not yet reviewed
-- **Migration check** — results of `migrationcheck`, see
-  [Migration check results](#migration-check-results)
+- **Migration check** — a form that composes the `migrationcheck` command, and
+  the results, see [Migration check results](#migration-check-results). The
+  form offers every complete snapshot and suggests the pair to compare: a
+  locked live snapshot, otherwise the newest live one, as reference; the
+  newest staging snapshot, otherwise development, then local, as target. It
+  suggests labels from the environments, offers the earlier runs whose
+  reference results can be reused, warns about label clashes before anything
+  runs, and prints the command for `vendor/bin/typo3`, `typo3` or
+  `ddev typo3`, with quoting, ready to copy.
 - **Sitemaps** — import form and the stored snapshots, newest first:
   - **Import** — choose one of the base URLs of the configured sites (`base`
-    and every `baseVariants` entry), "Find sitemaps" lists the sitemap of every
-    language, the selected languages are imported one request per language, so
-    a large site does not run into a request timeout. Basic Auth credentials can
-    be entered for protected environments; they are used for the import and not
-    stored. The form only fetches URLs on hosts of the configured sites — any
-    other URL needs the CLI command.
-  - **Snapshots** — a summary per snapshot (languages, sitemap indexes,
-    sitemaps, URLs, failures); expanded, one row per language with its URL
-    count per sitemap group — one column per group for up to five groups, a
-    list beyond that. A group that other languages have and this one lacks,
-    or that lists no URL, is marked as missing. Each language expands to its
-    sitemap index and the sitemaps of every group, including every page of a
-    paginated sitemap; a click anywhere on a row expands it, and one button
-    expands or collapses all languages. "Open" shows a sitemap as the site
-    delivers it now; "Raw content" shows what was stored. On devices with a
-    mouse these row actions appear when the row is hovered or focused. The
-    lock icon protects a snapshot from deletion. The language filter applies
-    to all snapshots. A snapshot whose import was interrupted is marked as
-    incomplete.
+    and every `baseVariants` entry), "Find sitemaps" lists the sitemap of
+    every language, the selected languages are imported one request per
+    language, so a large site does not run into a request timeout. The
+    environment of the snapshot is preselected from the site configuration —
+    see [Snapshot environments](#snapshot-environments) — and can be changed.
+    Basic Auth credentials can be entered for protected environments; they are
+    used for the import and not stored. The form only fetches URLs on hosts of
+    the configured sites — any other URL needs the CLI command.
+  - **Snapshots** — the environment as a badge and a summary per snapshot
+    (languages, sitemap indexes, sitemaps, URLs, failures); expanded, one row
+    per language with its URL count per sitemap group — one column per group
+    for up to five groups, a list beyond that. A group that other languages
+    have and this one lacks, or that lists no URL, is marked as missing. Each
+    language expands to its sitemap index and the sitemaps of every group,
+    including every page of a paginated sitemap; a click anywhere on a row
+    expands it, and one button expands or collapses all languages. "Open"
+    shows a sitemap as the site delivers it now; "Raw content" shows what was
+    stored. On devices with a mouse these row actions appear when the row is
+    hovered or focused. The lock icon protects a snapshot from deletion. The
+    language filter applies to all snapshots. A snapshot whose import was
+    interrupted is marked as incomplete.
 
 ### Relaunch workflow
 
@@ -280,16 +310,17 @@ URLs are only known to search engines, so their state has to be kept before:
 
    ```bash
    typo3 websitecheck:importsitemaps 'https://www.example.com/' \
-       --label=live-before-relaunch --lock
+       --label=live-before-relaunch --environment=live --lock
    ```
 
 2. **Whenever the new site has changed, while the old one is still live:**
    import a snapshot of staging and run the migration check against it.
    Missing redirects show up per page and record, with a suggested target
-   where one can be derived.
+   where one can be derived. The module composes this command for you.
 
    ```bash
-   typo3 websitecheck:importsitemaps 'https://staging.example.com/' --label=staging-current
+   typo3 websitecheck:importsitemaps 'https://staging.example.com/' \
+       --label=staging-current --environment=staging
    typo3 websitecheck:migrationcheck --run=relaunch \
        --reference-snapshot=live-before-relaunch --target-snapshot=staging-current
    ```
@@ -317,7 +348,8 @@ URLs are only known to search engines, so their state has to be kept before:
 
    ```bash
    typo3 websitecheck:importsnapshots --file=var/websitecheck/relaunch.json.gz
-   typo3 websitecheck:importsitemaps 'https://www.example.com/' --label=live-after-relaunch
+   typo3 websitecheck:importsitemaps 'https://www.example.com/' \
+       --label=live-after-relaunch --environment=live
    typo3 websitecheck:migrationcheck --run=after-relaunch --reference-run=relaunch \
        --reference-snapshot=live-before-relaunch --target-snapshot=live-after-relaunch
    ```
@@ -339,6 +371,12 @@ that the reference and target row of every language:
 Where a target URL is missing, the module suggests the path of the same page or
 record on the target — taken from the pages of the target snapshot.
 
+Every verdict and every failing status code explains itself in a popover, on
+hover or keyboard focus, with the usual causes — e.g. a detail page listed in
+the page sitemap that only works with a record in its URL. The verdict counts
+above the results filter the list; a chosen verdict is shown even when "only
+problems and warnings" is set.
+
 ### Verdicts
 
 | Verdict | Meaning |
@@ -349,7 +387,7 @@ record on the target — taken from the pages of the target snapshot.
 | `redirectBroken` | Redirects, but ends in an error, a loop or too many hops |
 | `otherContent` | Answers 200 with a different page, record or language |
 | `identityUnknown` | Answers 200, but the markers needed for a comparison are missing |
-| `referenceNotOk` | Already not working on the reference — ignored |
+| `referenceNotOk` | Already not working on the reference — not compared, but listed with the problems: the sitemap lists a broken URL |
 
 ### Warnings
 
@@ -393,6 +431,7 @@ not skipped. A snapshot without a single page URL is not kept.
 |--------|-------------|
 | `--label` | Unique name of the snapshot (default: host and time, e.g. `www.example.com 2026-01-31 14:05`). |
 | `--note` | Free text stored with the snapshot; editable in the module afterwards. |
+| `--environment` | `live`, `staging`, `development` or `local` (default: taken from the site configuration, see [Snapshot environments](#snapshot-environments)). |
 | `--lock` | Lock the snapshot once the import is complete, so it is deleted neither in the module nor by `websitecheck:cleanupsnapshots`. An import that does not finish stays unlocked. |
 | `--sitemap` | `hreflang=url` for one language. Repeatable. Replaces the detection from the start page. |
 | `--sitemap-path` | Sitemap path below each language's home page, e.g. `sitemap.xml` or `?type=1533906435` (default: the path configured for the site of the start URL, `sitemap.xml` for any other URL). |
@@ -516,8 +555,8 @@ typo3 websitecheck:exportsnapshots --file=var/websitecheck/backup.json.gz --lock
 ```
 
 Writes sitemap snapshots and migration check runs into one gzip-compressed JSON
-file with a format version: every snapshot with its label, start URL, note,
-lock and import time, every sitemap file with its raw content and HTTP status,
+file with a format version: every snapshot with its label, environment, start
+URL, note, lock and import time, every sitemap file with its raw content and HTTP status,
 every page URL with its group and `lastmod`, and every run with all its result
 rows, reviewed flags and notes included. A run brings the snapshots it
 compared. Snapshots and runs without a uuid get one on export.

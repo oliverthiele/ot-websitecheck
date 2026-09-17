@@ -18,7 +18,7 @@
 
     <p>{f:translate(key: '{languageFile}snapshot.intro')}</p>
 
-    <f:render section="Import" arguments="{bases: bases, languageFile: languageFile}"/>
+    <f:render section="Import" arguments="{bases: bases, environments: environments, languageFile: languageFile}"/>
 
     <f:if condition="{snapshots}">
         <f:then>
@@ -60,7 +60,7 @@
                             <label class="form-label" for="sitemapImportBase">{f:translate(key: '{languageFile}import.base')}</label>
                             <select class="form-select" id="sitemapImportBase" data-js="sitemapImportBase">
                                 <f:for each="{bases}" as="base">
-                                    <option value="{base.url}">{base.url} ({base.siteIdentifier}, {base.sitemapPath})</option>
+                                    <option value="{base.url}" data-environment="{base.environment.value}">{base.url} ({base.siteIdentifier}, {base.sitemapPath})</option>
                                 </f:for>
                             </select>
                         </div>
@@ -86,7 +86,16 @@
                                 <label class="form-label" for="sitemapImportLabel">{f:translate(key: '{languageFile}import.label')}</label>
                                 <input class="form-control" type="text" maxlength="100" id="sitemapImportLabel" data-js="sitemapImportLabel"/>
                             </div>
-                            <div class="col-12 col-lg-8">
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label" for="sitemapImportEnvironment">{f:translate(key: '{languageFile}import.environment')}</label>
+                                <select class="form-select" id="sitemapImportEnvironment" data-js="sitemapImportEnvironment">
+                                    <option value="">{f:translate(key: '{languageFile}import.environmentNone')}</option>
+                                    <f:for each="{environments}" as="environment">
+                                        <option value="{environment}">{f:translate(key: '{languageFile}environment.{environment}')}</option>
+                                    </f:for>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-6">
                                 <label class="form-label" for="sitemapImportNote">{f:translate(key: '{languageFile}label.note')}</label>
                                 <textarea class="form-control" rows="2" id="sitemapImportNote" data-js="sitemapImportNote"></textarea>
                             </div>
@@ -142,6 +151,7 @@
                 <f:render section="Chevron"/>
                 <strong>{snapshot.label}</strong>
             </button>
+            <f:render partial="EnvironmentBadge" arguments="{environment: snapshot.environment}"/>
             <f:if condition="{snapshot.labelContainsFetchedAt}">
                 <f:else><span><f:format.date format="d.m.Y H:i">@{snapshot.fetchedAt}</f:format.date></span></f:else>
             </f:if>

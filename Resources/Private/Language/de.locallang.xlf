@@ -54,8 +54,120 @@
         <target>%1$s Zeile(n) des Laufs „%2$s“ gelöscht.</target>
       </trans-unit>
       <trans-unit id="empty.noRuns" resname="empty.noRuns" approved="yes">
-        <source>No migration check has been run yet. Start one with the command websitecheck:migrationcheck.</source>
-        <target>Es wurde noch kein Migrations-Check ausgeführt. Starten Sie einen mit dem Command websitecheck:migrationcheck.</target>
+        <source>No migration check has been run yet. Compose the command below and run it on the command line.</source>
+        <target>Es wurde noch kein Migrations-Check ausgeführt. Stellen Sie den Befehl unten zusammen und führen Sie ihn auf der Kommandozeile aus.</target>
+      </trans-unit>
+      <trans-unit id="command.title" resname="command.title" approved="yes">
+        <source>Compose a migration check</source>
+        <target>Migrations-Check zusammenstellen</target>
+      </trans-unit>
+      <trans-unit id="command.intro" resname="command.intro" approved="yes">
+        <source>The check runs on the command line: it requests every URL and can take a while. Choose what to compare, then copy the command.</source>
+        <target>Der Check läuft auf der Kommandozeile, weil er jede URL abfragt und eine Weile dauern kann. Wählen Sie aus, was verglichen werden soll, und kopieren Sie dann den Befehl.</target>
+      </trans-unit>
+      <trans-unit id="command.reference" resname="command.reference" approved="yes">
+        <source>Reference snapshot (before)</source>
+        <target>Referenz-Snapshot (vorher)</target>
+      </trans-unit>
+      <trans-unit id="command.reference.help" resname="command.reference.help" approved="yes">
+        <source>The state to keep, usually the locked snapshot of the live site. Every URL in it is checked.</source>
+        <target>Der Stand, der erhalten bleiben soll, meist der gesperrte Snapshot der Live-Website. Jede URL daraus wird geprüft.</target>
+      </trans-unit>
+      <trans-unit id="command.target" resname="command.target" approved="yes">
+        <source>Target snapshot (after)</source>
+        <target>Ziel-Snapshot (nachher)</target>
+      </trans-unit>
+      <trans-unit id="command.target.help" resname="command.target.help" approved="yes">
+        <source>The new state, e.g. staging. The URLs of the reference are requested on its host.</source>
+        <target>Der neue Stand, z. B. Staging. Die URLs der Referenz werden auf dessen Host abgefragt.</target>
+      </trans-unit>
+      <trans-unit id="command.referenceRun" resname="command.referenceRun" approved="yes">
+        <source>Reference results</source>
+        <target>Referenz-Ergebnisse</target>
+      </trans-unit>
+      <trans-unit id="command.referenceRun.none" resname="command.referenceRun.none" approved="yes">
+        <source>Request the reference again</source>
+        <target>Referenz neu abfragen</target>
+      </trans-unit>
+      <trans-unit id="command.referenceRun.option" resname="command.referenceRun.option" approved="yes">
+        <source>Reuse from run "%1$s"</source>
+        <target>Aus Lauf „%1$s“ übernehmen</target>
+      </trans-unit>
+      <trans-unit id="command.referenceRun.help" resname="command.referenceRun.help" approved="yes">
+        <source>Once the new site is live, the old one no longer answers. Take its results from an earlier run with the same reference snapshot instead.</source>
+        <target>Sobald die neue Website live ist, antwortet die alte nicht mehr. Übernehmen Sie deren Ergebnisse dann aus einem früheren Lauf mit demselben Referenz-Snapshot.</target>
+      </trans-unit>
+      <trans-unit id="command.run" resname="command.run" approved="yes">
+        <source>Run label</source>
+        <target>Lauf-Label</target>
+      </trans-unit>
+      <trans-unit id="command.run.help" resname="command.run.help" approved="yes">
+        <source>Groups the results. The same label again updates that run.</source>
+        <target>Fasst die Ergebnisse zusammen. Dasselbe Label erneut aktualisiert diesen Lauf.</target>
+      </trans-unit>
+      <trans-unit id="command.referenceLabel" resname="command.referenceLabel" approved="yes">
+        <source>Reference label</source>
+        <target>Label der Referenz</target>
+      </trans-unit>
+      <trans-unit id="command.targetLabel" resname="command.targetLabel" approved="yes">
+        <source>Target label</source>
+        <target>Label des Ziels</target>
+      </trans-unit>
+      <trans-unit id="command.labels.help" resname="command.labels.help" approved="yes">
+        <source>The labels name the two environments in the results and must differ.</source>
+        <target>Die Labels benennen die beiden Umgebungen in den Ergebnissen und müssen sich unterscheiden.</target>
+      </trans-unit>
+      <trans-unit id="command.limit" resname="command.limit" approved="yes">
+        <source>Limit</source>
+        <target>Limit</target>
+      </trans-unit>
+      <trans-unit id="command.limit.help" resname="command.limit.help" approved="yes">
+        <source>Only the first URLs, for a test run.</source>
+        <target>Nur die ersten URLs, für einen Testlauf.</target>
+      </trans-unit>
+      <trans-unit id="command.prefix" resname="command.prefix" approved="yes">
+        <source>Call</source>
+        <target>Aufruf</target>
+      </trans-unit>
+      <trans-unit id="command.output" resname="command.output" approved="yes">
+        <source>Command</source>
+        <target>Befehl</target>
+      </trans-unit>
+      <trans-unit id="command.copy" resname="command.copy" approved="yes">
+        <source>Copy</source>
+        <target>Kopieren</target>
+      </trans-unit>
+      <trans-unit id="command.hint" resname="command.hint" approved="yes">
+        <source>Run it in the project root, then reload this page. Protected environments: add --reference-basic-auth or --target-basic-auth, or use the environment variables described in the README.</source>
+        <target>Im Projektverzeichnis ausführen und danach diese Seite neu laden. Geschützte Umgebungen: --reference-basic-auth oder --target-basic-auth ergänzen oder die in der README beschriebenen Umgebungsvariablen nutzen.</target>
+      </trans-unit>
+      <trans-unit id="command.locked" resname="command.locked" approved="yes">
+        <source>locked</source>
+        <target>gesperrt</target>
+      </trans-unit>
+      <trans-unit id="command.noSnapshots" resname="command.noSnapshots" approved="yes">
+        <source>A migration check compares two sitemap snapshots. Import them first, one of the state before and one of the state after.</source>
+        <target>Ein Migrations-Check vergleicht zwei Sitemap-Snapshots. Importieren Sie diese zuerst: einen vom Stand vorher und einen vom Stand nachher.</target>
+      </trans-unit>
+      <trans-unit id="command.openSitemaps" resname="command.openSitemaps" approved="yes">
+        <source>Go to Sitemaps</source>
+        <target>Zu den Sitemaps</target>
+      </trans-unit>
+      <trans-unit id="command.warning.sameSnapshot" resname="command.warning.sameSnapshot" approved="yes">
+        <source>Reference and target are the same snapshot.</source>
+        <target>Referenz und Ziel sind derselbe Snapshot.</target>
+      </trans-unit>
+      <trans-unit id="command.warning.sameLabels" resname="command.warning.sameLabels" approved="yes">
+        <source>The reference and target labels must differ.</source>
+        <target>Die Labels von Referenz und Ziel müssen sich unterscheiden.</target>
+      </trans-unit>
+      <trans-unit id="command.warning.labelClash" resname="command.warning.labelClash" approved="yes">
+        <source>The reused reference results carry the label "%1$s"; choose another target label.</source>
+        <target>Die übernommenen Referenz-Ergebnisse tragen das Label „%1$s“; wählen Sie ein anderes Label für das Ziel.</target>
+      </trans-unit>
+      <trans-unit id="command.warning.missingValue" resname="command.warning.missingValue" approved="yes">
+        <source>Fill in the run label and both environment labels.</source>
+        <target>Bitte Lauf-Label und beide Umgebungs-Labels ausfüllen.</target>
       </trans-unit>
       <trans-unit id="empty.noResults" resname="empty.noResults" approved="yes">
         <source>No results match the current filters.</source>
@@ -160,6 +272,90 @@
       <trans-unit id="verdict.listed" resname="verdict.listed" approved="yes">
         <source>Listed in target sitemap</source>
         <target>In Ziel-Sitemap gelistet</target>
+      </trans-unit>
+      <trans-unit id="summary.filterBy" resname="summary.filterBy" approved="yes">
+        <source>Show only these rows</source>
+        <target>Nur diese Zeilen anzeigen</target>
+      </trans-unit>
+      <trans-unit id="verdict.notAnalyzed.help" resname="verdict.notAnalyzed.help" approved="yes">
+        <source>The run has not been analysed yet. Verdicts are computed once all URLs are checked.</source>
+        <target>Der Lauf ist noch nicht ausgewertet. Die Ergebnisse entstehen, sobald alle URLs geprüft sind.</target>
+      </trans-unit>
+      <trans-unit id="verdict.reference.help" resname="verdict.reference.help" approved="yes">
+        <source>The reference row: how the URL answered before the migration.</source>
+        <target>Die Referenzzeile: So hat die URL vor der Migration geantwortet.</target>
+      </trans-unit>
+      <trans-unit id="verdict.referenceNotOk.help" resname="verdict.referenceNotOk.help" approved="yes">
+        <source>The URL already fails on the reference, so there is nothing to compare. It is listed in the sitemap search engines know, though. Possible causes: a detail page (news, job offer, product) listed in the page sitemap that only works with a record in its URL; an error in a plugin or content element; a page for logged-in users only.</source>
+        <target>Die URL funktioniert schon auf der Referenz nicht, es gibt also nichts zu vergleichen. Sie steht aber in der Sitemap, die Suchmaschinen kennen. Mögliche Ursachen: eine Detailseite (News, Stellenangebot, Produkt) in der Seiten-Sitemap, die nur mit einem Datensatz in der URL funktioniert; ein Fehler in einem Plugin oder Inhaltselement; eine Seite nur für angemeldete Benutzer.</target>
+      </trans-unit>
+      <trans-unit id="verdict.ok.help" resname="verdict.ok.help" approved="yes">
+        <source>Same path, same page or record.</source>
+        <target>Gleicher Pfad, gleiche Seite bzw. gleicher Datensatz.</target>
+      </trans-unit>
+      <trans-unit id="verdict.movedWithRedirect.help" resname="verdict.movedWithRedirect.help" approved="yes">
+        <source>The URL redirects to the same page or record. Nothing to do, unless a warning says otherwise.</source>
+        <target>Die URL leitet auf dieselbe Seite bzw. denselben Datensatz weiter. Nichts zu tun, sofern keine Warnung etwas anderes sagt.</target>
+      </trans-unit>
+      <trans-unit id="verdict.missing.help" resname="verdict.missing.help" approved="yes">
+        <source>The URL answers with an error on the target and does not redirect. Possible causes: the page was moved or renamed without a redirect; it was not migrated, is hidden or not translated; its slug changed; an error on the target itself — check the status code.</source>
+        <target>Die URL antwortet auf dem Ziel mit einem Fehler und leitet nicht weiter. Mögliche Ursachen: Die Seite wurde ohne Weiterleitung verschoben oder umbenannt; sie wurde nicht migriert, ist versteckt oder nicht übersetzt; ihr Slug hat sich geändert; ein Fehler auf dem Ziel selbst — siehe Statuscode.</target>
+      </trans-unit>
+      <trans-unit id="verdict.redirectBroken.help" resname="verdict.redirectBroken.help" approved="yes">
+        <source>The URL redirects, but ends in an error, a loop or too many redirects. Possible causes: the redirect target was deleted or moved; redirect rules lead into each other; rules for https, www or a trailing slash undo each other.</source>
+        <target>Die URL leitet weiter, endet aber in einem Fehler, einer Schleife oder zu vielen Weiterleitungen. Mögliche Ursachen: Das Weiterleitungsziel wurde gelöscht oder verschoben; Weiterleitungsregeln führen ineinander; Regeln für https, www oder einen abschließenden Schrägstrich heben sich gegenseitig auf.</target>
+      </trans-unit>
+      <trans-unit id="verdict.otherContent.help" resname="verdict.otherContent.help" approved="yes">
+        <source>The URL answers with 200, but shows a different page, record or language. Possible causes: a redirect to a parent or start page; the slug is used by another page now; a language fallback shows the default language.</source>
+        <target>Die URL antwortet mit 200, zeigt aber eine andere Seite, einen anderen Datensatz oder eine andere Sprache. Mögliche Ursachen: eine Weiterleitung auf eine übergeordnete Seite oder die Startseite; der Slug gehört jetzt einer anderen Seite; ein Sprach-Fallback zeigt die Standardsprache.</target>
+      </trans-unit>
+      <trans-unit id="verdict.identityUnknown.help" resname="verdict.identityUnknown.help" approved="yes">
+        <source>The URL answers with 200, but the markers needed for a comparison are missing. Possible causes: one environment does not render the page uid in the body tag or the record meta tag; a page template replaces the body tag.</source>
+        <target>Die URL antwortet mit 200, aber die Marker für einen Vergleich fehlen. Mögliche Ursachen: Eine Umgebung gibt die Seiten-uid im body-Tag oder das Datensatz-Meta-Tag nicht aus; ein Seiten-Template ersetzt das body-Tag.</target>
+      </trans-unit>
+      <trans-unit id="verdict.listed.help" resname="verdict.listed.help" approved="yes">
+        <source>A page from the target sitemap, requested to suggest redirect targets.</source>
+        <target>Eine Seite aus der Ziel-Sitemap, abgefragt, um Weiterleitungsziele vorzuschlagen.</target>
+      </trans-unit>
+      <trans-unit id="status.serverError" resname="status.serverError" approved="yes">
+        <source>HTTP %1$s: server error</source>
+        <target>HTTP %1$s: Serverfehler</target>
+      </trans-unit>
+      <trans-unit id="status.serverError.help" resname="status.serverError.help" approved="yes">
+        <source>Possible causes: a detail page listed in the page sitemap that needs a record in its URL — the plugin fails without one; an exception in a plugin or content element; a database or configuration error on this environment. The TYPO3 log of this environment names the exception.</source>
+        <target>Mögliche Ursachen: eine Detailseite in der Seiten-Sitemap, die einen Datensatz in der URL braucht — ohne ihn scheitert das Plugin; eine Exception in einem Plugin oder Inhaltselement; ein Datenbank- oder Konfigurationsfehler auf dieser Umgebung. Das TYPO3-Log dieser Umgebung nennt die Exception.</target>
+      </trans-unit>
+      <trans-unit id="status.notFound" resname="status.notFound" approved="yes">
+        <source>HTTP %1$s: not found</source>
+        <target>HTTP %1$s: nicht gefunden</target>
+      </trans-unit>
+      <trans-unit id="status.notFound.help" resname="status.notFound.help" approved="yes">
+        <source>Possible causes: the page was moved or renamed without a redirect; it is hidden, deleted or not translated; the record of a detail page no longer exists.</source>
+        <target>Mögliche Ursachen: Die Seite wurde ohne Weiterleitung verschoben oder umbenannt; sie ist versteckt, gelöscht oder nicht übersetzt; der Datensatz einer Detailseite existiert nicht mehr.</target>
+      </trans-unit>
+      <trans-unit id="status.accessDenied" resname="status.accessDenied" approved="yes">
+        <source>HTTP %1$s: access denied</source>
+        <target>HTTP %1$s: Zugriff verweigert</target>
+      </trans-unit>
+      <trans-unit id="status.accessDenied.help" resname="status.accessDenied.help" approved="yes">
+        <source>Possible causes: the page is restricted to logged-in users; Basic Auth for this environment is missing or wrong; a web server rule blocks the request.</source>
+        <target>Mögliche Ursachen: Die Seite ist auf angemeldete Benutzer beschränkt; die Basic-Auth-Zugangsdaten für diese Umgebung fehlen oder sind falsch; eine Regel des Webservers blockiert die Anfrage.</target>
+      </trans-unit>
+      <trans-unit id="status.clientError" resname="status.clientError" approved="yes">
+        <source>HTTP %1$s: request refused</source>
+        <target>HTTP %1$s: Anfrage abgelehnt</target>
+      </trans-unit>
+      <trans-unit id="status.clientError.help" resname="status.clientError.help" approved="yes">
+        <source>The server refused the request. Possible causes: a web server or firewall rule, rate limiting, or arguments in the URL the site does not accept.</source>
+        <target>Der Server hat die Anfrage abgelehnt. Mögliche Ursachen: eine Regel des Webservers oder einer Firewall, eine Begrenzung der Anfragen oder Argumente in der URL, die die Website nicht akzeptiert.</target>
+      </trans-unit>
+      <trans-unit id="status.noAnswer" resname="status.noAnswer" approved="yes">
+        <source>No answer</source>
+        <target>Keine Antwort</target>
+      </trans-unit>
+      <trans-unit id="status.noAnswer.help" resname="status.noAnswer.help" approved="yes">
+        <source>The request got no HTTP answer. Possible causes: the host is unreachable, a DNS or certificate error, or a timeout — a higher --timeout may help.</source>
+        <target>Die Anfrage bekam keine HTTP-Antwort. Mögliche Ursachen: Der Host ist nicht erreichbar, ein DNS- oder Zertifikatsfehler oder eine Zeitüberschreitung — ein höheres --timeout kann helfen.</target>
       </trans-unit>
       <trans-unit id="warning.redirectChain" resname="warning.redirectChain" approved="yes">
         <source>Redirect chain</source>
@@ -344,6 +540,30 @@
       <trans-unit id="import.label" resname="import.label" approved="yes">
         <source>Label (optional)</source>
         <target>Bezeichnung (optional)</target>
+      </trans-unit>
+      <trans-unit id="environment.live" resname="environment.live" approved="yes">
+        <source>Live</source>
+        <target>Live</target>
+      </trans-unit>
+      <trans-unit id="environment.staging" resname="environment.staging" approved="yes">
+        <source>Staging</source>
+        <target>Staging</target>
+      </trans-unit>
+      <trans-unit id="environment.development" resname="environment.development" approved="yes">
+        <source>Development</source>
+        <target>Entwicklung</target>
+      </trans-unit>
+      <trans-unit id="environment.local" resname="environment.local" approved="yes">
+        <source>Local</source>
+        <target>Lokal</target>
+      </trans-unit>
+      <trans-unit id="import.environment" resname="import.environment" approved="yes">
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </trans-unit>
+      <trans-unit id="import.environmentNone" resname="import.environmentNone" approved="yes">
+        <source>— not specified —</source>
+        <target>— keine Angabe —</target>
       </trans-unit>
       <trans-unit id="import.start" resname="import.start" approved="yes">
         <source>Import selected sitemaps</source>

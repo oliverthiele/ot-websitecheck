@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Command;
 
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use OliverThiele\OtWebsitecheck\Exception\SitemapImportException;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
@@ -41,6 +42,7 @@ class ImportSitemapsCommand extends Command
         $this->addArgument('startUrl', InputArgument::OPTIONAL, 'Start page of the site, e.g. "https://www.example.com/". Its hreflang links name the languages. Not needed with --sitemap.');
         $this->addOption('label', null, InputOption::VALUE_REQUIRED, 'Unique name of the snapshot, e.g. "live-before-relaunch". Defaults to host and time.', '');
         $this->addOption('note', null, InputOption::VALUE_REQUIRED, 'Free text stored with the snapshot, e.g. what is known to be missing.', '');
+        $this->addOption('environment', null, InputOption::VALUE_REQUIRED, 'Environment of the snapshot: live, staging, development or local. Defaults to what the site configuration says about the host of the start URL.');
         $this->addOption('lock', null, InputOption::VALUE_NONE, 'Lock the snapshot once the import is complete, so neither the backend module nor websitecheck:cleanupsnapshots deletes it.');
         $this->addOption('sitemap', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Sitemap of one language as "hreflang=url", e.g. "de-DE=https://www.example.com/de/sitemap.xml". Replaces the detection from the start page.');
         $this->addOption('sitemap-path', null, InputOption::VALUE_REQUIRED, 'Sitemap path below the home page of each language, e.g. "sitemap.xml" or "?type=1533906435". Defaults to the path configured for the site of the start URL.');
@@ -57,6 +59,12 @@ class ImportSitemapsCommand extends Command
         $timeout = max(1, $this->intValue($input->getOption('timeout'), 20));
         $fetchedAt = time();
         $lock = $input->getOption('lock') === true;
+        $environmentValue = $this->stringValue($input->getOption('environment'));
+        $environment = SnapshotEnvironment::tryFrom($environmentValue);
+        if ($environmentValue !== '' && $environment === null) {
+            $io->error(sprintf('--environment must be one of: %s.', implode(', ', array_column(SnapshotEnvironment::cases(), 'value'))));
+            return self::FAILURE;
+        }
 
         $requestOptions = $this->basicAuthResolver->buildRequestOptions(
             $this->stringValue($input->getOption('basic-auth')),
@@ -85,6 +93,7 @@ class ImportSitemapsCommand extends Command
         if ($startUrl === '') {
             $startUrl = (string)reset($sitemaps);
         }
+        $environment ??= $this->siteBaseProvider->suggestEnvironmentForUrl($startUrl);
 
         try {
             $snapshotUid = $this->sitemapSnapshotImporter->startSnapshot(
@@ -92,13 +101,14 @@ class ImportSitemapsCommand extends Command
                 $startUrl,
                 $this->stringValue($input->getOption('note')),
                 $fetchedAt,
+                $environment,
             );
         } catch (SitemapImportException $exception) {
             $io->error($exception->getMessage());
             return self::FAILURE;
         }
 
-        $io->title(sprintf('Sitemap snapshot for %s', $startUrl));
+        $io->title(sprintf('Sitemap snapshot for %s (%s)', $startUrl, $environment->value ?? 'environment not specified'));
 
         $tableRows = [];
         $failedDocuments = [];

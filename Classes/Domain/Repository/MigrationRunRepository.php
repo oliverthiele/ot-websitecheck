@@ -72,6 +72,22 @@ class MigrationRunRepository extends AbstractRepository
     }
 
     /**
+     * @return list<array{uid: int, uuid: string, runLabel: string, referenceSnapshotUid: int, targetSnapshotUid: int, targetHost: string, startedAt: int}> newest first
+     */
+    public function findAll(): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('*')
+            ->from(self::TABLE)
+            ->orderBy('started_at', 'DESC')
+            ->addOrderBy('uid', 'DESC')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map($this->mapRow(...), $rows);
+    }
+
+    /**
      * Runs created before the uuid column existed get one on first use.
      *
      * @param array{uid: int, uuid: string} $run

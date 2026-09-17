@@ -14,7 +14,7 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'label, locked, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source, start_url, fetched_at, status, uuid'],
+        '1' => ['showitem' => 'label, environment, locked, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.tab.source, start_url, fetched_at, status, uuid'],
     ],
     'columns' => [
         'uuid' => [
@@ -57,6 +57,21 @@ return [
                 'size' => 20,
                 'max' => 20,
                 'readOnly' => true,
+            ],
+        ],
+        'environment' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.environment',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'items' => [
+                    ['label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_sitemapsnapshot.environment.none', 'value' => ''],
+                    ['label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:environment.live', 'value' => 'live'],
+                    ['label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:environment.staging', 'value' => 'staging'],
+                    ['label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:environment.development', 'value' => 'development'],
+                    ['label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:environment.local', 'value' => 'local'],
+                ],
+                'default' => '',
             ],
         ],
         'locked' => [

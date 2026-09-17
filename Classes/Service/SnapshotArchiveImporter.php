@@ -153,7 +153,7 @@ class SnapshotArchiveImporter
      */
     private function importSnapshot(array $snapshot, string $label): void
     {
-        $snapshotUid = $this->sitemapSnapshotRepository->createSnapshot($label, $snapshot['startUrl'], $snapshot['note'], $snapshot['fetchedAt'], $snapshot['uuid']);
+        $snapshotUid = $this->sitemapSnapshotRepository->createSnapshot($label, $snapshot['startUrl'], $snapshot['note'], $snapshot['fetchedAt'], $snapshot['environment'], $snapshot['uuid']);
         foreach ($snapshot['documents'] as $document) {
             $this->sitemapSnapshotRepository->storeDocument($snapshotUid, $document['language'], new SitemapDocument(
                 url: $document['url'],

@@ -42,7 +42,91 @@
         <source>%1$s row(s) of run "%2$s" deleted.</source>
       </trans-unit>
       <trans-unit id="empty.noRuns" resname="empty.noRuns">
-        <source>No migration check has been run yet. Start one with the command websitecheck:migrationcheck.</source>
+        <source>No migration check has been run yet. Compose the command below and run it on the command line.</source>
+      </trans-unit>
+      <trans-unit id="command.title" resname="command.title">
+        <source>Compose a migration check</source>
+      </trans-unit>
+      <trans-unit id="command.intro" resname="command.intro">
+        <source>The check runs on the command line: it requests every URL and can take a while. Choose what to compare, then copy the command.</source>
+      </trans-unit>
+      <trans-unit id="command.reference" resname="command.reference">
+        <source>Reference snapshot (before)</source>
+      </trans-unit>
+      <trans-unit id="command.reference.help" resname="command.reference.help">
+        <source>The state to keep, usually the locked snapshot of the live site. Every URL in it is checked.</source>
+      </trans-unit>
+      <trans-unit id="command.target" resname="command.target">
+        <source>Target snapshot (after)</source>
+      </trans-unit>
+      <trans-unit id="command.target.help" resname="command.target.help">
+        <source>The new state, e.g. staging. The URLs of the reference are requested on its host.</source>
+      </trans-unit>
+      <trans-unit id="command.referenceRun" resname="command.referenceRun">
+        <source>Reference results</source>
+      </trans-unit>
+      <trans-unit id="command.referenceRun.none" resname="command.referenceRun.none">
+        <source>Request the reference again</source>
+      </trans-unit>
+      <trans-unit id="command.referenceRun.option" resname="command.referenceRun.option">
+        <source>Reuse from run "%1$s"</source>
+      </trans-unit>
+      <trans-unit id="command.referenceRun.help" resname="command.referenceRun.help">
+        <source>Once the new site is live, the old one no longer answers. Take its results from an earlier run with the same reference snapshot instead.</source>
+      </trans-unit>
+      <trans-unit id="command.run" resname="command.run">
+        <source>Run label</source>
+      </trans-unit>
+      <trans-unit id="command.run.help" resname="command.run.help">
+        <source>Groups the results. The same label again updates that run.</source>
+      </trans-unit>
+      <trans-unit id="command.referenceLabel" resname="command.referenceLabel">
+        <source>Reference label</source>
+      </trans-unit>
+      <trans-unit id="command.targetLabel" resname="command.targetLabel">
+        <source>Target label</source>
+      </trans-unit>
+      <trans-unit id="command.labels.help" resname="command.labels.help">
+        <source>The labels name the two environments in the results and must differ.</source>
+      </trans-unit>
+      <trans-unit id="command.limit" resname="command.limit">
+        <source>Limit</source>
+      </trans-unit>
+      <trans-unit id="command.limit.help" resname="command.limit.help">
+        <source>Only the first URLs, for a test run.</source>
+      </trans-unit>
+      <trans-unit id="command.prefix" resname="command.prefix">
+        <source>Call</source>
+      </trans-unit>
+      <trans-unit id="command.output" resname="command.output">
+        <source>Command</source>
+      </trans-unit>
+      <trans-unit id="command.copy" resname="command.copy">
+        <source>Copy</source>
+      </trans-unit>
+      <trans-unit id="command.hint" resname="command.hint">
+        <source>Run it in the project root, then reload this page. Protected environments: add --reference-basic-auth or --target-basic-auth, or use the environment variables described in the README.</source>
+      </trans-unit>
+      <trans-unit id="command.locked" resname="command.locked">
+        <source>locked</source>
+      </trans-unit>
+      <trans-unit id="command.noSnapshots" resname="command.noSnapshots">
+        <source>A migration check compares two sitemap snapshots. Import them first, one of the state before and one of the state after.</source>
+      </trans-unit>
+      <trans-unit id="command.openSitemaps" resname="command.openSitemaps">
+        <source>Go to Sitemaps</source>
+      </trans-unit>
+      <trans-unit id="command.warning.sameSnapshot" resname="command.warning.sameSnapshot">
+        <source>Reference and target are the same snapshot.</source>
+      </trans-unit>
+      <trans-unit id="command.warning.sameLabels" resname="command.warning.sameLabels">
+        <source>The reference and target labels must differ.</source>
+      </trans-unit>
+      <trans-unit id="command.warning.labelClash" resname="command.warning.labelClash">
+        <source>The reused reference results carry the label "%1$s"; choose another target label.</source>
+      </trans-unit>
+      <trans-unit id="command.warning.missingValue" resname="command.warning.missingValue">
+        <source>Fill in the run label and both environment labels.</source>
       </trans-unit>
       <trans-unit id="empty.noResults" resname="empty.noResults">
         <source>No results match the current filters.</source>
@@ -121,6 +205,69 @@
       </trans-unit>
       <trans-unit id="verdict.listed" resname="verdict.listed">
         <source>Listed in target sitemap</source>
+      </trans-unit>
+      <trans-unit id="summary.filterBy" resname="summary.filterBy">
+        <source>Show only these rows</source>
+      </trans-unit>
+      <trans-unit id="verdict.notAnalyzed.help" resname="verdict.notAnalyzed.help">
+        <source>The run has not been analysed yet. Verdicts are computed once all URLs are checked.</source>
+      </trans-unit>
+      <trans-unit id="verdict.reference.help" resname="verdict.reference.help">
+        <source>The reference row: how the URL answered before the migration.</source>
+      </trans-unit>
+      <trans-unit id="verdict.referenceNotOk.help" resname="verdict.referenceNotOk.help">
+        <source>The URL already fails on the reference, so there is nothing to compare. It is listed in the sitemap search engines know, though. Possible causes: a detail page (news, job offer, product) listed in the page sitemap that only works with a record in its URL; an error in a plugin or content element; a page for logged-in users only.</source>
+      </trans-unit>
+      <trans-unit id="verdict.ok.help" resname="verdict.ok.help">
+        <source>Same path, same page or record.</source>
+      </trans-unit>
+      <trans-unit id="verdict.movedWithRedirect.help" resname="verdict.movedWithRedirect.help">
+        <source>The URL redirects to the same page or record. Nothing to do, unless a warning says otherwise.</source>
+      </trans-unit>
+      <trans-unit id="verdict.missing.help" resname="verdict.missing.help">
+        <source>The URL answers with an error on the target and does not redirect. Possible causes: the page was moved or renamed without a redirect; it was not migrated, is hidden or not translated; its slug changed; an error on the target itself — check the status code.</source>
+      </trans-unit>
+      <trans-unit id="verdict.redirectBroken.help" resname="verdict.redirectBroken.help">
+        <source>The URL redirects, but ends in an error, a loop or too many redirects. Possible causes: the redirect target was deleted or moved; redirect rules lead into each other; rules for https, www or a trailing slash undo each other.</source>
+      </trans-unit>
+      <trans-unit id="verdict.otherContent.help" resname="verdict.otherContent.help">
+        <source>The URL answers with 200, but shows a different page, record or language. Possible causes: a redirect to a parent or start page; the slug is used by another page now; a language fallback shows the default language.</source>
+      </trans-unit>
+      <trans-unit id="verdict.identityUnknown.help" resname="verdict.identityUnknown.help">
+        <source>The URL answers with 200, but the markers needed for a comparison are missing. Possible causes: one environment does not render the page uid in the body tag or the record meta tag; a page template replaces the body tag.</source>
+      </trans-unit>
+      <trans-unit id="verdict.listed.help" resname="verdict.listed.help">
+        <source>A page from the target sitemap, requested to suggest redirect targets.</source>
+      </trans-unit>
+      <trans-unit id="status.serverError" resname="status.serverError">
+        <source>HTTP %1$s: server error</source>
+      </trans-unit>
+      <trans-unit id="status.serverError.help" resname="status.serverError.help">
+        <source>Possible causes: a detail page listed in the page sitemap that needs a record in its URL — the plugin fails without one; an exception in a plugin or content element; a database or configuration error on this environment. The TYPO3 log of this environment names the exception.</source>
+      </trans-unit>
+      <trans-unit id="status.notFound" resname="status.notFound">
+        <source>HTTP %1$s: not found</source>
+      </trans-unit>
+      <trans-unit id="status.notFound.help" resname="status.notFound.help">
+        <source>Possible causes: the page was moved or renamed without a redirect; it is hidden, deleted or not translated; the record of a detail page no longer exists.</source>
+      </trans-unit>
+      <trans-unit id="status.accessDenied" resname="status.accessDenied">
+        <source>HTTP %1$s: access denied</source>
+      </trans-unit>
+      <trans-unit id="status.accessDenied.help" resname="status.accessDenied.help">
+        <source>Possible causes: the page is restricted to logged-in users; Basic Auth for this environment is missing or wrong; a web server rule blocks the request.</source>
+      </trans-unit>
+      <trans-unit id="status.clientError" resname="status.clientError">
+        <source>HTTP %1$s: request refused</source>
+      </trans-unit>
+      <trans-unit id="status.clientError.help" resname="status.clientError.help">
+        <source>The server refused the request. Possible causes: a web server or firewall rule, rate limiting, or arguments in the URL the site does not accept.</source>
+      </trans-unit>
+      <trans-unit id="status.noAnswer" resname="status.noAnswer">
+        <source>No answer</source>
+      </trans-unit>
+      <trans-unit id="status.noAnswer.help" resname="status.noAnswer.help">
+        <source>The request got no HTTP answer. Possible causes: the host is unreachable, a DNS or certificate error, or a timeout — a higher --timeout may help.</source>
       </trans-unit>
       <trans-unit id="warning.redirectChain" resname="warning.redirectChain">
         <source>Redirect chain</source>
@@ -259,6 +406,24 @@
       </trans-unit>
       <trans-unit id="import.label" resname="import.label">
         <source>Label (optional)</source>
+      </trans-unit>
+      <trans-unit id="environment.live" resname="environment.live">
+        <source>Live</source>
+      </trans-unit>
+      <trans-unit id="environment.staging" resname="environment.staging">
+        <source>Staging</source>
+      </trans-unit>
+      <trans-unit id="environment.development" resname="environment.development">
+        <source>Development</source>
+      </trans-unit>
+      <trans-unit id="environment.local" resname="environment.local">
+        <source>Local</source>
+      </trans-unit>
+      <trans-unit id="import.environment" resname="import.environment">
+        <source>Environment</source>
+      </trans-unit>
+      <trans-unit id="import.environmentNone" resname="import.environmentNone">
+        <source>— not specified —</source>
       </trans-unit>
       <trans-unit id="import.start" resname="import.start">
         <source>Import selected sitemaps</source>

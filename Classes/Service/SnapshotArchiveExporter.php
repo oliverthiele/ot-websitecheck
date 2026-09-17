@@ -150,6 +150,7 @@ class SnapshotArchiveExporter
         return [
             'uuid' => $uuid,
             'label' => $snapshot->label,
+            'environment' => $snapshot->environment,
             'startUrl' => $snapshot->startUrl,
             'note' => $snapshot->note,
             'locked' => $snapshot->locked,

@@ -9,6 +9,7 @@ use OliverThiele\OtWebsitecheck\Domain\Repository\MigrationRunRepository;
 use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
 use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
+use OliverThiele\OtWebsitecheck\Service\MigrationCheckSuggestion;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
@@ -27,6 +28,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly ObservationRepository $observationRepository,
         private readonly MigrationRunRepository $migrationRunRepository,
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
+        private readonly MigrationCheckSuggestion $migrationCheckSuggestion,
     ) {
     }
 
@@ -78,7 +80,8 @@ class MigrationCheckModuleController extends AbstractModuleController
             if (($group !== '' && $reference->sitemapGroup !== $group)
                 || ($language !== '' && $rowLanguage !== $language)
                 || ($verdict !== '' && ($target === null || $this->verdictKey($target) !== $verdict))
-                || ($onlyProblems && !$this->isProblem($reference, $target))
+                // An explicitly chosen verdict is shown whether it counts as a problem or not.
+                || ($onlyProblems && $verdict === '' && !$this->isProblem($reference, $target))
                 || ($onlyUnreviewed && ($target === null || $target->reviewed))
             ) {
                 continue;
@@ -125,6 +128,7 @@ class MigrationCheckModuleController extends AbstractModuleController
             'onlyUnreviewed' => $onlyUnreviewed,
             'showTargetSitemap' => $showTargetSitemap,
             'moduleToken' => $this->moduleToken(),
+            'commandBuilder' => $this->buildCommandBuilder(),
         ]);
 
         return $moduleTemplate->renderResponse('MigrationCheckModule/Index');
@@ -149,9 +153,58 @@ class MigrationCheckModuleController extends AbstractModuleController
     }
 
     /**
+     * What the form for a new run offers: every complete snapshot, the earlier
+     * runs whose reference rows can be reused, and the suggested pair.
+     *
+     * @return array{snapshots: list<array{uid: int, label: string, host: string, environment: string, locked: bool, fetchedAt: int}>, runs: list<array{label: string, referenceSnapshotUid: int, referenceEnvironments: string}>, referenceUid: int, targetUid: int, today: string}
+     */
+    private function buildCommandBuilder(): array
+    {
+        $allSnapshots = $this->sitemapSnapshotRepository->findAll();
+        $suggestion = $this->migrationCheckSuggestion->suggest($allSnapshots);
+
+        $snapshots = [];
+        foreach ($allSnapshots as $snapshot) {
+            if (!$snapshot->isComplete()) {
+                continue;
+            }
+            $host = parse_url($snapshot->startUrl, PHP_URL_HOST);
+            $snapshots[] = [
+                'uid' => $snapshot->uid,
+                'label' => $snapshot->label,
+                'host' => is_string($host) ? $host : '',
+                'environment' => $snapshot->environment,
+                'locked' => $snapshot->locked,
+                'fetchedAt' => $snapshot->fetchedAt,
+            ];
+        }
+
+        $referenceEnvironments = $this->observationRepository->findReferenceEnvironmentsByRun();
+        $runs = [];
+        foreach ($this->migrationRunRepository->findAll() as $run) {
+            if (!isset($referenceEnvironments[$run['runLabel']])) {
+                continue;
+            }
+            $runs[] = [
+                'label' => $run['runLabel'],
+                'referenceSnapshotUid' => $run['referenceSnapshotUid'],
+                'referenceEnvironments' => implode(',', $referenceEnvironments[$run['runLabel']]),
+            ];
+        }
+
+        return [
+            'snapshots' => $snapshots,
+            'runs' => $runs,
+            'referenceUid' => $suggestion['reference']->uid ?? 0,
+            'targetUid' => $suggestion['target']->uid ?? 0,
+            'today' => date('Y-m-d'),
+        ];
+    }
+
+    /**
      * The snapshots a run compared. Runs from before snapshots existed have none.
      *
-     * @return array{reference: string, target: string, targetHost: string, startedAt: int}|null
+     * @return array{reference: string, referenceEnvironment: string, target: string, targetEnvironment: string, targetHost: string, startedAt: int}|null
      */
     private function buildRunSnapshots(string $run): ?array
     {
@@ -160,10 +213,14 @@ class MigrationCheckModuleController extends AbstractModuleController
             return null;
         }
         $deletedLabel = $this->translate('run.snapshotDeleted');
+        $reference = $this->sitemapSnapshotRepository->findByUid($migrationRun['referenceSnapshotUid']);
+        $target = $this->sitemapSnapshotRepository->findByUid($migrationRun['targetSnapshotUid']);
 
         return [
-            'reference' => $this->sitemapSnapshotRepository->findByUid($migrationRun['referenceSnapshotUid'])->label ?? $deletedLabel,
-            'target' => $this->sitemapSnapshotRepository->findByUid($migrationRun['targetSnapshotUid'])->label ?? $deletedLabel,
+            'reference' => $reference->label ?? $deletedLabel,
+            'referenceEnvironment' => $reference->environment ?? '',
+            'target' => $target->label ?? $deletedLabel,
+            'targetEnvironment' => $target->environment ?? '',
             'targetHost' => $migrationRun['targetHost'],
             'startedAt' => $migrationRun['startedAt'],
         ];
@@ -175,7 +232,10 @@ class MigrationCheckModuleController extends AbstractModuleController
             return false;
         }
 
+        // A reference URL that fails is no migration problem, but a broken URL
+        // search engines know from the sitemap — worth seeing all the same.
         return in_array($target->verdict, MigrationAnalyzer::PROBLEM_VERDICTS, true)
+            || $target->verdict === MigrationAnalyzer::VERDICT_REFERENCE_NOT_OK
             || $target->warnings !== []
             || $reference->warnings !== [];
     }
@@ -252,6 +312,7 @@ class MigrationCheckModuleController extends AbstractModuleController
                 default => 'danger',
             },
             'finalStatusSeverity' => $observation->finalStatus === 200 ? 'success' : 'danger',
+            'finalStatusHelp' => $this->statusHelpKey($observation->finalStatus),
             'requestedUrl' => $observation->requestedUrl,
             'finalUrl' => $observation->finalUrl,
             'finalPath' => $observation->finalPath,
@@ -319,6 +380,21 @@ class MigrationCheckModuleController extends AbstractModuleController
     private function verdictKey(Observation $observation): string
     {
         return $observation->verdict !== '' ? $observation->verdict : 'notAnalyzed';
+    }
+
+    /**
+     * The group of explanations for a final status that is not a success.
+     */
+    private function statusHelpKey(int $status): string
+    {
+        return match (true) {
+            $status === 0 => 'noAnswer',
+            $status === 401, $status === 403 => 'accessDenied',
+            $status === 404, $status === 410 => 'notFound',
+            $status >= 500 => 'serverError',
+            $status >= 400 => 'clientError',
+            default => '',
+        };
     }
 
     private function verdictSeverity(string $verdict): string
