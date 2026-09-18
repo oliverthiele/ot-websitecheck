@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] — 2026-09-18
+
+### Fixed
+
+- Resolve the page uid of URLs in every language, not only the default
+  language. `websitecheck:checksitemap` and `websitecheck:crawllinks` handed
+  the router the path below the site base, so a translated URL such as
+  `/de/imprint` was routed as `de/imprint` and stored without a page uid. The
+  path is now taken below the language base, as TYPO3 routes a request, and a
+  base only matches at a segment boundary
+
 ## [0.6.0] — 2026-09-18
 
 ### Added
