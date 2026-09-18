@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Service;
 
+use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Routing\SiteRouteResult;
-use TYPO3\CMS\Core\Site\Entity\Site;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Site\SiteFinder;
 
 /**
@@ -41,14 +42,21 @@ class PageUidResolver
         parse_str($queryString, $queryParams);
 
         foreach ($this->siteFinder->getAllSites() as $site) {
-            $tail = $this->stripSiteBasePath($path, $site);
-            if ($tail === null) {
+            if ($this->stripBasePath($path, $site->getBase()) === null) {
                 continue;
             }
 
-            $requestUri = new Uri('/' . ltrim($tail, '/') . ($queryString !== '' ? '?' . $queryString : ''));
+            // The router expects the path below the language base, as SiteMatcher
+            // hands it over: "/de/imprint" is routed as "imprint" in the German
+            // language, never as "de/imprint". Longer bases go first, so "/de/…"
+            // is not claimed by a default language at "/".
+            foreach ($this->sortByBasePathLength($site->getAllLanguages()) as $language) {
+                $tail = $this->stripBasePath($path, $language->getBase());
+                if ($tail === null) {
+                    continue;
+                }
 
-            foreach ($site->getAllLanguages() as $language) {
+                $requestUri = new Uri('/' . $tail . ($queryString !== '' ? '?' . $queryString : ''));
                 $request = (new ServerRequest($requestUri, 'GET'))->withQueryParams($queryParams);
                 $siteRouteResult = new SiteRouteResult($requestUri, $site, $language, $tail);
 
@@ -67,13 +75,32 @@ class PageUidResolver
         return null;
     }
 
-    private function stripSiteBasePath(string $path, Site $site): ?string
+    /**
+     * @param SiteLanguage[] $languages
+     * @return SiteLanguage[]
+     */
+    private function sortByBasePathLength(array $languages): array
     {
-        $basePath = rtrim($site->getBase()->getPath(), '/');
+        usort(
+            $languages,
+            static fn(SiteLanguage $first, SiteLanguage $second): int
+                => strlen($second->getBase()->getPath()) <=> strlen($first->getBase()->getPath()),
+        );
+
+        return $languages;
+    }
+
+    /**
+     * A base only matches at a segment boundary: "/de" covers "/de" and "/de/…",
+     * but not "/details".
+     */
+    private function stripBasePath(string $path, UriInterface $base): ?string
+    {
+        $basePath = rtrim($base->getPath(), '/');
         if ($basePath === '') {
             return ltrim($path, '/');
         }
-        if (!str_starts_with($path, $basePath)) {
+        if ($path !== $basePath && !str_starts_with($path, $basePath . '/')) {
             return null;
         }
 
