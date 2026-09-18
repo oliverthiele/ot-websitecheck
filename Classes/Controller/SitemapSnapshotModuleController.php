@@ -6,10 +6,14 @@ namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
+use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
+use OliverThiele\OtWebsitecheck\Service\ArchiveDirectory;
+use OliverThiele\OtWebsitecheck\Service\ArchiveFileService;
 use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotImporter;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOverviewBuilder;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
@@ -29,6 +33,8 @@ class SitemapSnapshotModuleController extends AbstractModuleController
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
         private readonly SiteBaseProvider $siteBaseProvider,
         private readonly SnapshotOverviewBuilder $snapshotOverviewBuilder,
+        private readonly ArchiveDirectory $archiveDirectory,
+        private readonly ArchiveFileService $archiveFileService,
     ) {
     }
 
@@ -69,9 +75,84 @@ class SitemapSnapshotModuleController extends AbstractModuleController
             'bases' => $this->siteBaseProvider->getBases(),
             'languageOptions' => array_map('strval', array_keys($languageOptions)),
             'environments' => array_column(SnapshotEnvironment::cases(), 'value'),
+            'archive' => $this->buildArchive(),
         ]);
 
         return $moduleTemplate->renderResponse('SitemapSnapshotModule/Index');
+    }
+
+    /**
+     * The archive directory and its files; a directory that is not allowed is
+     * reported instead.
+     *
+     * @return array{enabled: bool, directory: string, error: string, files: list<array<string, mixed>>}
+     */
+    private function buildArchive(): array
+    {
+        try {
+            $path = $this->archiveDirectory->getPath();
+
+            return [
+                'enabled' => $path !== '',
+                'directory' => $path !== '' ? substr($path, strlen(Environment::getProjectPath()) + 1) : '',
+                'error' => '',
+                'files' => $path !== '' ? $this->archiveFileService->describeFiles() : [],
+            ];
+        } catch (SnapshotArchiveException $exception) {
+            return ['enabled' => false, 'directory' => '', 'error' => $exception->getMessage(), 'files' => []];
+        }
+    }
+
+    public function initializeSaveSnapshotAction(): void
+    {
+        $this->assertAllowedHttpMethod($this->request, 'POST');
+    }
+
+    public function saveSnapshotAction(int $snapshot): ResponseInterface
+    {
+        $label = $this->sitemapSnapshotRepository->findByUid($snapshot)->label ?? '';
+        try {
+            $file = $this->archiveFileService->saveSnapshot($label);
+            $this->addFlashMessage(sprintf($this->translate('flash.archive.saved'), $file->name), '', ContextualFeedbackSeverity::OK);
+        } catch (SnapshotArchiveException $exception) {
+            $this->addFlashMessage($exception->getMessage(), $this->translate('flash.archive.failed'), ContextualFeedbackSeverity::ERROR);
+        }
+
+        return $this->redirect('index');
+    }
+
+    public function initializeImportArchiveAction(): void
+    {
+        $this->assertAllowedHttpMethod($this->request, 'POST');
+    }
+
+    public function importArchiveAction(string $file): ResponseInterface
+    {
+        try {
+            $imported = $this->archiveFileService->import($file);
+            $this->addFlashMessage(sprintf($this->translate('flash.archive.imported'), $imported['snapshots'], $imported['runs'], $file), '', ContextualFeedbackSeverity::OK);
+        } catch (SnapshotArchiveException $exception) {
+            $this->addFlashMessage($exception->getMessage(), $this->translate('flash.archive.failed'), ContextualFeedbackSeverity::ERROR);
+        }
+
+        return $this->redirect('index');
+    }
+
+    public function initializeDeleteArchiveAction(): void
+    {
+        $this->assertAllowedHttpMethod($this->request, 'POST');
+    }
+
+    public function deleteArchiveAction(string $file): ResponseInterface
+    {
+        try {
+            $this->archiveFileService->delete($file);
+            $this->addFlashMessage(sprintf($this->translate('flash.archive.deleted'), $file), '', ContextualFeedbackSeverity::OK);
+        } catch (SnapshotArchiveException $exception) {
+            $this->addFlashMessage($exception->getMessage(), $this->translate('flash.archive.failed'), ContextualFeedbackSeverity::ERROR);
+        }
+
+        return $this->redirect('index');
     }
 
     public function initializeDeleteAction(): void

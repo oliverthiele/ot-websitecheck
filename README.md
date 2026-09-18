@@ -44,8 +44,8 @@ URL of the live site still leads to the same page or record on the new one.
 - **Snapshot lock** — one click on the lock icon protects a snapshot from
   deletion, in the module and by the cleanup command, so the last copy of a
   sitemap structure the live site no longer delivers cannot get lost
-- **Archive** — snapshots and migration check runs can be exported into a
-  file and imported again, so they survive a database that is replaced, e.g.
+- **Archive** — snapshots and migration check runs can be saved into a file,
+  with a click in the backend modules or on the CLI, and read back in, so they survive a database that is replaced, e.g.
   by a fresh import of the live database, and move from staging to the new
   live system; records are identified by uuid, so importing twice doubles
   nothing
@@ -221,6 +221,19 @@ timestamp from `Sitemap.<timestamp>.xsl`: the rewrite rule for versioned file
 names has to include `xsl`. Search engines ignore the stylesheet; the snapshot is
 not affected.
 
+### Archive directory
+
+The backend modules save snapshots and migration check runs as files into one
+directory and read them back from there. It is set in **Settings > Extension
+Configuration > ot_websitecheck** as `archiveDirectory`, relative to the
+project root (default: `data/websitecheck`). An empty value switches saving in
+the modules off; the CLI commands take their own path either way.
+
+The directory has to lie inside the project and outside the public directory —
+an archive holds whole sitemaps and check results and must not be reachable by
+URL. It is created on the first save. Keep it out of version control, e.g. with
+`/data/*` in `.gitignore`.
+
 ### Snapshot environments
 
 Every snapshot can carry one of four environments: `live`, `staging`,
@@ -268,7 +281,8 @@ tool:
   and an environment label from it — with `-links` for a link check, so its
   results do not replace those of a status check.
 - **Migration check** — a form that composes the `migrationcheck` command, and
-  the results, see [Migration check results](#migration-check-results). The
+  the results, see [Migration check results](#migration-check-results). A run
+  can be saved as a file together with the snapshots it compared. The
   form offers every complete snapshot and suggests the pair to compare: a
   locked live snapshot, otherwise the newest live one, as reference; the
   newest staging snapshot, otherwise development, then local, as target. It
@@ -286,6 +300,12 @@ tool:
     Basic Auth credentials can be entered for protected environments; they are
     used for the import and not stored. The form only fetches URLs on hosts of
     the configured sites — any other URL needs the CLI command.
+  - **Saved files** — the files in the
+    [archive directory](#archive-directory), each with the snapshots and runs
+    it holds and whether reading it in would add them, skip them because they
+    are here already, or stop at a label another record uses. Files can be
+    read in and deleted here; every snapshot has a button that saves it as a
+    file.
   - **Snapshots** — the environment as a badge and a summary per snapshot
     (languages, sitemap indexes, sitemaps, URLs, failures); expanded, one row
     per language with its URL count per sitemap group — one column per group
@@ -331,8 +351,9 @@ URLs are only known to search engines, so their state has to be kept before:
    A label is unique: delete the previous `staging-current` snapshot in the
    module first, or use a new label per run.
 
-3. **Just before the switch, on staging:** export the last run; it brings the
-   live snapshot along. The run holds the reference results — how every old URL
+3. **Just before the switch, on staging:** save the last run as a file — with
+   the button in the migration check module or on the command line; it brings
+   the live snapshot along. The run holds the reference results — how every old URL
    answered while the old site was still live — and they cannot be requested
    again afterwards.
 
@@ -342,11 +363,11 @@ URLs are only known to search engines, so their state has to be kept before:
    ```
 
    The same applies whenever the staging database is replaced, e.g. by a fresh
-   import of the live database: export before, import the file with
-   `websitecheck:importsnapshots` afterwards.
+   import of the live database: save before, read the file in afterwards — in
+   the Sitemaps module or with `websitecheck:importsnapshots`.
 
 4. **After the switch, on the new live system:** copy the archive there,
-   import it, take a snapshot of the new site and compare it with the stored
+   read it in, take a snapshot of the new site and compare it with the stored
    reference results.
 
    ```bash

@@ -26,12 +26,14 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
  * @phpstan-import-type ArchivedSnapshot from SnapshotArchive
  * @phpstan-import-type ArchivedRun from SnapshotArchive
  * @phpstan-type PlannedItem array{label: string, originalLabel: string, action: 'import'|'skip'}
+ * @phpstan-type InspectedItem array{label: string, originalLabel: string, action: 'import'|'skip'|'conflict'}
  * @phpstan-type ImportPlan array{snapshots: list<PlannedItem>, runs: list<PlannedItem>}
  */
 class SnapshotArchiveImporter
 {
     public const string ACTION_IMPORT = 'import';
     public const string ACTION_SKIP = 'skip';
+    public const string ACTION_CONFLICT = 'conflict';
 
     public function __construct(
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
@@ -42,16 +44,15 @@ class SnapshotArchiveImporter
     }
 
     /**
-     * What an import would do, in the order of the archive.
+     * What an import would do with each entry, in the order of the archive,
+     * without refusing anything — conflicts are reported as such.
      *
      * @param Archive $archive
      * @param string $labelSuffix Appended to every imported label that is taken already.
-     * @return ImportPlan
-     * @throws SnapshotArchiveException on a label conflict
+     * @return array{snapshots: list<InspectedItem>, runs: list<InspectedItem>}
      */
-    public function plan(array $archive, string $labelSuffix = ''): array
+    public function inspect(array $archive, string $labelSuffix = ''): array
     {
-        $conflicts = [];
         $existingRunLabels = array_flip($this->observationRepository->findDistinctRuns());
 
         $snapshots = [];
@@ -67,14 +68,9 @@ class SnapshotArchiveImporter
                 $labelSuffix,
                 fn(string $candidate): bool => $this->sitemapSnapshotRepository->labelExists($candidate),
             );
-            if ($label === null) {
-                $conflicts[] = sprintf('snapshot "%s"', $snapshot['label']);
-                continue;
-            }
-            if (mb_strlen($label) > SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH) {
-                throw new SnapshotArchiveException(sprintf('The label "%s" is longer than %d characters.', $label, SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH), 1789490201);
-            }
-            $snapshots[] = ['label' => $label, 'originalLabel' => $snapshot['label'], 'action' => self::ACTION_IMPORT];
+            $snapshots[] = $label === null
+                ? ['label' => $snapshot['label'], 'originalLabel' => $snapshot['label'], 'action' => self::ACTION_CONFLICT]
+                : ['label' => $label, 'originalLabel' => $snapshot['label'], 'action' => self::ACTION_IMPORT];
         }
 
         $runs = [];
@@ -89,21 +85,49 @@ class SnapshotArchiveImporter
                 $labelSuffix,
                 fn(string $candidate): bool => isset($existingRunLabels[$candidate]) || $this->migrationRunRepository->findByLabel($candidate) !== null,
             );
-            if ($label === null) {
-                $conflicts[] = sprintf('run "%s"', $run['label']);
-                continue;
+            $runs[] = $label === null
+                ? ['label' => $run['label'], 'originalLabel' => $run['label'], 'action' => self::ACTION_CONFLICT]
+                : ['label' => $label, 'originalLabel' => $run['label'], 'action' => self::ACTION_IMPORT];
+        }
+
+        return ['snapshots' => $snapshots, 'runs' => $runs];
+    }
+
+    /**
+     * What an import would do, in the order of the archive.
+     *
+     * @param Archive $archive
+     * @param string $labelSuffix Appended to every imported label that is taken already.
+     * @return ImportPlan
+     * @throws SnapshotArchiveException on a label conflict or a label that gets too long
+     */
+    public function plan(array $archive, string $labelSuffix = ''): array
+    {
+        $inspection = $this->inspect($archive, $labelSuffix);
+
+        $conflicts = [];
+        $plan = ['snapshots' => [], 'runs' => []];
+        foreach (['snapshots' => 'snapshot', 'runs' => 'run'] as $key => $type) {
+            foreach ($inspection[$key] as $item) {
+                if ($item['action'] === self::ACTION_CONFLICT) {
+                    $conflicts[] = sprintf('%s "%s"', $type, $item['originalLabel']);
+                    continue;
+                }
+                if ($key === 'snapshots' && mb_strlen($item['label']) > SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH) {
+                    throw new SnapshotArchiveException(sprintf('The label "%s" is longer than %d characters.', $item['label'], SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH), 1789490201);
+                }
+                $plan[$key][] = ['label' => $item['label'], 'originalLabel' => $item['originalLabel'], 'action' => $item['action']];
             }
-            $runs[] = ['label' => $label, 'originalLabel' => $run['label'], 'action' => self::ACTION_IMPORT];
         }
 
         if ($conflicts !== []) {
             throw new SnapshotArchiveException(sprintf(
-                'These labels are already used by other records: %s. Delete those records or import with --label-suffix.',
+                'These labels are already used by other records: %s. Delete those records or import with a label suffix.',
                 implode(', ', $conflicts),
             ), 1789490202);
         }
 
-        return ['snapshots' => $snapshots, 'runs' => $runs];
+        return $plan;
     }
 
     /**

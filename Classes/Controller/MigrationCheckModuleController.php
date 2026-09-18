@@ -8,6 +8,9 @@ use OliverThiele\OtWebsitecheck\Domain\Model\Observation;
 use OliverThiele\OtWebsitecheck\Domain\Repository\MigrationRunRepository;
 use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
 use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
+use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
+use OliverThiele\OtWebsitecheck\Service\ArchiveDirectory;
+use OliverThiele\OtWebsitecheck\Service\ArchiveFileService;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\MigrationCheckSuggestion;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
@@ -31,6 +34,8 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly SitemapSnapshotRepository $sitemapSnapshotRepository,
         private readonly MigrationCheckSuggestion $migrationCheckSuggestion,
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
+        private readonly ArchiveDirectory $archiveDirectory,
+        private readonly ArchiveFileService $archiveFileService,
     ) {
     }
 
@@ -131,9 +136,27 @@ class MigrationCheckModuleController extends AbstractModuleController
             'showTargetSitemap' => $showTargetSitemap,
             'moduleToken' => $this->moduleToken(),
             'commandBuilder' => $this->buildCommandBuilder(),
+            'archiveEnabled' => $this->isArchiveEnabled(),
         ]);
 
         return $moduleTemplate->renderResponse('MigrationCheckModule/Index');
+    }
+
+    public function initializeSaveRunAction(): void
+    {
+        $this->assertAllowedHttpMethod($this->request, 'POST');
+    }
+
+    public function saveRunAction(string $run): ResponseInterface
+    {
+        try {
+            $file = $this->archiveFileService->saveRun($run);
+            $this->addFlashMessage(sprintf($this->translate('flash.archive.runSaved'), $file->name), '', ContextualFeedbackSeverity::OK);
+        } catch (SnapshotArchiveException $exception) {
+            $this->addFlashMessage($exception->getMessage(), $this->translate('flash.archive.failed'), ContextualFeedbackSeverity::ERROR);
+        }
+
+        return $this->redirect('index', null, null, ['run' => $run]);
     }
 
     public function initializeDeleteRunAction(): void
@@ -210,6 +233,15 @@ class MigrationCheckModuleController extends AbstractModuleController
             'targetHost' => $migrationRun['targetHost'],
             'startedAt' => $migrationRun['startedAt'],
         ];
+    }
+
+    private function isArchiveEnabled(): bool
+    {
+        try {
+            return $this->archiveDirectory->getPath() !== '';
+        } catch (SnapshotArchiveException) {
+            return false;
+        }
     }
 
     private function isProblem(Observation $reference, ?Observation $target): bool

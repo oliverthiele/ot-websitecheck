@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Add the extension setting `archiveDirectory` (default: `data/websitecheck`),
+  a directory inside the project and outside the public directory for archive
+  files
+- Save a snapshot as a file with a button in the Sitemaps module, and a
+  migration check run with the snapshots it compared in the migration check
+  module
+- List the saved files in the Sitemaps module with their contents and what
+  reading them in would do; read them in or delete them there
+
+### Changed
+
+- Report every label conflict of an archive at once; `plan()` of the importer
+  builds on the new `inspect()`
+
 ## [0.5.0] — 2026-09-17
 
 ### Added

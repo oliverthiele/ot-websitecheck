@@ -862,8 +862,8 @@
         <target>Jeden Snapshot sperren, der nicht verloren gehen darf, z. B. den Live-Stand vor einem Relaunch: Das Schloss schützt ihn vor dem Löschen, auch durch den Aufräumbefehl.</target>
       </trans-unit>
       <trans-unit id="guide.sitemaps.note" resname="guide.sitemaps.note" approved="yes">
-        <source>URLs outside the configured sites, scheduled imports and backups of snapshots need the command line: websitecheck:importsitemaps and websitecheck:exportsnapshots.</source>
-        <target>URLs außerhalb der konfigurierten Sites, regelmäßige Importe und Sicherungen von Snapshots laufen über die Kommandozeile: websitecheck:importsitemaps und websitecheck:exportsnapshots.</target>
+        <source>URLs outside the configured sites and scheduled imports need the command line: websitecheck:importsitemaps. Before the database is replaced, save the snapshots you need as files below.</source>
+        <target>URLs außerhalb der konfigurierten Sites und regelmäßige Importe laufen über die Kommandozeile: websitecheck:importsitemaps. Bevor die Datenbank ersetzt wird, sichern Sie die benötigten Snapshots unten als Dateien.</target>
       </trans-unit>
       <trans-unit id="guide.status.title" resname="guide.status.title" approved="yes">
         <source>How the status check works</source>
@@ -980,6 +980,110 @@
       <trans-unit id="help.sitemapsLabel" resname="help.sitemapsLabel" approved="yes">
         <source>The name the checks use to find the snapshot, e.g. "live-before-relaunch". It has to be unique. Left empty, it is the host and the time, e.g. "www.example.com 2026-01-31 14:05".</source>
         <target>Der Name, unter dem die Checks den Snapshot finden, z. B. „live-before-relaunch“. Er muss eindeutig sein. Leer gelassen, besteht er aus Host und Zeitpunkt, z. B. „www.example.com 2026-01-31 14:05“.</target>
+      </trans-unit>
+          <trans-unit id="archive.title" resname="archive.title" approved="yes">
+        <source>Saved files</source>
+        <target>Gesicherte Dateien</target>
+      </trans-unit>
+      <trans-unit id="archive.help" resname="archive.help" approved="yes">
+        <source>A database that is replaced — e.g. by a fresh import of the live database — takes every snapshot and every stored check result with it. A saved file brings them back, and it moves them to another installation, e.g. from staging to the new live system. The files are the same as those of websitecheck:exportsnapshots.</source>
+        <target>Eine Datenbank, die ersetzt wird — z. B. durch einen neuen Import der Live-Datenbank —, nimmt alle Snapshots und gespeicherten Prüfergebnisse mit. Eine gesicherte Datei holt sie zurück und bringt sie auch in eine andere Installation, z. B. von Staging auf das neue Live-System. Es sind dieselben Dateien wie bei websitecheck:exportsnapshots.</target>
+      </trans-unit>
+      <trans-unit id="archive.intro" resname="archive.intro" approved="yes">
+        <source>Snapshots and migration check runs saved to %1$s. Reading a file in skips what is already here; a label used by another record stops it. Keep the directory out of version control.</source>
+        <target>Snapshots und Migrationsläufe, gesichert in %1$s. Beim Einlesen wird übersprungen, was schon vorhanden ist; ein Label, das ein anderer Datensatz trägt, verhindert das Einlesen. Halten Sie den Ordner aus der Versionskontrolle heraus.</target>
+      </trans-unit>
+      <trans-unit id="archive.empty" resname="archive.empty" approved="yes">
+        <source>No saved files yet. Save a snapshot with the button in its header, or a migration check run in the migration check module.</source>
+        <target>Noch keine gesicherten Dateien. Sichern Sie einen Snapshot über den Button in seinem Kopf oder einen Migrationslauf im Modul Migrations-Check.</target>
+      </trans-unit>
+      <trans-unit id="archive.disabled" resname="archive.disabled" approved="yes">
+        <source>Saving to files is switched off. Set an archive directory in Settings → Extension Configuration → ot_websitecheck, e.g. data/websitecheck, to save snapshots here before the database is replaced.</source>
+        <target>Das Sichern in Dateien ist ausgeschaltet. Legen Sie unter Einstellungen → Extension-Konfiguration → ot_websitecheck einen Ordner fest, z. B. data/websitecheck, um Snapshots hier zu sichern, bevor die Datenbank ersetzt wird.</target>
+      </trans-unit>
+      <trans-unit id="archive.column.file" resname="archive.column.file" approved="yes">
+        <source>File</source>
+        <target>Datei</target>
+      </trans-unit>
+      <trans-unit id="archive.column.contents" resname="archive.column.contents" approved="yes">
+        <source>Contents</source>
+        <target>Inhalt</target>
+      </trans-unit>
+      <trans-unit id="archive.entry.snapshot" resname="archive.entry.snapshot" approved="yes">
+        <source>Snapshot "%1$s" (%2$s URLs)</source>
+        <target>Snapshot „%1$s“ (%2$s URLs)</target>
+      </trans-unit>
+      <trans-unit id="archive.entry.run" resname="archive.entry.run" approved="yes">
+        <source>Migration check run "%1$s" (%2$s result rows)</source>
+        <target>Migrationslauf „%1$s“ (%2$s Ergebniszeilen)</target>
+      </trans-unit>
+      <trans-unit id="archive.action.import" resname="archive.action.import" approved="yes">
+        <source>new</source>
+        <target>neu</target>
+      </trans-unit>
+      <trans-unit id="archive.action.skip" resname="archive.action.skip" approved="yes">
+        <source>already here</source>
+        <target>schon vorhanden</target>
+      </trans-unit>
+      <trans-unit id="archive.action.skipRenamed" resname="archive.action.skipRenamed" approved="yes">
+        <source>already here as "%1$s"</source>
+        <target>schon vorhanden als „%1$s“</target>
+      </trans-unit>
+      <trans-unit id="archive.action.conflict" resname="archive.action.conflict" approved="yes">
+        <source>label taken by another record</source>
+        <target>Label von anderem Datensatz belegt</target>
+      </trans-unit>
+      <trans-unit id="archive.import" resname="archive.import" approved="yes">
+        <source>Read in</source>
+        <target>Einlesen</target>
+      </trans-unit>
+      <trans-unit id="archive.import.conflicts" resname="archive.import.conflicts" approved="yes">
+        <source>A label in this file is used by another record here. Rename or delete that record, or read the file in with websitecheck:importsnapshots --label-suffix.</source>
+        <target>Ein Label aus dieser Datei trägt hier ein anderer Datensatz. Benennen Sie ihn um oder löschen Sie ihn, oder lesen Sie die Datei mit websitecheck:importsnapshots --label-suffix ein.</target>
+      </trans-unit>
+      <trans-unit id="archive.delete.confirmTitle" resname="archive.delete.confirmTitle" approved="yes">
+        <source>Delete the file?</source>
+        <target>Datei löschen?</target>
+      </trans-unit>
+      <trans-unit id="archive.delete.confirm" resname="archive.delete.confirm" approved="yes">
+        <source>"%1$s" is deleted from the directory. It may be the only copy of these snapshots.</source>
+        <target>„%1$s“ wird aus dem Ordner gelöscht. Sie kann die einzige Kopie dieser Snapshots sein.</target>
+      </trans-unit>
+      <trans-unit id="archive.save" resname="archive.save" approved="yes">
+        <source>Save as file</source>
+        <target>Als Datei sichern</target>
+      </trans-unit>
+      <trans-unit id="archive.save.help" resname="archive.save.help" approved="yes">
+        <source>Saves this snapshot to the archive directory, so it survives a replaced database.</source>
+        <target>Sichert diesen Snapshot im Archivordner, damit er eine ersetzte Datenbank übersteht.</target>
+      </trans-unit>
+      <trans-unit id="archive.saveRun" resname="archive.saveRun" approved="yes">
+        <source>Save run as file</source>
+        <target>Lauf als Datei sichern</target>
+      </trans-unit>
+      <trans-unit id="archive.saveRun.help" resname="archive.saveRun.help" approved="yes">
+        <source>Saves this run with its results and the snapshots it compared — after the switch, its reference results can no longer be requested.</source>
+        <target>Sichert diesen Lauf mit seinen Ergebnissen und den verglichenen Snapshots — nach dem Livegang lassen sich seine Referenz-Ergebnisse nicht mehr abfragen.</target>
+      </trans-unit>
+      <trans-unit id="flash.archive.saved" resname="flash.archive.saved" approved="yes">
+        <source>Saved as %1$s.</source>
+        <target>Gesichert als %1$s.</target>
+      </trans-unit>
+      <trans-unit id="flash.archive.runSaved" resname="flash.archive.runSaved" approved="yes">
+        <source>The run was saved as %1$s, with the snapshots it compared. Read it in from the Sitemaps module.</source>
+        <target>Der Lauf wurde als %1$s gesichert, samt verglichenen Snapshots. Eingelesen wird er im Modul Sitemaps.</target>
+      </trans-unit>
+      <trans-unit id="flash.archive.imported" resname="flash.archive.imported" approved="yes">
+        <source>%1$s snapshots and %2$s runs read in from %3$s.</source>
+        <target>%1$s Snapshots und %2$s Läufe aus %3$s eingelesen.</target>
+      </trans-unit>
+      <trans-unit id="flash.archive.deleted" resname="flash.archive.deleted" approved="yes">
+        <source>%1$s was deleted.</source>
+        <target>%1$s wurde gelöscht.</target>
+      </trans-unit>
+      <trans-unit id="flash.archive.failed" resname="flash.archive.failed" approved="yes">
+        <source>That did not work</source>
+        <target>Das hat nicht geklappt</target>
       </trans-unit>
     </body>
   </file>

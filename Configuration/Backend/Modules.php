@@ -55,6 +55,7 @@ return [
         'controllerActions' => [
             MigrationCheckModuleController::class => [
                 'index',
+                'saveRun',
                 'deleteRun',
             ],
         ],
@@ -76,6 +77,9 @@ return [
             SitemapSnapshotModuleController::class => [
                 'index',
                 'delete',
+                'saveSnapshot',
+                'importArchive',
+                'deleteArchive',
             ],
         ],
     ],
