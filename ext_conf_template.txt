@@ -1,0 +1,2 @@
+# cat=Archive/files/a1; type=string; label=Archive directory:Where the backend modules save sitemap snapshots and migration check runs as files and read them back, relative to the project root. Keep it out of version control and out of the public directory. Empty disables saving in the modules; the CLI commands take their own path.
+archiveDirectory = data/websitecheck

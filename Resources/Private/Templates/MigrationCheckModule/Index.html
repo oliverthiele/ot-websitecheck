@@ -177,7 +177,15 @@
         <f:for each="{verdictCounts}" as="count" key="verdictName">
             <f:link.action action="index" arguments="{run: currentRun, verdict: verdictName}" class="badge badge-{f:if(condition: '{verdictName} == {currentVerdict}', then: 'primary', else: 'default')}" title="{f:translate(key: '{languageFile}summary.filterBy')}">{f:translate(key: '{languageFile}verdict.{verdictName}')}: {count}</f:link.action>
         </f:for>
-        <f:form action="deleteRun" method="post" class="ms-auto">
+        <f:if condition="{archiveEnabled}">
+            <f:form action="saveRun" method="post" class="ms-auto">
+                <f:form.hidden name="run" value="{currentRun}"/>
+                <button type="submit" class="btn btn-default btn-sm" title="{f:translate(key: '{languageFile}archive.saveRun.help')}">
+                    <core:icon identifier="actions-download" size="small"/> {f:translate(key: '{languageFile}archive.saveRun')}
+                </button>
+            </f:form>
+        </f:if>
+        <f:form action="deleteRun" method="post" class="{f:if(condition: archiveEnabled, else: 'ms-auto')}">
             <f:form.hidden name="run" value="{currentRun}"/>
             <button type="submit" class="btn btn-danger btn-sm">{f:translate(key: '{languageFile}button.deleteRun', arguments: {0: currentRun})}</button>
         </f:form>
