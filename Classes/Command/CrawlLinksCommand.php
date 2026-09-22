@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Command;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\PageLinkCollector;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
+use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,6 +50,7 @@ class CrawlLinksCommand extends Command
         private readonly CheckResultRepository $checkResultRepository,
         private readonly PageUidResolver $pageUidResolver,
         private readonly BasicAuthResolver $basicAuthResolver,
+        private readonly RetryRounds $retryRounds,
     ) {
         parent::__construct();
     }
@@ -59,6 +62,7 @@ class CrawlLinksCommand extends Command
         $this->addOption('group', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Only start from pages of these sitemap groups, e.g. "pages".');
         $this->addOption('environment', 'e', InputOption::VALUE_REQUIRED, 'Label for the checked environment, e.g. "ddev-links" or "staging-links". Defaults to the environment of the snapshot followed by "-links".');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '20');
+        $this->addOption('retries', null, InputOption::VALUE_REQUIRED, 'How often a page or link that timed out or got no connection is requested again. Retries run after all other ones.', '2');
         $this->addOption('pages-limit', null, InputOption::VALUE_REQUIRED, 'Only read links from the first N sitemap pages.');
         $this->addOption('samples-per-shape', null, InputOption::VALUE_REQUIRED, 'How many links per distinct link shape to check. A shape is the path plus the argument names, so hundreds of links differing only in a record uid collapse into one.', '2');
         $this->addOption('max-links', null, InputOption::VALUE_REQUIRED, 'Upper bound on the number of links checked, as a safety net on a large site.', '2000');
@@ -89,6 +93,7 @@ class CrawlLinksCommand extends Command
         }
 
         $timeout = max(1, $this->intValue($input->getOption('timeout'), 20));
+        $retries = max(0, $this->intValue($input->getOption('retries'), 2));
         $samplesPerShape = max(1, $this->intValue($input->getOption('samples-per-shape'), 2));
         $maxLinks = max(1, $this->intValue($input->getOption('max-links'), 2000));
         $pagesLimit = $this->intValue($input->getOption('pages-limit'), 0);
@@ -110,7 +115,6 @@ class CrawlLinksCommand extends Command
         }
 
         $io->section(sprintf('Reading links from %d pages', count($pages)));
-        $io->progressStart(count($pages));
 
         /** @var array<string, string> $linksToCheck link URL => page it was found on */
         $linksToCheck = [];
@@ -118,27 +122,37 @@ class CrawlLinksCommand extends Command
         $shapeCounts = [];
         $skippedByShape = 0;
 
-        foreach ($pages as $pageUrl) {
-            $page = $this->pageFetcher->fetch($pageUrl, $timeout, $requestOptions);
-            $io->progressAdvance();
-            if (!$page->isOk()) {
-                continue;
-            }
+        // A page that timed out would otherwise contribute no links at all.
+        $this->retryRounds->run(
+            $pages,
+            $retries,
+            function (string $pageUrl) use ($timeout, $requestOptions, $io): FetchedPage {
+                $page = $this->pageFetcher->fetch($pageUrl, $timeout, $requestOptions);
+                $io->progressAdvance();
+                return $page;
+            },
+            static fn(FetchedPage $page): bool => $page->isRetryable(),
+            function (string $pageUrl, FetchedPage $page) use ($onlyWithArguments, $maxLinks, $samplesPerShape, &$linksToCheck, &$shapeCounts, &$skippedByShape): void {
+                if (!$page->isOk()) {
+                    return;
+                }
 
-            foreach ($this->pageLinkCollector->collect($page->body, $pageUrl, $onlyWithArguments) as $link) {
-                if (isset($linksToCheck[$link]) || count($linksToCheck) >= $maxLinks) {
-                    continue;
+                foreach ($this->pageLinkCollector->collect($page->body, $pageUrl, $onlyWithArguments) as $link) {
+                    if (isset($linksToCheck[$link]) || count($linksToCheck) >= $maxLinks) {
+                        continue;
+                    }
+                    $shape = $this->pageLinkCollector->shapeOf($link);
+                    $seen = $shapeCounts[$shape] ?? 0;
+                    if ($seen >= $samplesPerShape) {
+                        $skippedByShape++;
+                        continue;
+                    }
+                    $shapeCounts[$shape] = $seen + 1;
+                    $linksToCheck[$link] = $pageUrl;
                 }
-                $shape = $this->pageLinkCollector->shapeOf($link);
-                $seen = $shapeCounts[$shape] ?? 0;
-                if ($seen >= $samplesPerShape) {
-                    $skippedByShape++;
-                    continue;
-                }
-                $shapeCounts[$shape] = $seen + 1;
-                $linksToCheck[$link] = $pageUrl;
-            }
-        }
+            },
+            $this->progressPerRound($io, 'pages'),
+        );
 
         $io->progressFinish();
 
@@ -155,62 +169,69 @@ class CrawlLinksCommand extends Command
         ));
 
         $io->section('Checking links');
-        $io->progressStart(count($linksToCheck));
 
         /** @var array<string, string|null> $baselineCache URL without arguments => normalised body */
         $baselineCache = [];
         $notOk = 0;
         $withMarker = 0;
+        $timedOut = 0;
         $ignoredArguments = 0;
         $findings = [];
 
+        /** @var list<array{link: string, foundOn: string}> $linkItems */
+        $linkItems = [];
         foreach ($linksToCheck as $link => $foundOn) {
-            $linkedPage = $this->pageFetcher->fetch($link, $timeout, $requestOptions);
-            $httpStatus = $linkedPage->httpStatus;
-            $errorMarker = $this->errorMarkerDetector->detectFor($linkedPage);
-
-            if (!$linkedPage->isOk()) {
-                $notOk++;
-            } elseif ($errorMarker === '') {
-                $baseUrl = $this->pageLinkCollector->withoutArguments($link);
-                if ($baseUrl !== $link) {
-                    if (!array_key_exists($baseUrl, $baselineCache)) {
-                        $baselinePage = $this->pageFetcher->fetch($baseUrl, $timeout, $requestOptions);
-                        $baselineCache[$baseUrl] = $baselinePage->isOk() ? $this->comparableBody($baselinePage->body) : null;
-                    }
-                    $baseline = $baselineCache[$baseUrl];
-                    if ($baseline !== null && $baseline === $this->comparableBody($linkedPage->body)) {
-                        $errorMarker = self::MARKER_ARGUMENTS_IGNORED;
-                        $ignoredArguments++;
-                    }
-                }
-            }
-
-            if ($errorMarker !== '' && $errorMarker !== self::MARKER_ARGUMENTS_IGNORED) {
-                $withMarker++;
-            }
-            if ($httpStatus !== 200 || $errorMarker !== '') {
-                $findings[] = sprintf('%s  %s  (on %s)', $httpStatus === 200 ? $errorMarker : (string)$httpStatus, $link, $foundOn);
-            }
-
-            $this->checkResultRepository->storeResult(
-                $link,
-                $environment,
-                $foundOn,
-                $this->pageUidResolver->resolve($link),
-                $httpStatus,
-                $errorMarker,
-                time(),
-            );
-            $io->progressAdvance();
+            $linkItems[] = ['link' => $link, 'foundOn' => $foundOn];
         }
+
+        $this->retryRounds->run(
+            $linkItems,
+            $retries,
+            function (array $linkItem) use ($timeout, $requestOptions, $io, &$baselineCache): array {
+                $result = $this->checkLink($linkItem['link'], $timeout, $requestOptions, $baselineCache);
+                $io->progressAdvance();
+                return $result;
+            },
+            static fn(array $result): bool => $result['retryable'],
+            function (array $linkItem, array $result) use ($environment, &$notOk, &$withMarker, &$timedOut, &$ignoredArguments, &$findings): void {
+                ['link' => $link, 'foundOn' => $foundOn] = $linkItem;
+                $httpStatus = $result['page']->httpStatus;
+                $errorMarker = $result['errorMarker'];
+
+                if (!$result['page']->isOk()) {
+                    $notOk++;
+                }
+                if ($errorMarker === self::MARKER_ARGUMENTS_IGNORED) {
+                    $ignoredArguments++;
+                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_TIMEOUT) {
+                    $timedOut++;
+                } elseif ($errorMarker !== '') {
+                    $withMarker++;
+                }
+                if ($httpStatus !== 200 || $errorMarker !== '') {
+                    $findings[] = sprintf('%s  %s  (on %s)', $httpStatus === 200 || $errorMarker === ErrorMarkerDetector::MARKER_TIMEOUT ? $errorMarker : (string)$httpStatus, $link, $foundOn);
+                }
+
+                $this->checkResultRepository->storeResult(
+                    $link,
+                    $environment,
+                    $foundOn,
+                    $this->pageUidResolver->resolve($link),
+                    $httpStatus,
+                    $errorMarker,
+                    time(),
+                );
+            },
+            $this->progressPerRound($io, 'links'),
+        );
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d links checked, %d without HTTP 200, %d with an error marker, %d whose arguments had no effect.',
+            '%d links checked, %d without HTTP 200, %d with an error marker, %d timed out, %d whose arguments had no effect.',
             count($linksToCheck),
             $notOk,
             $withMarker,
+            $timedOut,
             $ignoredArguments,
         ));
 
@@ -223,6 +244,56 @@ class CrawlLinksCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Requests a link and, when it works, the same URL without its arguments, to
+     * see whether the arguments changed anything. The argument-less answer is
+     * cached; a failed transfer is not, so a later round requests it again.
+     *
+     * @param array<string, mixed> $requestOptions
+     * @param array<string, string|null> $baselineCache URL without arguments => normalised body
+     * @return array{page: FetchedPage, errorMarker: string, retryable: bool}
+     */
+    private function checkLink(string $link, int $timeout, array $requestOptions, array &$baselineCache): array
+    {
+        $linkedPage = $this->pageFetcher->fetch($link, $timeout, $requestOptions);
+        $errorMarker = $this->errorMarkerDetector->detectFor($linkedPage);
+        $retryable = $linkedPage->isRetryable();
+
+        if ($linkedPage->isOk() && $errorMarker === '') {
+            $baseUrl = $this->pageLinkCollector->withoutArguments($link);
+            if ($baseUrl !== $link) {
+                if (!array_key_exists($baseUrl, $baselineCache)) {
+                    $baselinePage = $this->pageFetcher->fetch($baseUrl, $timeout, $requestOptions);
+                    if ($baselinePage->isRetryable()) {
+                        $retryable = true;
+                    } else {
+                        $baselineCache[$baseUrl] = $baselinePage->isOk() ? $this->comparableBody($baselinePage->body) : null;
+                    }
+                }
+                $baseline = $baselineCache[$baseUrl] ?? null;
+                if ($baseline !== null && $baseline === $this->comparableBody($linkedPage->body)) {
+                    $errorMarker = self::MARKER_ARGUMENTS_IGNORED;
+                }
+            }
+        }
+
+        return ['page' => $linkedPage, 'errorMarker' => $errorMarker, 'retryable' => $retryable];
+    }
+
+    /**
+     * @return \Closure(int, int): void
+     */
+    private function progressPerRound(SymfonyStyle $io, string $noun): \Closure
+    {
+        return static function (int $round, int $count) use ($io, $noun): void {
+            if ($round > 1) {
+                $io->progressFinish();
+                $io->writeln(sprintf('Retrying %d %s that timed out or got no connection (round %d)...', $count, $noun, $round));
+            }
+            $io->progressStart($count);
+        };
     }
 
     /**

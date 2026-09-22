@@ -248,6 +248,9 @@
       <trans-unit id="errorMarker.connectionError" resname="errorMarker.connectionError">
         <source>No connection</source>
       </trans-unit>
+      <trans-unit id="errorMarker.timeout" resname="errorMarker.timeout">
+        <source>Timeout</source>
+      </trans-unit>
       <trans-unit id="errorMarker.argumentsIgnored" resname="errorMarker.argumentsIgnored">
         <source>Link arguments have no effect</source>
       </trans-unit>
@@ -329,6 +332,9 @@
       <trans-unit id="verdict.listed" resname="verdict.listed">
         <source>Listed in target sitemap</source>
       </trans-unit>
+      <trans-unit id="verdict.timeout" resname="verdict.timeout">
+        <source>Timeout</source>
+      </trans-unit>
       <trans-unit id="summary.filterBy" resname="summary.filterBy">
         <source>Show only these rows</source>
       </trans-unit>
@@ -361,6 +367,9 @@
       </trans-unit>
       <trans-unit id="verdict.listed.help" resname="verdict.listed.help">
         <source>A page from the target sitemap, requested to suggest redirect targets.</source>
+      </trans-unit>
+      <trans-unit id="verdict.timeout.help" resname="verdict.timeout.help">
+        <source>No complete answer within the timeout, also after the retries. The page may exist and only render slowly, e.g. right after a cache flush. Run the check again before treating it as missing.</source>
       </trans-unit>
       <trans-unit id="status.serverError" resname="status.serverError">
         <source>HTTP %1$s: server error</source>
@@ -445,6 +454,9 @@
       </trans-unit>
       <trans-unit id="abortReason.connectionError" resname="abortReason.connectionError">
         <source>connection error</source>
+      </trans-unit>
+      <trans-unit id="abortReason.timeout" resname="abortReason.timeout">
+        <source>timeout</source>
       </trans-unit>
       <trans-unit id="snapshot.noLanguage" resname="snapshot.noLanguage">
         <source>(no language)</source>

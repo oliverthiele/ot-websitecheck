@@ -54,6 +54,10 @@ URL of the live site still leads to the same page or record on the new one.
   or snapshots used by a run
 - **HTTP Basic Auth** — for environments protected at the webserver level,
   separately for reference and target
+- **Retries for slow pages** — a URL that timed out or got no connection is
+  requested again after all other URLs, so a page that renders slowly for the
+  first time after a cache flush is not reported as broken; a timeout is stored
+  apart from a missing connection, and an HTTP error answer is never repeated
 
 ---
 
@@ -63,6 +67,7 @@ URL of the live site still leads to the same page or record on the new one.
 |-------------|---------|
 | TYPO3       | ^14.3   |
 | PHP         | ^8.4    |
+| Guzzle      | ^8.0    |
 
 ---
 
@@ -409,6 +414,7 @@ problems and warnings" is set.
 | `movedWithRedirect` | Redirects to the same page or record |
 | `missing` | 4xx, 5xx or no connection — the finding this tool exists for |
 | `redirectBroken` | Redirects, but ends in an error, a loop or too many hops |
+| `timeout` | No complete answer within `--timeout`, also after the retries — slow, not necessarily missing; check again |
 | `otherContent` | Answers 200 with a different page, record or language |
 | `identityUnknown` | Answers 200, but the markers needed for a comparison are missing |
 | `referenceNotOk` | Already not working on the reference — not compared, but listed with the problems: the sitemap lists a broken URL |
@@ -503,6 +509,7 @@ detail pages get no suggestion rather than a wrong one.
 | `--group` | Only URLs from these sitemap groups, e.g. `pages`, see [Requirements for sitemap snapshots](#requirements-for-sitemap-snapshots). Repeatable. |
 | `--limit` | Only the first N reference URLs. The pages of the target snapshot are still all requested. |
 | `--timeout` | HTTP timeout per request in seconds (default: `10`). |
+| `--retries` | How often a URL that timed out or got no connection is followed again (default: `2`), see [Retries](#retries). |
 | `--max-hops` | Redirects followed per URL (default: `10`). |
 | `--page-uid-pattern`, `--language-pattern`, `--record-pattern` | Replace the marker patterns, see [Requirements on the checked site](#requirements-on-the-checked-site). |
 | `--reference-basic-auth`, `--target-basic-auth` | `user:password`, see [Environment variables](#environment-variables). |
@@ -532,6 +539,7 @@ typo3 websitecheck:checksitemap --snapshot=dev-current --environment=live-paths 
 | `--host` | Request the paths of the snapshot on this host — e.g. when a sitemap provider only exists on the source environment while the pages already exist on the target. |
 | `--group` | Only URLs from these sitemap groups, e.g. `pages`. Repeatable. |
 | `--timeout` | HTTP timeout per request in seconds (default: `10`). |
+| `--retries` | How often a URL that timed out or got no connection is requested again (default: `2`), see [Retries](#retries). |
 | `--limit` | Only check the first N URLs. |
 | `--basic-auth`, `--basic-auth-env` | `user:password`, or the prefix of the environment variables, see [Environment variables](#environment-variables). |
 
@@ -567,10 +575,31 @@ plugin on the same page, so only a couple of samples per shape are checked.
 | `--max-links` | Upper bound on links checked (default: `2000`). |
 | `--pages-limit` | Only read links from the first N pages of the snapshot. |
 | `--all-links` | Also follow links without Extbase arguments. |
-| `--timeout`, `--basic-auth`, `--basic-auth-env` | As for `checksitemap`. |
+| `--timeout`, `--retries`, `--basic-auth`, `--basic-auth-env` | As for `checksitemap`. Retries apply to the pages links are read from as well. |
 
 The `source` column holds the page a link was found on, which names the
 template that produced the link.
+
+### Retries
+
+`checksitemap`, `crawllinks` and `migrationcheck` request every URL once
+first. A URL whose request timed out or got no connection at all is requested
+again once all other URLs are done — up to `--retries` more rounds. Working
+through the other URLs is the pause: a page that took longer than `--timeout`
+to render for the first time, e.g. right after a cache flush, has usually
+finished by then. When a round is short, the command waits until five seconds
+have passed since the last attempt on that URL.
+
+Only the last outcome of a URL is stored, so a timeout on the way to a success
+does not reset the review state of a result.
+
+An HTTP answer is never repeated, a 500 included. It is a result, and
+repeating it would hide an error that only occurs now and then.
+
+What is left after the last round is stored apart from a missing connection:
+the marker `timeout` in the status check, the abort reason and verdict
+`timeout` in the migration check. A connect timeout — the server did not even
+accept the connection — counts as no connection.
 
 ### `websitecheck:exportsnapshots`
 

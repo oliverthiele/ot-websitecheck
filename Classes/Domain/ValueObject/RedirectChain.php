@@ -18,15 +18,36 @@ final readonly class RedirectChain
     public const string ABORT_HOP_LIMIT = 'hopLimit';
     public const string ABORT_MISSING_LOCATION = 'missingLocation';
     public const string ABORT_CONNECTION_ERROR = 'connectionError';
+    public const string ABORT_TIMEOUT = 'timeout';
 
     /**
      * @param list<array{url: string, status: int}> $steps
+     * @param TransferFailure|null $transferFailure set when a request of the chain got no response.
      */
     public function __construct(
         public array $steps,
         public string $finalBody,
         public string $abortReason = self::ABORT_NONE,
+        public ?TransferFailure $transferFailure = null,
     ) {
+    }
+
+    /**
+     * @param list<array{url: string, status: int}> $steps
+     */
+    public static function abortedByTransferFailure(array $steps, TransferFailure $transferFailure): self
+    {
+        return new self(
+            $steps,
+            '',
+            $transferFailure === TransferFailure::Timeout ? self::ABORT_TIMEOUT : self::ABORT_CONNECTION_ERROR,
+            $transferFailure,
+        );
+    }
+
+    public function isRetryable(): bool
+    {
+        return $this->transferFailure?->isRetryable() ?? false;
     }
 
     public function getRequestedUrl(): string

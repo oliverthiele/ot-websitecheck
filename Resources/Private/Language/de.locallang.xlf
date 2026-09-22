@@ -329,6 +329,10 @@
         <source>No connection</source>
         <target>Keine Verbindung</target>
       </trans-unit>
+      <trans-unit id="errorMarker.timeout" resname="errorMarker.timeout" approved="yes">
+        <source>Timeout</source>
+        <target>Zeitüberschreitung</target>
+      </trans-unit>
       <trans-unit id="errorMarker.argumentsIgnored" resname="errorMarker.argumentsIgnored" approved="yes">
         <source>Link arguments have no effect</source>
         <target>Link-Argumente ohne Wirkung</target>
@@ -437,6 +441,10 @@
         <source>Listed in target sitemap</source>
         <target>In Ziel-Sitemap gelistet</target>
       </trans-unit>
+      <trans-unit id="verdict.timeout" resname="verdict.timeout" approved="yes">
+        <source>Timeout</source>
+        <target>Zeitüberschreitung</target>
+      </trans-unit>
       <trans-unit id="summary.filterBy" resname="summary.filterBy" approved="yes">
         <source>Show only these rows</source>
         <target>Nur diese Zeilen anzeigen</target>
@@ -480,6 +488,10 @@
       <trans-unit id="verdict.listed.help" resname="verdict.listed.help" approved="yes">
         <source>A page from the target sitemap, requested to suggest redirect targets.</source>
         <target>Eine Seite aus der Ziel-Sitemap, abgefragt, um Weiterleitungsziele vorzuschlagen.</target>
+      </trans-unit>
+      <trans-unit id="verdict.timeout.help" resname="verdict.timeout.help" approved="yes">
+        <source>No complete answer within the timeout, also after the retries. The page may exist and only render slowly, e.g. right after a cache flush. Run the check again before treating it as missing.</source>
+        <target>Keine vollständige Antwort innerhalb des Timeouts, auch nach den Wiederholungen. Die Seite kann vorhanden sein und nur langsam rendern, etwa direkt nach einem Cache-Flush. Die Prüfung erneut ausführen, bevor die Seite als fehlend gilt.</target>
       </trans-unit>
       <trans-unit id="status.serverError" resname="status.serverError" approved="yes">
         <source>HTTP %1$s: server error</source>
@@ -592,6 +604,10 @@
       <trans-unit id="abortReason.connectionError" resname="abortReason.connectionError" approved="yes">
         <source>connection error</source>
         <target>Verbindungsfehler</target>
+      </trans-unit>
+      <trans-unit id="abortReason.timeout" resname="abortReason.timeout" approved="yes">
+        <source>timeout</source>
+        <target>Zeitüberschreitung</target>
       </trans-unit>
       <trans-unit id="snapshot.noLanguage" resname="snapshot.noLanguage" approved="yes">
         <source>(no language)</source>

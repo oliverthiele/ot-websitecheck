@@ -9,10 +9,12 @@ use OliverThiele\OtWebsitecheck\Domain\Repository\MigrationRunRepository;
 use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\IdentityPatterns;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\IdentityExtractor;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
+use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
 use Symfony\Component\Console\Command\Command;
@@ -46,6 +48,7 @@ class MigrationCheckCommand extends Command
         private readonly MigrationAnalyzer $migrationAnalyzer,
         private readonly BasicAuthResolver $basicAuthResolver,
         private readonly UrlHostRewriter $urlHostRewriter,
+        private readonly RetryRounds $retryRounds,
     ) {
         parent::__construct();
     }
@@ -61,6 +64,7 @@ class MigrationCheckCommand extends Command
         $this->addOption('group', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Only check URLs from these sitemap groups, e.g. "pages".');
         $this->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Only check the first N reference URLs (for a quick test run).');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '10');
+        $this->addOption('retries', null, InputOption::VALUE_REQUIRED, 'How often a URL that timed out or got no connection is requested again. Retries run after all other URLs.', '2');
         $this->addOption('max-hops', null, InputOption::VALUE_REQUIRED, 'Maximum number of redirects followed per URL.', '10');
         $this->addOption('page-uid-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the page uid (capture group 1) from the HTML.', IdentityPatterns::DEFAULT_PAGE_UID);
         $this->addOption('language-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the language (capture group 1) from the HTML.', IdentityPatterns::DEFAULT_LANGUAGE);
@@ -124,6 +128,7 @@ class MigrationCheckCommand extends Command
 
         $timeout = max(1, $this->intValue($input->getOption('timeout'), 10));
         $maximumHops = max(1, $this->intValue($input->getOption('max-hops'), 10));
+        $retries = max(0, $this->intValue($input->getOption('retries'), 2));
         $limit = $this->intValue($input->getOption('limit'), 0);
         $groups = $this->stringList($input->getOption('group'));
 
@@ -189,33 +194,30 @@ class MigrationCheckCommand extends Command
             count($referenceUrls),
             $referenceRunLabel,
         ));
-        $io->progressStart(count($referenceUrls));
+        $observations = [];
         /** @var array<string, bool> $checkedTargetUrls */
         $checkedTargetUrls = [];
         foreach ($referenceUrls as $referenceUrl => $group) {
             if ($referenceRunLabel === '') {
-                $this->observe($runLabel, $referenceLabel, Observation::ROLE_REFERENCE, $group, $referenceUrl, $timeout, $maximumHops, $referenceRequestOptions, $patterns);
+                $observations[] = ['environment' => $referenceLabel, 'role' => Observation::ROLE_REFERENCE, 'group' => $group, 'url' => $referenceUrl, 'requestOptions' => $referenceRequestOptions];
             }
 
             $targetUrl = $this->urlHostRewriter->replace($referenceUrl, $targetHost);
-            $this->observe($runLabel, $targetLabel, Observation::ROLE_TARGET, $group, $targetUrl, $timeout, $maximumHops, $targetRequestOptions, $patterns);
+            $observations[] = ['environment' => $targetLabel, 'role' => Observation::ROLE_TARGET, 'group' => $group, 'url' => $targetUrl, 'requestOptions' => $targetRequestOptions];
             $checkedTargetUrls[$targetUrl] = true;
-
-            $io->progressAdvance();
         }
-        $io->progressFinish();
+        $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
         $targetUrls = array_diff_key(
             $this->sitemapSnapshotLocator->findUrls($targetSnapshot, $groups),
             $checkedTargetUrls,
         );
         $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
-        $io->progressStart(count($targetUrls));
+        $observations = [];
         foreach ($targetUrls as $targetUrl => $group) {
-            $this->observe($runLabel, $targetSitemapLabel, Observation::ROLE_TARGET_SITEMAP, $group, $targetUrl, $timeout, $maximumHops, $targetRequestOptions, $patterns);
-            $io->progressAdvance();
+            $observations[] = ['environment' => $targetSitemapLabel, 'role' => Observation::ROLE_TARGET_SITEMAP, 'group' => $group, 'url' => $targetUrl, 'requestOptions' => $targetRequestOptions];
         }
-        $io->progressFinish();
+        $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
         $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
 
@@ -274,26 +276,47 @@ class MigrationCheckCommand extends Command
     }
 
     /**
-     * @param array<string, mixed> $requestOptions
+     * Follows every URL and stores what it leads to. A chain that ended in a
+     * timeout or without a connection is followed again after all others, and
+     * only its last outcome is stored.
+     *
+     * @param list<array{environment: string, role: string, group: string, url: string, requestOptions: array<string, mixed>}> $observations
      */
-    private function observe(
+    private function observeAll(
+        SymfonyStyle $io,
         string $runLabel,
-        string $environment,
-        string $role,
-        string $group,
-        string $url,
+        array $observations,
         int $timeout,
         int $maximumHops,
-        array $requestOptions,
+        int $retries,
         IdentityPatterns $patterns,
     ): void {
-        $redirectChain = $this->redirectChainFollower->follow($url, $timeout, $maximumHops, $requestOptions);
-        // An error page renders its own page uid — only a working page has an identity worth comparing.
-        $identity = $redirectChain->getFinalStatus() === 200
-            ? $this->identityExtractor->extract($redirectChain->finalBody, $patterns)
-            : new PageIdentity();
+        $this->retryRounds->run(
+            $observations,
+            $retries,
+            function (array $observation) use ($timeout, $maximumHops, $io): RedirectChain {
+                $redirectChain = $this->redirectChainFollower->follow($observation['url'], $timeout, $maximumHops, $observation['requestOptions']);
+                $io->progressAdvance();
+                return $redirectChain;
+            },
+            static fn(RedirectChain $redirectChain): bool => $redirectChain->isRetryable(),
+            function (array $observation, RedirectChain $redirectChain) use ($runLabel, $patterns): void {
+                // An error page renders its own page uid — only a working page has an identity worth comparing.
+                $identity = $redirectChain->getFinalStatus() === 200
+                    ? $this->identityExtractor->extract($redirectChain->finalBody, $patterns)
+                    : new PageIdentity();
 
-        $this->observationRepository->storeObservation($runLabel, $environment, $role, $group, $redirectChain, $identity, time());
+                $this->observationRepository->storeObservation($runLabel, $observation['environment'], $observation['role'], $observation['group'], $redirectChain, $identity, time());
+            },
+            static function (int $round, int $count) use ($io): void {
+                if ($round > 1) {
+                    $io->progressFinish();
+                    $io->writeln(sprintf('Retrying %d URLs that timed out or got no connection (round %d)...', $count, $round));
+                }
+                $io->progressStart($count);
+            },
+        );
+        $io->progressFinish();
     }
 
     /**

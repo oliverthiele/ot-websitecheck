@@ -420,7 +420,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         return match ($verdict) {
             MigrationAnalyzer::VERDICT_OK, MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT => 'success',
             MigrationAnalyzer::VERDICT_MISSING, MigrationAnalyzer::VERDICT_REDIRECT_BROKEN, MigrationAnalyzer::VERDICT_OTHER_CONTENT => 'danger',
-            MigrationAnalyzer::VERDICT_IDENTITY_UNKNOWN, MigrationAnalyzer::VERDICT_REFERENCE_NOT_OK => 'warning',
+            MigrationAnalyzer::VERDICT_IDENTITY_UNKNOWN, MigrationAnalyzer::VERDICT_REFERENCE_NOT_OK, MigrationAnalyzer::VERDICT_TIMEOUT => 'warning',
             default => 'default',
         };
     }

@@ -130,6 +130,15 @@ final class MigrationAnalyzerTest extends UnitTestCase
     }
 
     #[Test]
+    public function timedOutTargetIsNotReportedAsMissing(): void
+    {
+        $reference = $this->reference('/slow/', new PageIdentity(10, 'en'));
+        $target = $this->target('/slow/', [['url' => 'https://target.example.com/slow/', 'status' => 0]], new PageIdentity(), RedirectChain::ABORT_TIMEOUT);
+
+        self::assertSame(MigrationAnalyzer::VERDICT_TIMEOUT, $this->verdictOf($target, [$reference, $target]));
+    }
+
+    #[Test]
     public function deepUrlRedirectingToStartPageIsWarned(): void
     {
         $reference = $this->reference('/products/', new PageIdentity(10, 'en'));

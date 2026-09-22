@@ -7,12 +7,16 @@ namespace OliverThiele\OtWebsitecheck\Service;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\UriResolver;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\TransferFailure;
 use TYPO3\CMS\Core\Http\RequestFactory;
 
 /**
  * Follows redirects one request at a time instead of letting Guzzle do it, so
  * every hop is recorded with its status code. Whether a redirect comes from the
  * webserver or from TYPO3 makes no difference here — only the HTTP answers count.
+ *
+ * One attempt per hop. A chain that ends in a failed transfer is retried as a
+ * whole by the caller, see RetryRounds.
  */
 class RedirectChainFollower
 {
@@ -51,9 +55,9 @@ class RedirectChainFollower
                     'allow_redirects' => false,
                     'http_errors' => false,
                 ] + $options);
-            } catch (\Throwable) {
+            } catch (\Throwable $throwable) {
                 $steps[] = ['url' => $currentUrl, 'status' => 0];
-                return new RedirectChain($steps, '', RedirectChain::ABORT_CONNECTION_ERROR);
+                return RedirectChain::abortedByTransferFailure($steps, TransferFailure::fromThrowable($throwable));
             }
 
             $status = $response->getStatusCode();

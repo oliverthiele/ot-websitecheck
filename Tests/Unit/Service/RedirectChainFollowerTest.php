@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Tests\Unit\Service;
 
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\NetworkTimeoutException;
+use GuzzleHttp\Psr7\Request;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
 use PHPUnit\Framework\Attributes\Test;
@@ -54,6 +57,46 @@ final class RedirectChainFollowerTest extends UnitTestCase
         $chain = $subject->follow('https://www.example.com/0', 5, 2);
 
         self::assertSame(RedirectChain::ABORT_HOP_LIMIT, $chain->abortReason);
+    }
+
+    #[Test]
+    public function timeoutOnAHopAbortsAsRetryableTimeout(): void
+    {
+        $requestFactory = self::createStub(RequestFactory::class);
+        $requestFactory->method('request')->willReturnCallback(
+            static fn(string $url): Response => $url === 'https://www.example.com/old/'
+                ? new Response('php://temp', 301, ['Location' => '/slow/'])
+                : throw new NetworkTimeoutException('cURL error 28', new Request('GET', $url)),
+        );
+
+        $chain = (new RedirectChainFollower($requestFactory))->follow('https://www.example.com/old/', 5, 10);
+
+        self::assertSame(RedirectChain::ABORT_TIMEOUT, $chain->abortReason);
+        self::assertTrue($chain->isRetryable());
+        self::assertSame(0, $chain->getFinalStatus());
+        self::assertSame(1, $chain->getHopCount());
+    }
+
+    #[Test]
+    public function refusedConnectionAbortsAsRetryableConnectionError(): void
+    {
+        $requestFactory = self::createStub(RequestFactory::class);
+        $requestFactory->method('request')->willThrowException(new ConnectException('cURL error 7', new Request('GET', 'https://www.example.com/')));
+
+        $chain = (new RedirectChainFollower($requestFactory))->follow('https://www.example.com/', 5, 10);
+
+        self::assertSame(RedirectChain::ABORT_CONNECTION_ERROR, $chain->abortReason);
+        self::assertTrue($chain->isRetryable());
+    }
+
+    #[Test]
+    public function serverErrorEndsTheChainAndIsNotRetryable(): void
+    {
+        $chain = $this->followerAnswering(['https://www.example.com/' => [500, '']])->follow('https://www.example.com/', 5, 10);
+
+        self::assertSame(RedirectChain::ABORT_NONE, $chain->abortReason);
+        self::assertSame(500, $chain->getFinalStatus());
+        self::assertFalse($chain->isRetryable());
     }
 
     #[Test]

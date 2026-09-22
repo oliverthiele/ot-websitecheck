@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\TransferFailure;
 use TYPO3\CMS\Core\Http\RequestFactory;
 
 /**
  * Requests one URL and keeps status and body, whatever the status is — an
  * error page is a result here, not an exception.
+ *
+ * One attempt per call. Whether a failed transfer is worth another one is up
+ * to the caller, see RetryRounds.
  */
 class PageFetcher
 {
@@ -28,8 +32,8 @@ class PageFetcher
                 'timeout' => $timeout,
                 'http_errors' => false,
             ]);
-        } catch (\Throwable) {
-            return new FetchedPage(0, '');
+        } catch (\Throwable $throwable) {
+            return new FetchedPage(0, '', TransferFailure::fromThrowable($throwable));
         }
 
         return new FetchedPage($response->getStatusCode(), (string)$response->getBody());
