@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] — 2026-09-22
+
+### Added
+
+- Add `--resume` to `websitecheck:checksitemap`: continue the latest run of a
+  snapshot on an environment and skip the URLs it already stored. Every result
+  now stores the start of its run in the new column `run_started_at`, which a
+  resumed run keeps. Requires a database schema update
+
 ## [0.7.0] — 2026-09-22
 
 ### Added

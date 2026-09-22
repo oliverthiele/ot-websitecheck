@@ -23,6 +23,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Requests every URL of a sitemap snapshot and records the HTTP status and any
  * TYPO3 error marker found in the response body, so results from different
  * environments and runs can be compared and reviewed in the backend module.
+ *
+ * Every result carries the start of the run that stored it, so an aborted run
+ * can be resumed without requesting its URLs again.
  */
 class CheckSitemapCommand extends Command
 {
@@ -51,6 +54,7 @@ class CheckSitemapCommand extends Command
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '10');
         $this->addOption('retries', null, InputOption::VALUE_REQUIRED, 'How often a URL that timed out or got no connection is requested again. Retries run after all other URLs.', '2');
         $this->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Only check the first N URLs (for a quick test run).');
+        $this->addOption('resume', null, InputOption::VALUE_NONE, 'Continue the latest run of this snapshot on this environment and skip the URLs it already checked. Expects the same options as that run.');
         $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
@@ -102,6 +106,28 @@ class CheckSitemapCommand extends Command
             return self::FAILURE;
         }
 
+        $runStartedAt = time();
+        if ($input->getOption('resume') === true) {
+            $runStartedAt = $this->checkResultRepository->findLatestRunStart($environment, $snapshot->label);
+            if ($runStartedAt === 0) {
+                $io->error(sprintf('There is no earlier run of snapshot "%s" on "%s" to resume.', $snapshot->label, $environment));
+                return self::FAILURE;
+            }
+            $checkedUrls = $this->checkResultRepository->findUrlsOfRun($environment, $snapshot->label, $runStartedAt);
+            $remainingUrls = array_values(array_filter($urls, static fn(string $url): bool => !isset($checkedUrls[$url])));
+            $io->writeln(sprintf(
+                'Resuming the run started at %s: %d of %d URLs already checked.',
+                date('Y-m-d H:i:s', $runStartedAt),
+                count($urls) - count($remainingUrls),
+                count($urls),
+            ));
+            if ($remainingUrls === []) {
+                $io->success('That run is complete, nothing left to check.');
+                return self::SUCCESS;
+            }
+            $urls = $remainingUrls;
+        }
+
         $io->writeln(sprintf('Checking %d URLs against "%s"...', count($urls), $environment));
 
         $notOkCount = 0;
@@ -116,7 +142,7 @@ class CheckSitemapCommand extends Command
                 return $page;
             },
             static fn(FetchedPage $page): bool => $page->isRetryable(),
-            function (string $url, FetchedPage $page) use ($environment, $snapshot, &$notOkCount, &$errorMarkerCount, &$timeoutCount): void {
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount): void {
                 $errorMarker = $this->errorMarkerDetector->detectFor($page);
                 if (!$page->isOk()) {
                     $notOkCount++;
@@ -127,7 +153,7 @@ class CheckSitemapCommand extends Command
                     $errorMarkerCount++;
                 }
 
-                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time());
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time(), $runStartedAt);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {

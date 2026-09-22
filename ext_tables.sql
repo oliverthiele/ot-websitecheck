@@ -12,10 +12,12 @@ CREATE TABLE tx_otwebsitecheck_domain_model_check
 	http_status     int(11)             DEFAULT '0' NOT NULL,
 	error_marker    varchar(255)        DEFAULT ''  NOT NULL,
 	checked_at      int(11)  unsigned   DEFAULT '0' NOT NULL,
+	run_started_at  int(11)  unsigned   DEFAULT '0' NOT NULL,
 	reviewed        tinyint(4) unsigned DEFAULT '0' NOT NULL,
 	note            text                            NOT NULL,
 
 	KEY url_environment (url(255), environment),
+	KEY environment_run (environment, run_started_at),
 	KEY page_uid (page_uid),
 	KEY path (path(255))
 );

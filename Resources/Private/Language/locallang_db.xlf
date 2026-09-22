@@ -32,6 +32,12 @@
       <trans-unit id="tx_otwebsitecheck_domain_model_check.checked_at" resname="tx_otwebsitecheck_domain_model_check.checked_at">
         <source>Checked at</source>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.run_started_at" resname="tx_otwebsitecheck_domain_model_check.run_started_at">
+        <source>Run started at</source>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.run_started_at.description" resname="tx_otwebsitecheck_domain_model_check.run_started_at.description">
+        <source>When the checksitemap run that stored this result started. A resumed run keeps the start of the run it continues.</source>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_check.reviewed" resname="tx_otwebsitecheck_domain_model_check.reviewed">
         <source>Reviewed</source>
       </trans-unit>
