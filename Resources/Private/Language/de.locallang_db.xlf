@@ -41,6 +41,14 @@
         <source>Checked at</source>
         <target>Geprüft am</target>
       </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.run_started_at" resname="tx_otwebsitecheck_domain_model_check.run_started_at" approved="yes">
+        <source>Run started at</source>
+        <target>Lauf gestartet am</target>
+      </trans-unit>
+      <trans-unit id="tx_otwebsitecheck_domain_model_check.run_started_at.description" resname="tx_otwebsitecheck_domain_model_check.run_started_at.description" approved="yes">
+        <source>When the checksitemap run that stored this result started. A resumed run keeps the start of the run it continues.</source>
+        <target>Wann der checksitemap-Lauf begann, der dieses Ergebnis gespeichert hat. Ein fortgesetzter Lauf behält den Start des Laufs, den er fortsetzt.</target>
+      </trans-unit>
       <trans-unit id="tx_otwebsitecheck_domain_model_check.reviewed" resname="tx_otwebsitecheck_domain_model_check.reviewed" approved="yes">
         <source>Reviewed</source>
         <target>Geprüft/Bearbeitet</target>

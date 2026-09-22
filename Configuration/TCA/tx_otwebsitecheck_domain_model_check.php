@@ -15,7 +15,7 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'page_uid, url, path, environment, source, http_status, error_marker, checked_at, reviewed, note'],
+        '1' => ['showitem' => 'page_uid, url, path, environment, source, http_status, error_marker, checked_at, run_started_at, reviewed, note'],
     ],
     'columns' => [
         'page_uid' => [
@@ -77,6 +77,15 @@ return [
         ],
         'checked_at' => [
             'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.checked_at',
+            'config' => [
+                'type' => 'datetime',
+                'readOnly' => true,
+                'searchable' => false,
+            ],
+        ],
+        'run_started_at' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.run_started_at',
+            'description' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.run_started_at.description',
             'config' => [
                 'type' => 'datetime',
                 'readOnly' => true,

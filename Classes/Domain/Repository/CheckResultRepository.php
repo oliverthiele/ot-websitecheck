@@ -17,8 +17,10 @@ class CheckResultRepository extends AbstractRepository
      * Upserts one result per (url, environment). The "reviewed" flag and note
      * survive across runs as long as the HTTP status stays the same — a changed
      * status is a new finding and needs review again.
+     *
+     * @param int $runStartedAt start of the checksitemap run storing the result, 0 for other commands
      */
-    public function storeResult(string $url, string $environment, string $source, ?int $pageUid, int $httpStatus, string $errorMarker, int $checkedAt): void
+    public function storeResult(string $url, string $environment, string $source, ?int $pageUid, int $httpStatus, string $errorMarker, int $checkedAt, int $runStartedAt = 0): void
     {
         $values = [
             'path' => UrlUtility::pathWithQuery($url),
@@ -27,6 +29,7 @@ class CheckResultRepository extends AbstractRepository
             'http_status' => $httpStatus,
             'error_marker' => $errorMarker,
             'checked_at' => $checkedAt,
+            'run_started_at' => $runStartedAt,
         ];
 
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
@@ -81,6 +84,53 @@ class CheckResultRepository extends AbstractRepository
         $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
 
         return $queryBuilder->executeQuery()->fetchAllAssociative();
+    }
+
+    /**
+     * The start of the latest run that stored results for this environment and
+     * source, 0 when there is none.
+     */
+    public function findLatestRunStart(string $environment, string $source): int
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $latest = $queryBuilder
+            ->selectLiteral($queryBuilder->expr()->max('run_started_at'))
+            ->from(self::TABLE)
+            ->where(
+                $queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)),
+                $queryBuilder->expr()->eq('source', $queryBuilder->createNamedParameter($source)),
+            )
+            ->executeQuery()
+            ->fetchOne();
+
+        return is_numeric($latest) ? (int)$latest : 0;
+    }
+
+    /**
+     * @return array<string, true> URLs whose result was stored by the run that started at $runStartedAt
+     */
+    public function findUrlsOfRun(string $environment, string $source, int $runStartedAt): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $urls = $queryBuilder
+            ->select('url')
+            ->from(self::TABLE)
+            ->where(
+                $queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)),
+                $queryBuilder->expr()->eq('source', $queryBuilder->createNamedParameter($source)),
+                $queryBuilder->expr()->eq('run_started_at', $queryBuilder->createNamedParameter($runStartedAt, ParameterType::INTEGER)),
+            )
+            ->executeQuery()
+            ->fetchFirstColumn();
+
+        $result = [];
+        foreach ($urls as $url) {
+            if (is_string($url)) {
+                $result[$url] = true;
+            }
+        }
+
+        return $result;
     }
 
     /**

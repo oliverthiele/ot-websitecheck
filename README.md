@@ -541,9 +541,24 @@ typo3 websitecheck:checksitemap --snapshot=dev-current --environment=live-paths 
 | `--timeout` | HTTP timeout per request in seconds (default: `10`). |
 | `--retries` | How often a URL that timed out or got no connection is requested again (default: `2`), see [Retries](#retries). |
 | `--limit` | Only check the first N URLs. |
+| `--resume` | Continue the latest run of this snapshot on this environment, see below. |
 | `--basic-auth`, `--basic-auth-env` | `user:password`, or the prefix of the environment variables, see [Environment variables](#environment-variables). |
 
 The `source` column holds the label of the snapshot.
+
+Every result stores when its run started. `--resume` looks up the latest run
+of the same snapshot on the same `--environment`, skips the URLs that run
+already stored, and checks the rest under the same start, so a resumed run
+can itself be resumed again. It fails when there is no earlier run to
+continue — results stored before version 0.8.0 carry no run start.
+
+```bash
+typo3 websitecheck:checksitemap --snapshot=staging-current --environment=staging --resume
+```
+
+Pass the same options as in the aborted run: `--resume` does not know which
+`--group`, `--host` or `--limit` it used and skips by URL only. A URL still
+waiting for a [retry](#retries) was not stored yet and is checked again.
 
 ### `websitecheck:crawllinks`
 
@@ -579,6 +594,10 @@ plugin on the same page, so only a couple of samples per shape are checked.
 
 The `source` column holds the page a link was found on, which names the
 template that produced the link.
+
+`crawllinks` cannot be resumed. Its first phase collects the links of all
+pages in memory before the second one checks them, so an aborted run has
+nothing stored to continue from; that would need a table of its own.
 
 ### Retries
 
