@@ -24,12 +24,18 @@ class ErrorMarkerDetector
     ];
 
     public const string MARKER_CONNECTION_ERROR = 'connectionError';
+    public const string MARKER_TIMEOUT = 'timeout';
 
     /**
-     * The marker of a fetched page: a failed connection is a marker of its own.
+     * The marker of a fetched page: a failed connection is a marker of its own,
+     * and a timeout one apart from it — a slow page is not a broken one.
      */
     public function detectFor(FetchedPage $page): string
     {
+        if ($page->isTimeout()) {
+            return self::MARKER_TIMEOUT;
+        }
+
         return $page->isConnectionError() ? self::MARKER_CONNECTION_ERROR : $this->detect($page->body);
     }
 

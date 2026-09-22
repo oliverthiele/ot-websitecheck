@@ -26,6 +26,7 @@ class MigrationAnalyzer
     public const string VERDICT_REDIRECT_BROKEN = 'redirectBroken';
     public const string VERDICT_OTHER_CONTENT = 'otherContent';
     public const string VERDICT_IDENTITY_UNKNOWN = 'identityUnknown';
+    public const string VERDICT_TIMEOUT = 'timeout';
     public const string VERDICT_LISTED = 'listed';
 
     /**
@@ -36,6 +37,7 @@ class MigrationAnalyzer
         self::VERDICT_REDIRECT_BROKEN,
         self::VERDICT_OTHER_CONTENT,
         self::VERDICT_IDENTITY_UNKNOWN,
+        self::VERDICT_TIMEOUT,
     ];
 
     public const string WARNING_REDIRECT_CHAIN = 'redirectChain';
@@ -122,6 +124,10 @@ class MigrationAnalyzer
     {
         if ($reference->finalStatus !== 200) {
             return self::VERDICT_REFERENCE_NOT_OK;
+        }
+        // Too slow is not missing: the target may well have the page.
+        if ($target->abortReason === RedirectChain::ABORT_TIMEOUT) {
+            return self::VERDICT_TIMEOUT;
         }
         if (in_array($target->abortReason, [RedirectChain::ABORT_LOOP, RedirectChain::ABORT_HOP_LIMIT, RedirectChain::ABORT_MISSING_LOCATION], true)) {
             return self::VERDICT_REDIRECT_BROKEN;

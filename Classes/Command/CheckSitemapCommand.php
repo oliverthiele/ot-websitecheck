@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Command;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
+use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
 use Symfony\Component\Console\Command\Command;
@@ -34,6 +36,7 @@ class CheckSitemapCommand extends Command
         private readonly PageUidResolver $pageUidResolver,
         private readonly BasicAuthResolver $basicAuthResolver,
         private readonly UrlHostRewriter $urlHostRewriter,
+        private readonly RetryRounds $retryRounds,
     ) {
         parent::__construct();
     }
@@ -46,6 +49,7 @@ class CheckSitemapCommand extends Command
         $this->addOption('host', null, InputOption::VALUE_REQUIRED, 'Request the paths of the snapshot on this host instead, e.g. "www.example.com" — to check a URL list collected on one environment against another one.');
         $this->addOption('group', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Only check URLs from these sitemap groups, e.g. "pages".');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '10');
+        $this->addOption('retries', null, InputOption::VALUE_REQUIRED, 'How often a URL that timed out or got no connection is requested again. Retries run after all other URLs.', '2');
         $this->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Only check the first N URLs (for a quick test run).');
         $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
@@ -75,6 +79,7 @@ class CheckSitemapCommand extends Command
         }
 
         $timeout = max(1, $this->intValue($input->getOption('timeout'), 10));
+        $retries = max(0, $this->intValue($input->getOption('retries'), 2));
         $limit = $this->intValue($input->getOption('limit'), 0);
         $host = $this->stringValue($input->getOption('host'));
         $requestOptions = $this->basicAuthResolver->buildRequestOptions(
@@ -98,30 +103,48 @@ class CheckSitemapCommand extends Command
         }
 
         $io->writeln(sprintf('Checking %d URLs against "%s"...', count($urls), $environment));
-        $io->progressStart(count($urls));
 
         $notOkCount = 0;
         $errorMarkerCount = 0;
-        foreach ($urls as $url) {
-            $page = $this->pageFetcher->fetch($url, $timeout, $requestOptions);
-            $errorMarker = $this->errorMarkerDetector->detectFor($page);
-            if (!$page->isOk()) {
-                $notOkCount++;
-            }
-            if ($errorMarker !== '') {
-                $errorMarkerCount++;
-            }
+        $timeoutCount = 0;
+        $this->retryRounds->run(
+            $urls,
+            $retries,
+            function (string $url) use ($timeout, $requestOptions, $io): FetchedPage {
+                $page = $this->pageFetcher->fetch($url, $timeout, $requestOptions);
+                $io->progressAdvance();
+                return $page;
+            },
+            static fn(FetchedPage $page): bool => $page->isRetryable(),
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, &$notOkCount, &$errorMarkerCount, &$timeoutCount): void {
+                $errorMarker = $this->errorMarkerDetector->detectFor($page);
+                if (!$page->isOk()) {
+                    $notOkCount++;
+                }
+                if ($page->isTimeout()) {
+                    $timeoutCount++;
+                } elseif ($errorMarker !== '') {
+                    $errorMarkerCount++;
+                }
 
-            $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time());
-            $io->progressAdvance();
-        }
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time());
+            },
+            static function (int $round, int $count) use ($io): void {
+                if ($round > 1) {
+                    $io->progressFinish();
+                    $io->writeln(sprintf('Retrying %d URLs that timed out or got no connection (round %d)...', $count, $round));
+                }
+                $io->progressStart($count);
+            },
+        );
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d URLs checked, %d without HTTP 200, %d with a detected error marker.',
+            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out.',
             count($urls),
             $notOkCount,
             $errorMarkerCount,
+            $timeoutCount,
         ));
 
         return self::SUCCESS;

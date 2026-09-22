@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] — 2026-09-22
+
+### Added
+
+- Add `--retries` (default: `2`) to `websitecheck:checksitemap`,
+  `websitecheck:crawllinks` and `websitecheck:migrationcheck`. A URL whose
+  request timed out or got no connection is requested again after all other
+  URLs, with at least five seconds since its last attempt; an HTTP answer,
+  a 5xx included, is never repeated. Only the last outcome is stored
+- Add the error marker `timeout` to the status check and the abort reason and
+  verdict `timeout` to the migration check, so a page that answers too slowly
+  is kept apart from one without a connection and is no longer reported as
+  `missing`
+- Print the number of timed out URLs in the summary of `checksitemap` and
+  `crawllinks`
+
+### Changed
+
+- Require `guzzlehttp/guzzle` `^8.0`, whose exceptions tell a timeout from a
+  refused connection. TYPO3 14.3 allows Guzzle 7 as well; a project still on
+  Guzzle 7 updates with `composer update oliverthiele/ot-websitecheck -W`
+- Classify a failed request by transport phase instead of treating every
+  exception as "no connection": a connect timeout counts as no connection,
+  a timeout after connecting as `timeout`
+
 ## [0.6.1] — 2026-09-18
 
 ### Fixed
