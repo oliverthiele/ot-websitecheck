@@ -132,6 +132,10 @@ class MigrationAnalyzer
         if (in_array($target->abortReason, [RedirectChain::ABORT_LOOP, RedirectChain::ABORT_HOP_LIMIT, RedirectChain::ABORT_MISSING_LOCATION], true)) {
             return self::VERDICT_REDIRECT_BROKEN;
         }
+        // The page answered, but too much to read the markers out of it.
+        if ($target->abortReason === RedirectChain::ABORT_RESPONSE_TOO_LARGE) {
+            return self::VERDICT_IDENTITY_UNKNOWN;
+        }
         if ($target->finalStatus !== 200) {
             return $target->hopCount > 0 ? self::VERDICT_REDIRECT_BROKEN : self::VERDICT_MISSING;
         }

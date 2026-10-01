@@ -2,6 +2,7 @@
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
     xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:ws="http://typo3.org/ns/OliverThiele/OtWebsitecheck/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -316,7 +317,7 @@
         <div class="collapse" id="snapshot{snapshot.uid}">
             <div class="panel-body pt-2">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                    <a href="{snapshot.startUrl}" target="_blank" rel="noreferrer">{snapshot.startUrl}</a>
+                    <ws:webLink url="{snapshot.startUrl}" target="_blank" rel="noreferrer">{snapshot.startUrl}</ws:webLink>
                     <button type="button" class="btn btn-default btn-sm"
                         data-js="sitemapToggleAll"
                         data-label-expand="{f:translate(key: '{languageFile}button.expandAll')}"
@@ -394,9 +395,9 @@
             <td class="text-end">{languageRow.sitemapCount -> f:format.number(decimals: 0, thousandsSeparator: thousandsSeparator)}</td>
             <td class="text-nowrap">
                 <f:for each="{languageRow.indexFiles}" as="indexFile">
-                    <a href="{indexFile.url}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm ot-websitecheck-row-action" title="{indexFile.url}">
+                    <ws:webLink url="{indexFile.url}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm ot-websitecheck-row-action" title="{indexFile.url}">
                         <core:icon identifier="actions-window-open" size="small"/> {f:translate(key: '{languageFile}button.openSitemap')}
-                    </a>
+                    </ws:webLink>
                 </f:for>
             </td>
         </tr>
@@ -451,9 +452,9 @@
             </f:if>
         </td>
         <td class="text-nowrap text-end">
-            <a href="{file.url}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm ot-websitecheck-row-action">
+            <ws:webLink url="{file.url}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm ot-websitecheck-row-action">
                 <core:icon identifier="actions-window-open" size="small"/> {f:translate(key: '{languageFile}button.openSitemap')}
-            </a>
+            </ws:webLink>
             <be:link.editRecord uid="{file.uid}" table="tx_otwebsitecheck_domain_model_sitemapdocument" class="btn btn-default btn-sm ot-websitecheck-row-action">{f:translate(key: '{languageFile}button.showRaw')}</be:link.editRecord>
         </td>
     </tr>

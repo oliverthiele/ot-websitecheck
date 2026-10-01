@@ -2,16 +2,38 @@
 	"name": "oliverthiele/ot-websitecheck",
 	"type": "typo3-cms-extension",
 	"description": "Website Check - Store TYPO3 XML sitemaps as snapshots, record HTTP status and error markers per URL, and check whether the URLs of a live site still lead to the same content after a relaunch.",
-	"homepage": "https://www.oliver-thiele.de/",
+	"homepage": "https://github.com/oliverthiele/ot-websitecheck",
 	"license": [
 		"GPL-2.0-or-later"
 	],
-	"keywords": [
-		"TYPO3 CMS"
+	"authors": [
+		{
+			"name": "Oliver Thiele",
+			"email": "mail@oliver-thiele.de",
+			"homepage": "https://www.oliver-thiele.de",
+			"role": "Developer"
+		}
 	],
+	"keywords": [
+		"TYPO3 CMS",
+		"TYPO3 extension",
+		"sitemap",
+		"redirect",
+		"relaunch",
+		"migration",
+		"broken links",
+		"SEO"
+	],
+	"support": {
+		"issues": "https://github.com/oliverthiele/ot-websitecheck/issues",
+		"source": "https://github.com/oliverthiele/ot-websitecheck"
+	},
 	"require": {
 		"php": "^8.4",
 		"guzzlehttp/guzzle": "^8.0",
+		"guzzlehttp/psr7": "^2.10.2 || ^3.0",
+		"psr/clock": "^1.0",
+		"symfony/uid": "^7.4.8 || ^8.0",
 		"typo3/cms-backend": "^14.3",
 		"typo3/cms-core": "^14.3",
 		"typo3/cms-extbase": "^14.3",
@@ -29,7 +51,11 @@
 	},
 	"extra": {
 		"typo3/cms": {
-			"extension-key": "ot_websitecheck"
+			"extension-key": "ot_websitecheck",
+			"version": "0.9.0",
+			"Package": {
+				"providesPackages": {}
+			}
 		}
 	}
 }

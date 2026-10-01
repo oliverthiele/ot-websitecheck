@@ -1,0 +1,8 @@
+"tx_otwebsitecheck_domain_model_observation"
+,"uid","pid","run_label","environment","role","sitemap_group","requested_url","requested_path","first_status","final_url","final_path","final_status","hop_count","redirect_chain","abort_reason","page_uid","language","record_table","record_uid","verdict","warnings","suggested_target","checked_at","reviewed","note"
+,1,0,"relaunch","live","reference","pages","https://www.example.com/a/","/a/",200,"https://www.example.com/a/","/a/",200,0,"[]","",10,"de-DE","",0,"reference","","",1790000000,0,""
+,2,0,"relaunch","staging","target","pages","https://staging.example.com/a/","/a/",200,"https://staging.example.com/a/","/a/",200,0,"[]","",10,"de-DE","",0,"ok","","",1790000000,1,"checked"
+,3,0,"relaunch","live","reference","pages","https://www.example.com/b/","/b/",200,"https://www.example.com/b/","/b/",200,0,"[]","",11,"de-DE","",0,"reference","","",1790000000,0,""
+,4,0,"relaunch","staging","target","pages","https://staging.example.com/b/","/b/",404,"https://staging.example.com/b/","/b/",404,0,"[]","",0,"","",0,"missing","","",1790000000,0,""
+,5,0,"relaunch","staging-sitemap","targetSitemap","pages","https://staging.example.com/c/","/c/",200,"https://staging.example.com/c/","/c/",200,0,"[]","",12,"de-DE","",0,"listed","","",1790000000,0,""
+,6,0,"earlier","live-old","reference","pages","https://www.example.com/a/","/a/",200,"https://www.example.com/a/","/a/",200,0,"[]","",10,"de-DE","",0,"reference","","",1789000000,0,""

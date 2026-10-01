@@ -1,0 +1,8 @@
+"tx_otwebsitecheck_domain_model_check"
+,"uid","pid","url","path","environment","source","page_uid","http_status","error_marker","checked_at","run_started_at","reviewed","note"
+,1,0,"https://www.example.com/","/","staging","staging-current",1,200,"",1790000010,1790000000,1,"fine"
+,2,0,"https://www.example.com/broken/","/broken/","staging","staging-current",2,500,"",1790000020,1790000000,1,"known"
+,3,0,"https://www.example.com/slow/","/slow/","staging","staging-current",3,0,"timeout",1790000030,1790000000,0,""
+,4,0,"https://www.example.com/moved/","/moved/","staging","staging-current",4,200,"redirected",1790000040,1790000000,0,""
+,5,0,"https://www.example.com/","/","live","live-current",1,200,"",1790000050,1790000500,0,""
+,6,0,"https://www.example.com/old/","/old/","staging","staging-current",5,404,"",1789000000,1789000000,0,""

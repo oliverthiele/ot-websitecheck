@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Command;
 
+use Doctrine\DBAL\Exception as DbalException;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
 use OliverThiele\OtWebsitecheck\Service\SnapshotArchive;
 use OliverThiele\OtWebsitecheck\Service\SnapshotArchiveImporter;
@@ -46,14 +47,8 @@ class ImportSnapshotsCommand extends Command
             $io->error('--file must name a readable archive file.');
             return self::FAILURE;
         }
-        $content = file_get_contents($file);
-        if ($content === false) {
-            $io->error(sprintf('"%s" could not be read.', $file));
-            return self::FAILURE;
-        }
-
         try {
-            $archive = $this->snapshotArchive->decode($content);
+            $archive = $this->snapshotArchive->readFile($file);
             $plan = $this->snapshotArchiveImporter->plan($archive, $this->stringValue($input->getOption('label-suffix')));
         } catch (SnapshotArchiveException $exception) {
             $io->error($exception->getMessage());
@@ -74,7 +69,12 @@ class ImportSnapshotsCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->snapshotArchiveImporter->import($archive, $plan);
+        try {
+            $this->snapshotArchiveImporter->import($archive, $plan);
+        } catch (SnapshotArchiveException|DbalException $exception) {
+            $io->error(sprintf('The import was rolled back, nothing was written: %s', $exception->getMessage()));
+            return self::FAILURE;
+        }
         $io->success(sprintf('Imported %s.', $file));
 
         return self::SUCCESS;

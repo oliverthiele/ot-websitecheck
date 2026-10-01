@@ -28,6 +28,13 @@ class MigrationCheckModuleController extends AbstractModuleController
 {
     use AllowedMethodsTrait;
 
+    /**
+     * Pages and records per page of results. Each block holds the reference
+     * and target row of every language, so a large run would otherwise render
+     * tens of thousands of table rows at once.
+     */
+    private const int BLOCKS_PER_PAGE = 200;
+
     public function __construct(
         private readonly ObservationRepository $observationRepository,
         private readonly MigrationRunRepository $migrationRunRepository,
@@ -47,6 +54,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         bool $onlyProblems = true,
         bool $onlyUnreviewed = false,
         bool $showTargetSitemap = false,
+        int $page = 1,
     ): ResponseInterface {
         $runs = $this->observationRepository->findDistinctRuns();
         if ($run === '' || !in_array($run, $runs, true)) {
@@ -112,7 +120,22 @@ class MigrationCheckModuleController extends AbstractModuleController
                 }
             }
         }
-        $sections = $this->buildSections($observationsBySection);
+        ksort($observationsBySection);
+        $blocks = [];
+        foreach ($observationsBySection as $sectionName => $observationsByIdentity) {
+            foreach ($observationsByIdentity as $identityKey => $blockObservations) {
+                $blocks[] = [(string)$sectionName, (string)$identityKey, $blockObservations];
+            }
+        }
+        $blockCount = count($blocks);
+        $pageCount = max(1, (int)ceil($blockCount / self::BLOCKS_PER_PAGE));
+        $page = min(max(1, $page), $pageCount);
+        $offset = ($page - 1) * self::BLOCKS_PER_PAGE;
+        $observationsOnPage = [];
+        foreach (array_slice($blocks, $offset, self::BLOCKS_PER_PAGE) as [$sectionName, $identityKey, $blockObservations]) {
+            $observationsOnPage[$sectionName][$identityKey] = $blockObservations;
+        }
+        $sections = $this->buildSections($observationsOnPage);
 
         ksort($groupOptions);
         ksort($languageOptions);
@@ -134,6 +157,15 @@ class MigrationCheckModuleController extends AbstractModuleController
             'onlyProblems' => $onlyProblems,
             'onlyUnreviewed' => $onlyUnreviewed,
             'showTargetSitemap' => $showTargetSitemap,
+            'pagination' => [
+                'page' => $page,
+                'pageCount' => $pageCount,
+                'total' => $blockCount,
+                'from' => $blockCount > 0 ? $offset + 1 : 0,
+                'to' => min($offset + self::BLOCKS_PER_PAGE, $blockCount),
+                'previousPage' => $page > 1 ? $page - 1 : 0,
+                'nextPage' => $page < $pageCount ? $page + 1 : 0,
+            ],
             'moduleToken' => $this->moduleToken(),
             'commandBuilder' => $this->buildCommandBuilder(),
             'archiveEnabled' => $this->isArchiveEnabled(),

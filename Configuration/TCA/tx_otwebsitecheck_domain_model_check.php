@@ -30,6 +30,7 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 50,
+                'max' => 2048,
                 'eval' => 'trim',
                 'required' => true,
             ],
@@ -39,6 +40,7 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 50,
+                'max' => 2048,
                 'readOnly' => true,
                 'searchable' => false,
             ],
@@ -57,6 +59,7 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 50,
+                'max' => 2048,
                 'readOnly' => true,
                 'searchable' => false,
             ],

@@ -19,6 +19,7 @@ final readonly class RedirectChain
     public const string ABORT_MISSING_LOCATION = 'missingLocation';
     public const string ABORT_CONNECTION_ERROR = 'connectionError';
     public const string ABORT_TIMEOUT = 'timeout';
+    public const string ABORT_RESPONSE_TOO_LARGE = 'responseTooLarge';
 
     /**
      * @param list<array{url: string, status: int}> $steps
@@ -40,7 +41,11 @@ final readonly class RedirectChain
         return new self(
             $steps,
             '',
-            $transferFailure === TransferFailure::Timeout ? self::ABORT_TIMEOUT : self::ABORT_CONNECTION_ERROR,
+            match ($transferFailure) {
+                TransferFailure::Timeout => self::ABORT_TIMEOUT,
+                TransferFailure::TooLarge => self::ABORT_RESPONSE_TOO_LARGE,
+                default => self::ABORT_CONNECTION_ERROR,
+            },
             $transferFailure,
         );
     }

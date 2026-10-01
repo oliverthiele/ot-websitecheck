@@ -16,7 +16,8 @@ URL of the live site still leads to the same page or record on the new one.
 
 - **Status check** — checks the HTTP status of every URL of a sitemap snapshot and
   detects TYPO3 error pages in the response body (production "Oops, an error
-  occurred!", uncaught exceptions, 404 and access-denied pages)
+  occurred!", uncaught exceptions, 404 and access-denied pages); a URL that only
+  answers through a redirect is marked as such
 - **Link crawl** — follows the plugin links found on those pages, including
   the ones a sitemap never lists, and reports links whose arguments have no
   effect
@@ -73,22 +74,19 @@ URL of the live site still leads to the same page or record on the new one.
 
 ## Installation
 
-The package is not on Packagist yet, so add its repository first:
-
-```json
-"repositories": {
-    "oliverthiele/ot-websitecheck": {
-        "type": "vcs",
-        "url": "https://github.com/oliverthiele/ot-websitecheck.git"
-    }
-}
-```
-
 ```bash
 composer require oliverthiele/ot-websitecheck
 ```
 
-Then update the database schema — also after every update of the extension:
+Then run the TYPO3 setup:
+
+```bash
+vendor/bin/typo3 extension:setup -e ot_websitecheck
+# or via DDEV:
+ddev typo3 extension:setup -e ot_websitecheck
+```
+
+After every update of the extension, update the database schema:
 
 ```bash
 vendor/bin/typo3 database:updateschema
@@ -261,8 +259,14 @@ The import form and `websitecheck:importsitemaps --environment` override it.
 ### Environment variables
 
 Basic Auth credentials can be passed as options or read from the environment.
-The fallback reads `$_ENV`, not `getenv()` — projects loading `.env` files via
-`vlucas/phpdotenv` without the putenv adapter only populate `$_ENV`/`$_SERVER`.
+Prefer the environment: an option value ends up in the shell history and is
+visible to every user of the machine in the process list.
+
+Each variable is read from `$_ENV` first, then with `getenv()`. That covers
+`.env` files loaded via `vlucas/phpdotenv` without the putenv adapter, which
+only populate `$_ENV`, as well as the real environment of the process, which
+only reaches `$_ENV` when `variables_order` contains `E` —
+`php.ini-production` leaves it out.
 
 | Variable | Used by |
 |----------|---------|
@@ -270,8 +274,28 @@ The fallback reads `$_ENV`, not `getenv()` — projects loading `.env` files via
 | `WEBSITECHECK_REFERENCE_BASIC_AUTH_USER`, `WEBSITECHECK_REFERENCE_BASIC_AUTH_PASS` | `migrationcheck`, reference environment |
 | `WEBSITECHECK_TARGET_BASIC_AUTH_USER`, `WEBSITECHECK_TARGET_BASIC_AUTH_PASS` | `migrationcheck`, target environment |
 
-Credentials are only sent to the host they belong to, never to a host a
-redirect leads to.
+The credentials can come from a secret manager instead of a file. With the
+1Password CLI, `op run` resolves secret references in the environment and
+hands the values to the command only — they appear neither in the shell
+history nor in the process list:
+
+```bash
+export WEBSITECHECK_BASIC_AUTH_USER="op://Vault/Staging/username"
+export WEBSITECHECK_BASIC_AUTH_PASS="op://Vault/Staging/password"
+op run -- vendor/bin/typo3 websitecheck:checksitemap --snapshot=staging-current
+```
+
+`--basic-auth="$(op read …)"` is no replacement: the shell inserts the value
+before the command starts, so it is in the process list again. For a scheduled
+run, `op` needs a service account instead of a signed-in user.
+
+Credentials are only sent to the URLs they were given for: the start URL and
+the sitemap of every language, the way the import found them — given with
+`--sitemap` or listed on the start page — and from there everything on the same
+host and port. A sub-sitemap, page or redirect target on another host, on
+another port or over plain http where the credentials were given for https gets
+no credentials. The checks take these URLs from the snapshot they read; with
+`--host`, from the snapshot with its host replaced.
 
 ---
 
@@ -282,12 +306,13 @@ tool:
 
 - **Status check** — a form that composes the `checksitemap` or `crawllinks`
   command for a snapshot, and the results, filterable by environment, only
-  problems and only not yet reviewed. The form suggests the newest snapshot
-  and an environment label from it — with `-links` for a link check, so its
-  results do not replace those of a status check.
+  problems and only not yet reviewed, 500 rows per page. The form suggests the
+  newest snapshot and an environment label from it — with `-links` for a link
+  check, so its results do not replace those of a status check.
 - **Migration check** — a form that composes the `migrationcheck` command, and
-  the results, see [Migration check results](#migration-check-results). A run
-  can be saved as a file together with the snapshots it compared. The
+  the results, see [Migration check results](#migration-check-results), 200
+  pages and records per page. A run can be saved as a file together with the
+  snapshots it compared. The
   form offers every complete snapshot and suggests the pair to compare: a
   locked live snapshot, otherwise the newest live one, as reference; the
   newest staging snapshot, otherwise development, then local, as target. It
@@ -416,7 +441,7 @@ problems and warnings" is set.
 | `redirectBroken` | Redirects, but ends in an error, a loop or too many hops |
 | `timeout` | No complete answer within `--timeout`, also after the retries — slow, not necessarily missing; check again |
 | `otherContent` | Answers 200 with a different page, record or language |
-| `identityUnknown` | Answers 200, but the markers needed for a comparison are missing |
+| `identityUnknown` | Answers 200, but the markers needed for a comparison are missing — or the page is larger than 50 MB and was not read |
 | `referenceNotOk` | Already not working on the reference — not compared, but listed with the problems: the sitemap lists a broken URL |
 
 ### Warnings
@@ -456,6 +481,12 @@ page URL with its sitemap group and `lastmod`. Each language is fetched
 completely before it is stored; an interrupted import stays marked as
 incomplete. A sitemap file that fails is stored with the snapshot and reported,
 not skipped. A snapshot without a single page URL is not kept.
+
+A gzip-compressed sitemap (`sitemap.xml.gz`) is decompressed and stored as XML.
+Every response is read up to 50 MB — the largest sitemap file the protocol
+allows; a larger one is stored as "too large". An index nested more than three
+levels deep, or anything beyond 5,000 sitemap files per language, is stored as
+"skipped" instead of being fetched.
 
 | Option | Description |
 |--------|-------------|
@@ -500,9 +531,20 @@ A redirect target is only suggested when exactly one path on the target matches.
 Without record markers every record of a detail page shares its page uid, so
 detail pages get no suggestion rather than a wrong one.
 
+Reference and target rows are matched by path, so each snapshot may list a path
+only once. A snapshot that lists the same path on two hosts — one domain per
+language — or over http and https stops the check before anything is
+requested, with the colliding URLs listed. Import one snapshot per host for
+such a site.
+
+A re-run with the same `--run` keeps the review state of every row it produces
+again and removes the rows it no longer produces — after a different
+`--group`, `--limit` or label, or a changed snapshot — so the results never mix
+two selections.
+
 | Option | Description |
 |--------|-------------|
-| `--run` | Required. Groups the results; a re-run with the same label updates the rows. |
+| `--run` | Required. Groups the results; a re-run with the same label replaces the rows, see above. |
 | `--reference-snapshot` | Required. Label of the snapshot of the state before; every URL in it is checked. |
 | `--target-snapshot` | Required. Label of the snapshot of the state after; its host is the target host. |
 | `--reference-label`, `--target-label` | Environment labels shown in the module (default: `reference`, `target`). |
@@ -515,6 +557,7 @@ detail pages get no suggestion rather than a wrong one.
 | `--reference-basic-auth`, `--target-basic-auth` | `user:password`, see [Environment variables](#environment-variables). |
 | `--reference-run` | Take the reference rows from this earlier run instead of requesting the reference again. The run must have compared the same `--reference-snapshot`; it may be the `--run` itself. |
 | `--analyze-only` | Request nothing; recompute verdicts, warnings and suggestions for the stored rows of `--run`. |
+| `--fail-on-problems` | Exit with a failure code when a target row has a verdict that needs attention, see [Redirects and exit codes](#redirects-and-exit-codes). Works with `--analyze-only` as well. |
 
 With `--reference-run`, only the target is requested. The reference rows are
 copied from the earlier run with their environment label, which therefore
@@ -542,15 +585,18 @@ typo3 websitecheck:checksitemap --snapshot=dev-current --environment=live-paths 
 | `--retries` | How often a URL that timed out or got no connection is requested again (default: `2`), see [Retries](#retries). |
 | `--limit` | Only check the first N URLs. |
 | `--resume` | Continue the latest run of this snapshot on this environment, see below. |
+| `--fail-on-problems` | Exit with a failure code when a result needs attention, see [Redirects and exit codes](#redirects-and-exit-codes). |
 | `--basic-auth`, `--basic-auth-env` | `user:password`, or the prefix of the environment variables, see [Environment variables](#environment-variables). |
 
 The `source` column holds the label of the snapshot.
 
-Every result stores when its run started. `--resume` looks up the latest run
-of the same snapshot on the same `--environment`, skips the URLs that run
-already stored, and checks the rest under the same start, so a resumed run
-can itself be resumed again. It fails when there is no earlier run to
-continue — results stored before version 0.8.0 carry no run start.
+Every result stores when its run started, and every run notes its start in the
+TYPO3 registry before the first request. `--resume` continues the latest run
+of the same snapshot on the same `--environment` — also one aborted before it
+stored a single result —, skips the URLs that run already stored, and checks
+the rest under the same start, so a resumed run can itself be resumed again. It
+fails when there is no earlier run to continue — results stored before version
+0.8.0 carry no run start.
 
 ```bash
 typo3 websitecheck:checksitemap --snapshot=staging-current --environment=staging --resume
@@ -590,6 +636,7 @@ plugin on the same page, so only a couple of samples per shape are checked.
 | `--max-links` | Upper bound on links checked (default: `2000`). |
 | `--pages-limit` | Only read links from the first N pages of the snapshot. |
 | `--all-links` | Also follow links without Extbase arguments. |
+| `--fail-on-problems` | As for `checksitemap`; ignored link arguments count as a problem as well. |
 | `--timeout`, `--retries`, `--basic-auth`, `--basic-auth-env` | As for `checksitemap`. Retries apply to the pages links are read from as well. |
 
 The `source` column holds the page a link was found on, which names the
@@ -620,6 +667,21 @@ the marker `timeout` in the status check, the abort reason and verdict
 `timeout` in the migration check. A connect timeout — the server did not even
 accept the connection — counts as no connection.
 
+### Redirects and exit codes
+
+`checksitemap` and `crawllinks` follow up to ten redirects and store the status
+of the page they end on. A URL that works only through a redirect gets the
+marker `redirected`, unless the final page shows an error, whose marker wins;
+more than ten redirects give the marker `tooManyRedirects`. The migration check
+follows redirects itself, one hop at a time, see above.
+
+`checksitemap`, `crawllinks` and `migrationcheck` exit with a failure code when
+not a single URL got an HTTP answer — a wrong host, no network or rejected
+credentials. With `--fail-on-problems`, they also fail when a result needs
+attention: a status other than 200, an error marker or a timeout, ignored link
+arguments, or one of the verdicts `missing`, `redirectBroken`, `otherContent`,
+`identityUnknown` and `timeout`. A redirect alone does not fail a run.
+
 ### `websitecheck:exportsnapshots`
 
 ```bash
@@ -634,7 +696,8 @@ rows, reviewed flags and notes included. A run brings the snapshots it
 compared. Snapshots and runs without a uuid get one on export.
 
 Where the file goes is up to the project — the path has no default, and the
-directory has to exist. Keep the file out of version control.
+directory has to exist. A path in the public directory is refused, as in the
+backend modules. Keep the file out of version control.
 
 | Option | Description |
 |--------|-------------|
@@ -665,7 +728,8 @@ Locks and notes are restored with the snapshots.
 | `--label-suffix` | Appended to each label that is taken by a different record, e.g. `-restored`. |
 | `--dry-run` | Show what would be imported or skipped, write nothing. |
 
-Only archives of the format version this extension writes are read.
+Only archives of the format version this extension writes are read, up to
+64 MB as a file and 256 MB decompressed.
 
 ### `websitecheck:cleanupsnapshots`
 
@@ -674,12 +738,16 @@ typo3 websitecheck:cleanupsnapshots --keep=10 --dry-run
 ```
 
 The counterpart of a scheduled import. Removes old sitemap snapshots and
-imports that never finished. Always kept:
+imports that never finished. Always kept, complete or not:
 
-- locked snapshots — complete or not
-- the newest complete snapshots per start URL, up to `--keep`
+- locked snapshots
 - snapshots a migration check run compared — its results refer to them
 - snapshots with a note
+
+Kept besides: the newest complete snapshots per start URL, up to `--keep`. The
+snapshots kept for one of the reasons above do not count towards it. Start URLs
+that differ only in the case of scheme and host or in a trailing slash count as
+one.
 
 A snapshot is locked with the lock icon in its header in the backend module,
 with the "Locked" field when editing the record, or right away with

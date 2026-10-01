@@ -8,6 +8,7 @@ use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SnapshotEnvironment;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
+use OliverThiele\OtWebsitecheck\Utility\GzipUtility;
 
 /**
  * The file format that carries sitemap snapshots and migration check runs
@@ -31,6 +32,12 @@ class SnapshotArchive
     public const string FORMAT = 'ot-websitecheck-archive';
     public const int VERSION = 1;
 
+    /** Compressed size of an archive file that is read at all. */
+    public const int MAXIMUM_FILE_BYTES = 64 * 1024 * 1024;
+
+    /** Decompressed size, so a small file cannot expand without bound. */
+    public const int MAXIMUM_DECODED_BYTES = 256 * 1024 * 1024;
+
     /**
      * @param Archive $archive
      */
@@ -50,13 +57,34 @@ class SnapshotArchive
 
     /**
      * @return Archive
+     * @throws SnapshotArchiveException when the file cannot be read, is too large or holds no archive of a supported version
+     */
+    public function readFile(string $path): array
+    {
+        $size = @filesize($path);
+        if ($size === false) {
+            throw new SnapshotArchiveException(sprintf('"%s" could not be read.', basename($path)), 1789490006);
+        }
+        if ($size > self::MAXIMUM_FILE_BYTES) {
+            throw new SnapshotArchiveException(sprintf('"%s" is larger than %d MB.', basename($path), self::MAXIMUM_FILE_BYTES / 1024 / 1024), 1789490007);
+        }
+        $content = @file_get_contents($path);
+        if ($content === false) {
+            throw new SnapshotArchiveException(sprintf('"%s" could not be read.', basename($path)), 1789490006);
+        }
+
+        return $this->decode($content);
+    }
+
+    /**
+     * @return Archive
      * @throws SnapshotArchiveException when the content is no archive of a supported version
      */
     public function decode(string $content): array
     {
-        $json = @gzdecode($content);
-        if ($json === false) {
-            throw new SnapshotArchiveException('The file is not gzip-compressed.', 1789490002);
+        $json = GzipUtility::decode($content, self::MAXIMUM_DECODED_BYTES);
+        if ($json === null) {
+            throw new SnapshotArchiveException(sprintf('The file is not gzip-compressed, or larger than %d MB once decompressed.', self::MAXIMUM_DECODED_BYTES / 1024 / 1024), 1789490002);
         }
         try {
             $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);

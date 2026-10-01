@@ -13,6 +13,7 @@ use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -55,7 +56,8 @@ class CheckSitemapCommand extends Command
         $this->addOption('retries', null, InputOption::VALUE_REQUIRED, 'How often a URL that timed out or got no connection is requested again. Retries run after all other URLs.', '2');
         $this->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Only check the first N URLs (for a quick test run).');
         $this->addOption('resume', null, InputOption::VALUE_NONE, 'Continue the latest run of this snapshot on this environment and skip the URLs it already checked. Expects the same options as that run.');
-        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level.');
+        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a URL answers without HTTP 200, with an error marker or not in time — for CI and monitoring. A run in which no URL answered at all fails without this option, too.');
+        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level. Visible in the shell history and the process list — prefer the environment variables.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
 
@@ -94,8 +96,11 @@ class CheckSitemapCommand extends Command
         $io->title(sprintf('Website Check: snapshot "%s" (%s)', $snapshot->label, $environment));
 
         $urls = array_keys($this->sitemapSnapshotLocator->findUrls($snapshot, $this->stringList($input->getOption('group'))));
+        $authorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($snapshot);
         if ($host !== '') {
-            $urls = array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $urls);
+            // http and https, or www and the bare domain, become the same URL here.
+            $urls = array_values(array_unique(array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $urls)));
+            $authorizedUrls = array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $authorizedUrls);
             $io->writeln(sprintf('Requesting every path on host "%s".', $host));
         }
         if ($limit > 0) {
@@ -126,6 +131,8 @@ class CheckSitemapCommand extends Command
                 return self::SUCCESS;
             }
             $urls = $remainingUrls;
+        } else {
+            $this->checkResultRepository->registerRunStart($environment, $snapshot->label, $runStartedAt);
         }
 
         $io->writeln(sprintf('Checking %d URLs against "%s"...', count($urls), $environment));
@@ -133,22 +140,29 @@ class CheckSitemapCommand extends Command
         $notOkCount = 0;
         $errorMarkerCount = 0;
         $timeoutCount = 0;
+        $redirectedCount = 0;
+        $answeredCount = 0;
         $this->retryRounds->run(
             $urls,
             $retries,
-            function (string $url) use ($timeout, $requestOptions, $io): FetchedPage {
-                $page = $this->pageFetcher->fetch($url, $timeout, $requestOptions);
+            function (string $url) use ($timeout, $requestOptions, $authorizedUrls, $io): FetchedPage {
+                $page = $this->pageFetcher->fetch($url, $timeout, UrlUtility::requestOptionsFor($requestOptions, $url, $authorizedUrls));
                 $io->progressAdvance();
                 return $page;
             },
             static fn(FetchedPage $page): bool => $page->isRetryable(),
-            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount): void {
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$redirectedCount, &$answeredCount): void {
                 $errorMarker = $this->errorMarkerDetector->detectFor($page);
+                if (!$page->isConnectionError()) {
+                    $answeredCount++;
+                }
                 if (!$page->isOk()) {
                     $notOkCount++;
                 }
                 if ($page->isTimeout()) {
                     $timeoutCount++;
+                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
+                    $redirectedCount++;
                 } elseif ($errorMarker !== '') {
                     $errorMarkerCount++;
                 }
@@ -166,12 +180,21 @@ class CheckSitemapCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out.',
+            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d only through a redirect.',
             count($urls),
             $notOkCount,
             $errorMarkerCount,
             $timeoutCount,
+            $redirectedCount,
         ));
+
+        if ($answeredCount === 0) {
+            $io->error('Not a single URL answered. Check the host, the network and the Basic Auth credentials.');
+            return self::FAILURE;
+        }
+        if ($input->getOption('fail-on-problems') === true && $notOkCount + $errorMarkerCount + $timeoutCount > 0) {
+            return self::FAILURE;
+        }
 
         return self::SUCCESS;
     }

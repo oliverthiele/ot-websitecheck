@@ -17,6 +17,7 @@ use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -56,7 +57,7 @@ class MigrationCheckCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('Check whether the URLs of a reference environment still lead to the same content on a target environment.');
-        $this->addOption('run', null, InputOption::VALUE_REQUIRED, 'Label that groups the results of this check, e.g. "relaunch". Re-running with the same label updates the rows.');
+        $this->addOption('run', null, InputOption::VALUE_REQUIRED, 'Label that groups the results of this check, e.g. "relaunch". Re-running with the same label replaces its rows; review states of unchanged findings are kept.');
         $this->addOption('reference-snapshot', null, InputOption::VALUE_REQUIRED, 'Label of the sitemap snapshot of the reference environment (the state before). Every URL in it is checked.');
         $this->addOption('target-snapshot', null, InputOption::VALUE_REQUIRED, 'Label of the sitemap snapshot of the target environment (the state after). Its host is where the reference paths are requested; its pages are read to suggest where a missing URL should redirect to.');
         $this->addOption('reference-label', null, InputOption::VALUE_REQUIRED, 'Environment label of the reference rows.', 'reference');
@@ -71,8 +72,9 @@ class MigrationCheckCommand extends Command
         $this->addOption('record-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the record table (group 1) and uid (group 2) from the HTML of a detail page.', IdentityPatterns::DEFAULT_RECORD);
         $this->addOption('reference-run', null, InputOption::VALUE_REQUIRED, 'Take the reference rows from this earlier run instead of requesting the reference again, e.g. after the reference site has been replaced. The run must have compared the same reference snapshot; may equal --run.');
         $this->addOption('analyze-only', null, InputOption::VALUE_NONE, 'Do not request anything; recompute verdicts, warnings and suggestions for the stored rows of --run.');
-        $this->addOption('reference-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the reference environment as "user:password". Falls back to WEBSITECHECK_REFERENCE_BASIC_AUTH_USER/_PASS.');
-        $this->addOption('target-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the target environment as "user:password". Falls back to WEBSITECHECK_TARGET_BASIC_AUTH_USER/_PASS.');
+        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a target row has a verdict that needs attention (missing, redirectBroken, otherContent, identityUnknown, timeout) — for CI. A run in which no target URL answered at all fails without this option, too.');
+        $this->addOption('reference-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the reference environment as "user:password". Falls back to WEBSITECHECK_REFERENCE_BASIC_AUTH_USER/_PASS. Visible in the shell history and the process list — prefer the environment variables.');
+        $this->addOption('target-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the target environment as "user:password". Falls back to WEBSITECHECK_TARGET_BASIC_AUTH_USER/_PASS. Visible in the shell history and the process list — prefer the environment variables.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -88,10 +90,15 @@ class MigrationCheckCommand extends Command
                 $io->error('--run is required.');
                 return self::FAILURE;
             }
-            $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
-            return self::SUCCESS;
+            $verdictCounts = $this->analyzeRun($runLabel);
+            $this->renderVerdictCounts($io, $verdictCounts, $runLabel);
+            return $this->exitCode($input, $verdictCounts);
         }
 
+        if (mb_strlen($runLabel) > MigrationRunRepository::MAXIMUM_LABEL_LENGTH) {
+            $io->error(sprintf('--run must not be longer than %d characters.', MigrationRunRepository::MAXIMUM_LABEL_LENGTH));
+            return self::FAILURE;
+        }
         if ($runLabel === '' || $referenceLabel === '' || $targetLabel === '' || $referenceLabel === $targetLabel) {
             $io->error('--run is required, and --reference-label and --target-label must differ.');
             return self::FAILURE;
@@ -187,6 +194,23 @@ class MigrationCheckCommand extends Command
                 return self::FAILURE;
             }
         }
+        $targetSnapshotUrls = $this->sitemapSnapshotLocator->findUrls($targetSnapshot, $groups);
+        foreach (['reference' => [$referenceSnapshot, $referenceUrls], 'target' => [$targetSnapshot, $targetSnapshotUrls]] as $side => [$snapshot, $urls]) {
+            $collisions = $this->findPathCollisions(array_keys($urls));
+            if ($collisions !== []) {
+                $io->error(sprintf(
+                    'The %s snapshot "%s" lists the same path on more than one host or scheme. A migration check matches reference and target by path, so these URLs would overwrite each other. Import one snapshot per host, or narrow the selection with --group.',
+                    $side,
+                    $snapshot->label,
+                ));
+                $io->listing(array_map(
+                    static fn(string $path, array $collidingUrls): string => $path . ': ' . implode(', ', $collidingUrls),
+                    array_keys(array_slice($collisions, 0, 5, true)),
+                    array_slice($collisions, 0, 5, true),
+                ));
+                return self::FAILURE;
+            }
+        }
         $this->migrationRunRepository->storeRun($runLabel, $referenceSnapshot->uid, $targetSnapshot->uid, $targetHost, time());
 
         $io->section(sprintf(
@@ -194,34 +218,106 @@ class MigrationCheckCommand extends Command
             count($referenceUrls),
             $referenceRunLabel,
         ));
+        $referenceAuthorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($referenceSnapshot);
+        $targetAuthorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($targetSnapshot);
         $observations = [];
         /** @var array<string, bool> $checkedTargetUrls */
         $checkedTargetUrls = [];
         foreach ($referenceUrls as $referenceUrl => $group) {
             if ($referenceRunLabel === '') {
-                $observations[] = ['environment' => $referenceLabel, 'role' => Observation::ROLE_REFERENCE, 'group' => $group, 'url' => $referenceUrl, 'requestOptions' => $referenceRequestOptions];
+                $observations[] = [
+                    'environment' => $referenceLabel,
+                    'role' => Observation::ROLE_REFERENCE,
+                    'group' => $group,
+                    'url' => $referenceUrl,
+                    'requestOptions' => UrlUtility::requestOptionsFor($referenceRequestOptions, $referenceUrl, $referenceAuthorizedUrls),
+                ];
             }
 
             $targetUrl = $this->urlHostRewriter->replace($referenceUrl, $targetHost);
-            $observations[] = ['environment' => $targetLabel, 'role' => Observation::ROLE_TARGET, 'group' => $group, 'url' => $targetUrl, 'requestOptions' => $targetRequestOptions];
+            $observations[] = [
+                'environment' => $targetLabel,
+                'role' => Observation::ROLE_TARGET,
+                'group' => $group,
+                'url' => $targetUrl,
+                'requestOptions' => UrlUtility::requestOptionsFor($targetRequestOptions, $targetUrl, $targetAuthorizedUrls),
+            ];
             $checkedTargetUrls[$targetUrl] = true;
         }
-        $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
-        $targetUrls = array_diff_key(
-            $this->sitemapSnapshotLocator->findUrls($targetSnapshot, $groups),
-            $checkedTargetUrls,
-        );
-        $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
-        $observations = [];
+        $targetUrls = array_diff_key($targetSnapshotUrls, $checkedTargetUrls);
+        $sitemapObservations = [];
         foreach ($targetUrls as $targetUrl => $group) {
-            $observations[] = ['environment' => $targetSitemapLabel, 'role' => Observation::ROLE_TARGET_SITEMAP, 'group' => $group, 'url' => $targetUrl, 'requestOptions' => $targetRequestOptions];
+            $sitemapObservations[] = [
+                'environment' => $targetSitemapLabel,
+                'role' => Observation::ROLE_TARGET_SITEMAP,
+                'group' => $group,
+                'url' => $targetUrl,
+                'requestOptions' => UrlUtility::requestOptionsFor($targetRequestOptions, $targetUrl, $targetAuthorizedUrls),
+            ];
         }
-        $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
-        $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
+        // A re-run with another selection, other labels or changed snapshots
+        // must not leave rows of the earlier one behind: the analysis reads all
+        // rows of the run. Rows the run produces again stay, with their review.
+        $keptRows = [];
+        foreach ([...$observations, ...$sitemapObservations] as $observation) {
+            $keptRows[$observation['environment']][UrlUtility::pathWithQuery($observation['url'])] = true;
+        }
+        foreach ($referenceRows as $row) {
+            if (isset($referenceUrls[(string)$row['requested_url']])) {
+                $keptRows[(string)$row['environment']][(string)$row['requested_path']] = true;
+            }
+        }
+        $removedCount = $this->observationRepository->deleteRowsOfRunExcept($runLabel, $keptRows);
+        if ($removedCount > 0) {
+            $io->note(sprintf('Removed %d rows of an earlier run "%s" that this selection no longer covers.', $removedCount, $runLabel));
+        }
 
-        return self::SUCCESS;
+        $answeredCount = $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
+
+        $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
+        $answeredCount += $this->observeAll($io, $runLabel, $sitemapObservations, $timeout, $maximumHops, $retries, $patterns);
+
+        $verdictCounts = $this->analyzeRun($runLabel);
+        $this->renderVerdictCounts($io, $verdictCounts, $runLabel);
+        if ($answeredCount === 0) {
+            $io->error('Not a single URL answered. Check the hosts, the network and the Basic Auth credentials.');
+            return self::FAILURE;
+        }
+
+        return $this->exitCode($input, $verdictCounts);
+    }
+
+    /**
+     * @param array<string, int> $verdictCounts
+     */
+    private function exitCode(InputInterface $input, array $verdictCounts): int
+    {
+        if ($input->getOption('fail-on-problems') !== true) {
+            return self::SUCCESS;
+        }
+        $problemCount = array_sum(array_intersect_key($verdictCounts, array_flip(MigrationAnalyzer::PROBLEM_VERDICTS)));
+
+        return $problemCount > 0 ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * Paths that more than one URL leads to — the same path on two hosts or
+     * over http and https. Rows of a run are keyed by path, so such URLs would
+     * replace each other.
+     *
+     * @param list<string> $urls
+     * @return array<string, list<string>> path => the URLs sharing it
+     */
+    private function findPathCollisions(array $urls): array
+    {
+        $urlsByPath = [];
+        foreach ($urls as $url) {
+            $urlsByPath[UrlUtility::pathWithQuery($url)][] = $url;
+        }
+
+        return array_filter($urlsByPath, static fn(array $urlsOfPath): bool => count($urlsOfPath) > 1);
     }
 
     /**
@@ -281,6 +377,7 @@ class MigrationCheckCommand extends Command
      * only its last outcome is stored.
      *
      * @param list<array{environment: string, role: string, group: string, url: string, requestOptions: array<string, mixed>}> $observations
+     * @return int how many URLs got an HTTP answer on their first request
      */
     private function observeAll(
         SymfonyStyle $io,
@@ -290,7 +387,8 @@ class MigrationCheckCommand extends Command
         int $maximumHops,
         int $retries,
         IdentityPatterns $patterns,
-    ): void {
+    ): int {
+        $answeredCount = 0;
         $this->retryRounds->run(
             $observations,
             $retries,
@@ -300,7 +398,10 @@ class MigrationCheckCommand extends Command
                 return $redirectChain;
             },
             static fn(RedirectChain $redirectChain): bool => $redirectChain->isRetryable(),
-            function (array $observation, RedirectChain $redirectChain) use ($runLabel, $patterns): void {
+            function (array $observation, RedirectChain $redirectChain) use ($runLabel, $patterns, &$answeredCount): void {
+                if ($redirectChain->getFirstStatus() > 0) {
+                    $answeredCount++;
+                }
                 // An error page renders its own page uid — only a working page has an identity worth comparing.
                 $identity = $redirectChain->getFinalStatus() === 200
                     ? $this->identityExtractor->extract($redirectChain->finalBody, $patterns)
@@ -317,6 +418,8 @@ class MigrationCheckCommand extends Command
             },
         );
         $io->progressFinish();
+
+        return $answeredCount;
     }
 
     /**

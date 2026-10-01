@@ -7,6 +7,8 @@ namespace OliverThiele\OtWebsitecheck\Domain\ValueObject;
 use GuzzleHttp\Exception\NetworkException;
 use GuzzleHttp\Exception\NetworkTimeoutException;
 use GuzzleHttp\Exception\ResponseTimeoutException;
+use GuzzleHttp\Exception\TooManyRedirectsException;
+use OliverThiele\OtWebsitecheck\Exception\ResponseTooLargeException;
 
 /**
  * Why a request ended without a usable HTTP answer.
@@ -31,8 +33,18 @@ enum TransferFailure: string
     case Network = 'network';
 
     /**
-     * Anything else, e.g. an invalid URL or too many redirects. Another
-     * attempt would fail the same way.
+     * More redirects than the request follows — a loop or a long chain.
+     */
+    case TooManyRedirects = 'tooManyRedirects';
+
+    /**
+     * The response exceeded ResponseSizeLimit::MAXIMUM_BYTES and was aborted.
+     */
+    case TooLarge = 'tooLarge';
+
+    /**
+     * Anything else, e.g. an invalid URL. Another attempt would fail the same
+     * way.
      */
     case Request = 'request';
 
@@ -45,12 +57,21 @@ enum TransferFailure: string
         if ($throwable instanceof NetworkException) {
             return self::Network;
         }
+        if ($throwable instanceof TooManyRedirectsException) {
+            return self::TooManyRedirects;
+        }
+        // Guzzle wraps what the progress callback throws.
+        for ($cause = $throwable; $cause !== null; $cause = $cause->getPrevious()) {
+            if ($cause instanceof ResponseTooLargeException) {
+                return self::TooLarge;
+            }
+        }
 
         return self::Request;
     }
 
     public function isRetryable(): bool
     {
-        return $this !== self::Request;
+        return $this === self::Timeout || $this === self::Network;
     }
 }

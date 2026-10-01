@@ -5,6 +5,87 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.9.0] — 2026-10-01
+
+### Added
+
+- Add `--fail-on-problems` to `websitecheck:checksitemap`,
+  `websitecheck:crawllinks` and `websitecheck:migrationcheck` for CI: exit with
+  a failure code when a result needs attention
+- Add the marker `redirected` to the status check for a URL that only answers
+  through a redirect, and `tooManyRedirects` for more than ten
+- Read gzip-compressed sitemaps (`sitemap.xml.gz`)
+- Show the status check results 500 rows per page
+- Show the migration check results 200 pages and records per page; the
+  verdict counts and filters still cover the whole run
+- Add functional tests for the repositories and the archive round trip,
+  run on SQLite
+
+### Changed
+
+- Store `url`, `path` and `source` of the status check results as text like
+  the other tables, and declare only the indexes of that table in
+  `ext_tables.sql`. Requires a database schema update
+- Stop `websitecheck:migrationcheck` before requesting anything when a snapshot
+  lists the same path on more than one host or scheme; rows are matched by
+  path, so such URLs overwrote each other
+- Add an index on the role of migration check rows. Requires a database
+  schema update
+- Remove `ext_emconf.php`: TYPO3 14.2+ reads the extension metadata from
+  `composer.json` in classic mode as well (#108345), so the version and
+  `providesPackages` are declared there now. The state `alpha` is dropped;
+  a 0.x version already says that the API may still change
+- Declare `guzzlehttp/psr7`, `psr/clock` and `symfony/uid` as dependencies;
+  the code uses them directly
+- Mention in the option help that credentials passed on the command line show
+  up in the shell history and the process list
+- Switch all label files to XLIFF 2.0. File names, unit ids, texts and
+  placeholders are unchanged, so `LLL:` references and overrides keep working;
+  override files in XLIFF 1.2 still load next to them
+
+### Fixed
+
+- Read the Basic Auth environment variables with `getenv()` as well when
+  `$_ENV` does not have them: with `variables_order` without `E`, as in
+  `php.ini-production`, variables set with `export`, in a cron entry or by
+  `op run` were ignored
+- Exit `checksitemap`, `crawllinks` and `migrationcheck` with a failure code
+  when not a single URL got an HTTP answer
+- Read at most 50 MB per response and stop a sitemap crawl at three nested
+  indexes or 5,000 files; a sitemap of any size could exhaust the memory
+- Read archive files only up to 64 MB, 256 MB decompressed, also when the
+  Sitemaps module lists them
+- Link stored URLs in the backend modules only when they are http or https;
+  a `javascript:` URL from a sitemap or a Location header became a clickable
+  link
+- Refuse an export into the public directory with
+  `websitecheck:exportsnapshots`, as the backend modules do
+- Refuse run labels longer than 100 characters in `migrationcheck` and in
+  archive imports, and report a database error during an archive import
+  instead of an uncaught exception
+- Keep incomplete snapshots with a note in `cleanupsnapshots`, do not count
+  locked, noted or used snapshots towards `--keep`, and treat start URLs that
+  differ only in case or a trailing slash as one
+- Request a URL only once in `checksitemap --host` when the rewrite makes two
+  snapshot URLs equal
+- Delete a snapshot with its sitemaps and URLs in one transaction
+- Send Basic Auth credentials only to the start URL and language sitemaps
+  they were given for. A sitemap index could list a sub-sitemap on any host,
+  and `checksitemap`, `crawllinks` and `migrationcheck` sent the credentials to
+  every URL of a snapshot, so a foreign host named in a sitemap received them
+- Withhold Basic Auth credentials on a redirect to another port or from https
+  to plain http; until now only a change of host was checked
+- Store links and pages longer than 1024 characters in the status check;
+  `crawllinks` and `checksitemap` aborted with a database error on them
+- Resume the right run with `websitecheck:checksitemap --resume` when the
+  latest run was aborted before it stored a result; it reported the previous
+  run as complete and checked nothing
+- Remove the rows a re-run of `websitecheck:migrationcheck` no longer
+  produces — after a different `--group`, `--limit`, label or snapshot — so
+  the analysis no longer mixes them with the new ones
+
 ## [0.8.0] — 2026-09-22
 
 ### Added
@@ -224,3 +305,16 @@ First alpha release.
   target of a migration check
 - Add unit tests for verdicts, redirect chains, the sitemap crawler, language
   detection, site bases, sitemap groups, identity markers and snapshot retention
+
+[Unreleased]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/oliverthiele/ot-websitecheck/releases/tag/v0.1.0

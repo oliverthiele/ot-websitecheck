@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use TYPO3\CMS\Core\Core\Environment;
 
 /**
  * Writes sitemap snapshots and migration check runs into an archive file, so
@@ -57,6 +58,16 @@ class ExportSnapshotsCommand extends Command
         $directory = dirname($file);
         if (!is_dir($directory) || !is_writable($directory)) {
             $io->error(sprintf('The directory "%s" does not exist or is not writable.', $directory));
+            return self::FAILURE;
+        }
+        // An archive holds whole sitemaps and check results; the backend
+        // modules refuse the public directory for the same reason.
+        $resolvedDirectory = realpath($directory);
+        $publicPath = realpath(Environment::getPublicPath());
+        if ($resolvedDirectory !== false && $publicPath !== false
+            && ($resolvedDirectory === $publicPath || str_starts_with($resolvedDirectory . '/', $publicPath . '/'))
+        ) {
+            $io->error(sprintf('"%s" lies in the public directory, where the archive could be downloaded by anyone. Choose a path outside of it, e.g. var/websitecheck/.', $file));
             return self::FAILURE;
         }
 

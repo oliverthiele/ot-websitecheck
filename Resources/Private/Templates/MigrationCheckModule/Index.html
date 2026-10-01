@@ -2,6 +2,7 @@
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
     xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:ws="http://typo3.org/ns/OliverThiele/OtWebsitecheck/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -193,6 +194,7 @@
 </f:section>
 
 <f:section name="Results">
+    <f:render section="Pagination" arguments="{_all}"/>
     <f:for each="{sections}" as="section">
         <h2 class="mt-4">
             <f:if condition="{section.name}">
@@ -230,11 +232,26 @@
             </div>
         </f:for>
     </f:for>
+    <f:render section="Pagination" arguments="{_all}"/>
 
     <f:if condition="{sections}">
         <f:else>
             <f:be.infobox state="-1">{f:translate(key: '{languageFile}empty.noResults')}</f:be.infobox>
         </f:else>
+    </f:if>
+</f:section>
+
+<f:section name="Pagination">
+    <f:if condition="{pagination.pageCount} > 1">
+        <div class="d-flex flex-wrap align-items-center gap-2 my-3">
+            <span>{f:translate(key: '{languageFile}migrationResults.pagination', arguments: {0: pagination.from, 1: pagination.to, 2: pagination.total})}</span>
+            <f:if condition="{pagination.previousPage}">
+                <f:link.action action="index" arguments="{run: currentRun, group: currentGroup, language: currentLanguage, verdict: currentVerdict, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', showTargetSitemap: '{f:if(condition: showTargetSitemap, then: 1, else: 0)}', page: pagination.previousPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.previousPage')}</f:link.action>
+            </f:if>
+            <f:if condition="{pagination.nextPage}">
+                <f:link.action action="index" arguments="{run: currentRun, group: currentGroup, language: currentLanguage, verdict: currentVerdict, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', showTargetSitemap: '{f:if(condition: showTargetSitemap, then: 1, else: 0)}', page: pagination.nextPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.nextPage')}</f:link.action>
+            </f:if>
+        </div>
     </f:if>
 </f:section>
 
@@ -295,12 +312,12 @@
                 <br/><small class="text-danger">{f:translate(key: '{languageFile}abortReason.{row.abortReason}')}</small>
             </f:if>
         </td>
-        <td><a href="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</a></td>
+        <td><ws:webLink url="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</ws:webLink></td>
         <td>
             <f:for each="{row.chain}" as="step" iteration="stepIteration">
                 <f:if condition="{stepIteration.isFirst}">
-                    <f:then><a href="{step.url}" target="_blank" rel="noreferrer">{step.label}</a></f:then>
-                    <f:else> → <a href="{step.url}" target="_blank" rel="noreferrer">{step.label}</a> ({step.status})</f:else>
+                    <f:then><ws:webLink url="{step.url}" target="_blank" rel="noreferrer">{step.label}</ws:webLink></f:then>
+                    <f:else> → <ws:webLink url="{step.url}" target="_blank" rel="noreferrer">{step.label}</ws:webLink> ({step.status})</f:else>
                 </f:if>
             </f:for>
         </td>

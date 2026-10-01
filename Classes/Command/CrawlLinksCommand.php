@@ -13,6 +13,7 @@ use OliverThiele\OtWebsitecheck\Service\PageLinkCollector;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -67,7 +68,8 @@ class CrawlLinksCommand extends Command
         $this->addOption('samples-per-shape', null, InputOption::VALUE_REQUIRED, 'How many links per distinct link shape to check. A shape is the path plus the argument names, so hundreds of links differing only in a record uid collapse into one.', '2');
         $this->addOption('max-links', null, InputOption::VALUE_REQUIRED, 'Upper bound on the number of links checked, as a safety net on a large site.', '2000');
         $this->addOption('all-links', null, InputOption::VALUE_NONE, 'Also follow links without Extbase arguments. Off by default: the sitemap crawl already covers plain pages.');
-        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password".');
+        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a link answers without HTTP 200, with an error marker, not in time or ignores its arguments — for CI and monitoring. A run in which no link answered at all fails without this option, too.');
+        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password". Visible in the shell history and the process list — prefer the environment variables.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
 
@@ -106,6 +108,7 @@ class CrawlLinksCommand extends Command
         $io->title(sprintf('Website Check — links: snapshot "%s" (%s)', $snapshot->label, $environment));
 
         $pages = array_keys($this->sitemapSnapshotLocator->findUrls($snapshot, $this->stringList($input->getOption('group'))));
+        $authorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($snapshot);
         if ($pagesLimit > 0) {
             $pages = array_slice($pages, 0, $pagesLimit);
         }
@@ -126,8 +129,8 @@ class CrawlLinksCommand extends Command
         $this->retryRounds->run(
             $pages,
             $retries,
-            function (string $pageUrl) use ($timeout, $requestOptions, $io): FetchedPage {
-                $page = $this->pageFetcher->fetch($pageUrl, $timeout, $requestOptions);
+            function (string $pageUrl) use ($timeout, $requestOptions, $authorizedUrls, $io): FetchedPage {
+                $page = $this->pageFetcher->fetch($pageUrl, $timeout, UrlUtility::requestOptionsFor($requestOptions, $pageUrl, $authorizedUrls));
                 $io->progressAdvance();
                 return $page;
             },
@@ -175,6 +178,8 @@ class CrawlLinksCommand extends Command
         $notOk = 0;
         $withMarker = 0;
         $timedOut = 0;
+        $redirected = 0;
+        $answered = 0;
         $ignoredArguments = 0;
         $findings = [];
 
@@ -187,17 +192,21 @@ class CrawlLinksCommand extends Command
         $this->retryRounds->run(
             $linkItems,
             $retries,
-            function (array $linkItem) use ($timeout, $requestOptions, $io, &$baselineCache): array {
-                $result = $this->checkLink($linkItem['link'], $timeout, $requestOptions, $baselineCache);
+            function (array $linkItem) use ($timeout, $requestOptions, $authorizedUrls, $io, &$baselineCache): array {
+                $linkRequestOptions = UrlUtility::requestOptionsFor($requestOptions, $linkItem['link'], $authorizedUrls);
+                $result = $this->checkLink($linkItem['link'], $timeout, $linkRequestOptions, $baselineCache);
                 $io->progressAdvance();
                 return $result;
             },
             static fn(array $result): bool => $result['retryable'],
-            function (array $linkItem, array $result) use ($environment, &$notOk, &$withMarker, &$timedOut, &$ignoredArguments, &$findings): void {
+            function (array $linkItem, array $result) use ($environment, &$notOk, &$withMarker, &$timedOut, &$redirected, &$answered, &$ignoredArguments, &$findings): void {
                 ['link' => $link, 'foundOn' => $foundOn] = $linkItem;
                 $httpStatus = $result['page']->httpStatus;
                 $errorMarker = $result['errorMarker'];
 
+                if (!$result['page']->isConnectionError()) {
+                    $answered++;
+                }
                 if (!$result['page']->isOk()) {
                     $notOk++;
                 }
@@ -205,6 +214,8 @@ class CrawlLinksCommand extends Command
                     $ignoredArguments++;
                 } elseif ($errorMarker === ErrorMarkerDetector::MARKER_TIMEOUT) {
                     $timedOut++;
+                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
+                    $redirected++;
                 } elseif ($errorMarker !== '') {
                     $withMarker++;
                 }
@@ -227,11 +238,12 @@ class CrawlLinksCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d links checked, %d without HTTP 200, %d with an error marker, %d timed out, %d whose arguments had no effect.',
+            '%d links checked, %d without HTTP 200, %d with an error marker, %d timed out, %d only through a redirect, %d whose arguments had no effect.',
             count($linksToCheck),
             $notOk,
             $withMarker,
             $timedOut,
+            $redirected,
             $ignoredArguments,
         ));
 
@@ -241,6 +253,14 @@ class CrawlLinksCommand extends Command
             if (count($findings) > 60) {
                 $io->writeln(sprintf('… and %d more, see the Website Check backend module.', count($findings) - 60));
             }
+        }
+
+        if ($answered === 0) {
+            $io->error('Not a single link answered. Check the network and the Basic Auth credentials.');
+            return self::FAILURE;
+        }
+        if ($input->getOption('fail-on-problems') === true && $notOk + $withMarker + $timedOut + $ignoredArguments > 0) {
+            return self::FAILURE;
         }
 
         return self::SUCCESS;
@@ -261,7 +281,7 @@ class CrawlLinksCommand extends Command
         $errorMarker = $this->errorMarkerDetector->detectFor($linkedPage);
         $retryable = $linkedPage->isRetryable();
 
-        if ($linkedPage->isOk() && $errorMarker === '') {
+        if ($linkedPage->isOk() && ($errorMarker === '' || $errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED)) {
             $baseUrl = $this->pageLinkCollector->withoutArguments($link);
             if ($baseUrl !== $link) {
                 if (!array_key_exists($baseUrl, $baselineCache)) {

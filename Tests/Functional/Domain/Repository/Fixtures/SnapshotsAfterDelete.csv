@@ -1,0 +1,12 @@
+"tx_otwebsitecheck_domain_model_sitemapsnapshot"
+,"uid","label"
+,2,"live locked"
+,3,"staging"
+"tx_otwebsitecheck_domain_model_sitemapdocument"
+,"uid","snapshot"
+,5,2
+,6,3
+"tx_otwebsitecheck_domain_model_sitemapurl"
+,"uid","snapshot"
+,4,2
+,5,3
