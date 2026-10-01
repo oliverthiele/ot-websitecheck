@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   path, so such URLs overwrote each other
 - Add an index on the role of migration check rows. Requires a database
   schema update
+- Remove `ext_emconf.php`: TYPO3 14.2+ reads the extension metadata from
+  `composer.json` in classic mode as well (#108345), so the version and
+  `providesPackages` are declared there now. The state `alpha` is dropped;
+  a 0.x version already says that the API may still change
 - Declare `guzzlehttp/psr7`, `psr/clock` and `symfony/uid` as dependencies;
   the code uses them directly
 - Mention in the option help that credentials passed on the command line show

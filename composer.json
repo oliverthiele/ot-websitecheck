@@ -51,7 +51,11 @@
 	},
 	"extra": {
 		"typo3/cms": {
-			"extension-key": "ot_websitecheck"
+			"extension-key": "ot_websitecheck",
+			"version": "0.8.0",
+			"Package": {
+				"providesPackages": {}
+			}
 		}
 	}
 }
