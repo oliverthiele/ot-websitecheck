@@ -73,22 +73,19 @@ URL of the live site still leads to the same page or record on the new one.
 
 ## Installation
 
-The package is not on Packagist yet, so add its repository first:
-
-```json
-"repositories": {
-    "oliverthiele/ot-websitecheck": {
-        "type": "vcs",
-        "url": "https://github.com/oliverthiele/ot-websitecheck.git"
-    }
-}
-```
-
 ```bash
 composer require oliverthiele/ot-websitecheck
 ```
 
-Then update the database schema — also after every update of the extension:
+Then run the TYPO3 setup:
+
+```bash
+vendor/bin/typo3 extension:setup -e ot_websitecheck
+# or via DDEV:
+ddev typo3 extension:setup -e ot_websitecheck
+```
+
+After every update of the extension, update the database schema:
 
 ```bash
 vendor/bin/typo3 database:updateschema
