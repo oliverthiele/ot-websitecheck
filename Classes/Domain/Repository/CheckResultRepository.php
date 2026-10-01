@@ -7,11 +7,21 @@ namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Registry;
 
 class CheckResultRepository extends AbstractRepository
 {
     public const string TABLE = 'tx_otwebsitecheck_domain_model_check';
+    private const string REGISTRY_NAMESPACE = 'ot_websitecheck';
+
+    public function __construct(
+        ConnectionPool $connectionPool,
+        private readonly Registry $registry,
+    ) {
+        parent::__construct($connectionPool);
+    }
 
     /**
      * Upserts one result per (url, environment). The "reviewed" flag and note
@@ -87,11 +97,28 @@ class CheckResultRepository extends AbstractRepository
     }
 
     /**
-     * The start of the latest run that stored results for this environment and
-     * source, 0 when there is none.
+     * Notes that a run has started, before it stores its first result. A run
+     * that is aborted before that would otherwise leave no trace, and the
+     * latest run with results — possibly a complete one — would pass as the
+     * run to resume.
+     */
+    public function registerRunStart(string $environment, string $source, int $runStartedAt): void
+    {
+        $this->registry->set(self::REGISTRY_NAMESPACE, $this->runRegistryKey($environment, $source), $runStartedAt);
+    }
+
+    /**
+     * The start of the latest run for this environment and source, 0 when
+     * there is none. Runs started before runs were registered are found by
+     * their results.
      */
     public function findLatestRunStart(string $environment, string $source): int
     {
+        $registered = $this->registry->get(self::REGISTRY_NAMESPACE, $this->runRegistryKey($environment, $source));
+        if (is_int($registered) && $registered > 0) {
+            return $registered;
+        }
+
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         $latest = $queryBuilder
             ->selectLiteral($queryBuilder->expr()->max('run_started_at'))
@@ -220,6 +247,15 @@ class CheckResultRepository extends AbstractRepository
         }
 
         return $queryBuilder->executeStatement();
+    }
+
+    /**
+     * Environment and source are free text of any length; the registry key
+     * column is not.
+     */
+    private function runRegistryKey(string $environment, string $source): string
+    {
+        return 'checksitemap.run.' . hash('sha256', $environment . "\n" . $source);
     }
 
     private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed): void

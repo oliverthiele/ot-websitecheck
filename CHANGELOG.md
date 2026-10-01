@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to plain http; until now only a change of host was checked
 - Store links and pages longer than 1024 characters in the status check;
   `crawllinks` and `checksitemap` aborted with a database error on them
+- Resume the right run with `websitecheck:checksitemap --resume` when the
+  latest run was aborted before it stored a result; it reported the previous
+  run as complete and checked nothing
 
 ## [0.8.0] — 2026-09-22
 

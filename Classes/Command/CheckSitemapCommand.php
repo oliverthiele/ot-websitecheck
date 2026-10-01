@@ -129,6 +129,8 @@ class CheckSitemapCommand extends Command
                 return self::SUCCESS;
             }
             $urls = $remainingUrls;
+        } else {
+            $this->checkResultRepository->registerRunStart($environment, $snapshot->label, $runStartedAt);
         }
 
         $io->writeln(sprintf('Checking %d URLs against "%s"...', count($urls), $environment));

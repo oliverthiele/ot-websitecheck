@@ -548,11 +548,13 @@ typo3 websitecheck:checksitemap --snapshot=dev-current --environment=live-paths 
 
 The `source` column holds the label of the snapshot.
 
-Every result stores when its run started. `--resume` looks up the latest run
-of the same snapshot on the same `--environment`, skips the URLs that run
-already stored, and checks the rest under the same start, so a resumed run
-can itself be resumed again. It fails when there is no earlier run to
-continue — results stored before version 0.8.0 carry no run start.
+Every result stores when its run started, and every run notes its start in the
+TYPO3 registry before the first request. `--resume` continues the latest run
+of the same snapshot on the same `--environment` — also one aborted before it
+stored a single result —, skips the URLs that run already stored, and checks
+the rest under the same start, so a resumed run can itself be resumed again. It
+fails when there is no earlier run to continue — results stored before version
+0.8.0 carry no run start.
 
 ```bash
 typo3 websitecheck:checksitemap --snapshot=staging-current --environment=staging --resume
