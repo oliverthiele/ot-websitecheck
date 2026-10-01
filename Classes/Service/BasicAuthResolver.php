@@ -8,9 +8,11 @@ namespace OliverThiele\OtWebsitecheck\Service;
  * Resolves HTTP Basic Auth credentials from a "user:password" option value,
  * falling back to the environment variables <prefix>_USER and <prefix>_PASS.
  *
- * The fallback reads $_ENV, not getenv(): projects loading .env files via
- * vlucas/phpdotenv without the putenv adapter only ever populate
- * $_ENV/$_SERVER, so getenv() would stay empty.
+ * Each variable is read from $_ENV first, then with getenv(). Both are needed:
+ * vlucas/phpdotenv without the putenv adapter only populates $_ENV, while the
+ * real environment of the process — export, a cron entry, `op run` — only
+ * reaches $_ENV when variables_order contains "E", which php.ini-production
+ * leaves out.
  */
 class BasicAuthResolver
 {
@@ -27,12 +29,23 @@ class BasicAuthResolver
             return [];
         }
 
-        $user = $_ENV[$environmentPrefix . '_USER'] ?? null;
-        $password = $_ENV[$environmentPrefix . '_PASS'] ?? null;
-        if (is_string($user) && $user !== '' && is_string($password) && $password !== '') {
+        $user = $this->readEnvironment($environmentPrefix . '_USER');
+        $password = $this->readEnvironment($environmentPrefix . '_PASS');
+        if ($user !== '' && $password !== '') {
             return ['auth' => [$user, $password]];
         }
 
         return [];
+    }
+
+    private function readEnvironment(string $name): string
+    {
+        $value = $_ENV[$name] ?? null;
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+        $value = getenv($name);
+
+        return is_string($value) ? $value : '';
     }
 }

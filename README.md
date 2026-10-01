@@ -259,14 +259,35 @@ The import form and `websitecheck:importsitemaps --environment` override it.
 ### Environment variables
 
 Basic Auth credentials can be passed as options or read from the environment.
-The fallback reads `$_ENV`, not `getenv()` — projects loading `.env` files via
-`vlucas/phpdotenv` without the putenv adapter only populate `$_ENV`/`$_SERVER`.
+Prefer the environment: an option value ends up in the shell history and is
+visible to every user of the machine in the process list.
+
+Each variable is read from `$_ENV` first, then with `getenv()`. That covers
+`.env` files loaded via `vlucas/phpdotenv` without the putenv adapter, which
+only populate `$_ENV`, as well as the real environment of the process, which
+only reaches `$_ENV` when `variables_order` contains `E` —
+`php.ini-production` leaves it out.
 
 | Variable | Used by |
 |----------|---------|
 | `WEBSITECHECK_BASIC_AUTH_USER`, `WEBSITECHECK_BASIC_AUTH_PASS` | `importsitemaps`, `checksitemap`, `crawllinks` — the prefix can be changed with `--basic-auth-env` |
 | `WEBSITECHECK_REFERENCE_BASIC_AUTH_USER`, `WEBSITECHECK_REFERENCE_BASIC_AUTH_PASS` | `migrationcheck`, reference environment |
 | `WEBSITECHECK_TARGET_BASIC_AUTH_USER`, `WEBSITECHECK_TARGET_BASIC_AUTH_PASS` | `migrationcheck`, target environment |
+
+The credentials can come from a secret manager instead of a file. With the
+1Password CLI, `op run` resolves secret references in the environment and
+hands the values to the command only — they appear neither in the shell
+history nor in the process list:
+
+```bash
+export WEBSITECHECK_BASIC_AUTH_USER="op://Vault/Staging/username"
+export WEBSITECHECK_BASIC_AUTH_PASS="op://Vault/Staging/password"
+op run -- vendor/bin/typo3 websitecheck:checksitemap --snapshot=staging-current
+```
+
+`--basic-auth="$(op read …)"` is no replacement: the shell inserts the value
+before the command starts, so it is in the process list again. For a scheduled
+run, `op` needs a service account instead of a signed-in user.
 
 Credentials are only sent to the URLs they were given for: the start URL and
 the sitemap of every language, the way the import found them — given with

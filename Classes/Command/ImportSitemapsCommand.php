@@ -47,7 +47,7 @@ class ImportSitemapsCommand extends Command
         $this->addOption('sitemap', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Sitemap of one language as "hreflang=url", e.g. "de-DE=https://www.example.com/de/sitemap.xml". Replaces the detection from the start page.');
         $this->addOption('sitemap-path', null, InputOption::VALUE_REQUIRED, 'Sitemap path below the home page of each language, e.g. "sitemap.xml" or "?type=1533906435". Defaults to the path configured for the site of the start URL.');
         $this->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'HTTP timeout per request in seconds.', '20');
-        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password".');
+        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password". Visible in the shell history and the process list — prefer the environment variables.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
 

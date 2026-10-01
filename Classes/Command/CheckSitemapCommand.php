@@ -57,7 +57,7 @@ class CheckSitemapCommand extends Command
         $this->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Only check the first N URLs (for a quick test run).');
         $this->addOption('resume', null, InputOption::VALUE_NONE, 'Continue the latest run of this snapshot on this environment and skip the URLs it already checked. Expects the same options as that run.');
         $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a URL answers without HTTP 200, with an error marker or not in time — for CI and monitoring. A run in which no URL answered at all fails without this option, too.');
-        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level.');
+        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level. Visible in the shell history and the process list — prefer the environment variables.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
 

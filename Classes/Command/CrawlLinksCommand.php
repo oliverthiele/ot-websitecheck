@@ -69,7 +69,7 @@ class CrawlLinksCommand extends Command
         $this->addOption('max-links', null, InputOption::VALUE_REQUIRED, 'Upper bound on the number of links checked, as a safety net on a large site.', '2000');
         $this->addOption('all-links', null, InputOption::VALUE_NONE, 'Also follow links without Extbase arguments. Off by default: the sitemap crawl already covers plain pages.');
         $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a link answers without HTTP 200, with an error marker, not in time or ignores its arguments — for CI and monitoring. A run in which no link answered at all fails without this option, too.');
-        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password".');
+        $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password". Visible in the shell history and the process list — prefer the environment variables.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
 

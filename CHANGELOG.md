@@ -29,12 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   schema update
 - Declare `guzzlehttp/psr7`, `psr/clock` and `symfony/uid` as dependencies;
   the code uses them directly
+- Mention in the option help that credentials passed on the command line show
+  up in the shell history and the process list
 - Switch all label files to XLIFF 2.0. File names, unit ids, texts and
   placeholders are unchanged, so `LLL:` references and overrides keep working;
   override files in XLIFF 1.2 still load next to them
 
 ### Fixed
 
+- Read the Basic Auth environment variables with `getenv()` as well when
+  `$_ENV` does not have them: with `variables_order` without `E`, as in
+  `php.ini-production`, variables set with `export`, in a cron entry or by
+  `op run` were ignored
 - Exit `checksitemap`, `crawllinks` and `migrationcheck` with a failure code
   when not a single URL got an HTTP answer
 - Read at most 50 MB per response and stop a sitemap crawl at three nested
