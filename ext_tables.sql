@@ -19,7 +19,8 @@ CREATE TABLE tx_otwebsitecheck_domain_model_check
 CREATE TABLE tx_otwebsitecheck_domain_model_observation
 (
 	KEY run_environment_path (run_label, environment, requested_path(255)),
-	KEY run_identity (run_label, page_uid, record_uid)
+	KEY run_identity (run_label, page_uid, record_uid),
+	KEY role_run (role, run_label)
 );
 
 #
