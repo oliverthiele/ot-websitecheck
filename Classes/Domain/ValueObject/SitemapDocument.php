@@ -14,6 +14,10 @@ final readonly class SitemapDocument
     public const string TYPE_URLSET = 'urlset';
     public const string TYPE_INVALID = 'invalid';
     public const string TYPE_UNREACHABLE = 'unreachable';
+    /** Larger than ResponseSizeLimit::MAXIMUM_BYTES, compressed or not. */
+    public const string TYPE_TOO_LARGE = 'tooLarge';
+    /** Listed by an index, but not fetched: the crawl reached its depth or document limit. */
+    public const string TYPE_SKIPPED = 'skipped';
 
     /**
      * @param list<array{url: string, lastmod: string}> $entries Page URLs of a urlset, empty otherwise.

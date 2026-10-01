@@ -28,7 +28,7 @@ class PageFetcher
     public function fetch(string $url, int $timeout, array $requestOptions = []): FetchedPage
     {
         try {
-            $response = $this->requestFactory->request($url, 'GET', $requestOptions + [
+            $response = $this->requestFactory->request($url, 'GET', $requestOptions + ResponseSizeLimit::requestOptions() + [
                 'timeout' => $timeout,
                 'http_errors' => false,
             ]);

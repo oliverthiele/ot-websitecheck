@@ -417,6 +417,11 @@
         <source>Link arguments have no effect</source>
       </segment>
     </unit>
+    <unit id="errorMarker.responseTooLarge">
+      <segment>
+        <source>Response too large</source>
+      </segment>
+    </unit>
     <unit id="empty.noResults">
       <segment>
         <source>No results match the current filters.</source>
@@ -757,6 +762,11 @@
         <source>timeout</source>
       </segment>
     </unit>
+    <unit id="abortReason.responseTooLarge">
+      <segment>
+        <source>response too large</source>
+      </segment>
+    </unit>
     <unit id="snapshot.noLanguage">
       <segment>
         <source>(no language)</source>
@@ -815,6 +825,16 @@
     <unit id="documentType.unreachable">
       <segment>
         <source>not reachable</source>
+      </segment>
+    </unit>
+    <unit id="documentType.tooLarge">
+      <segment>
+        <source>too large</source>
+      </segment>
+    </unit>
+    <unit id="documentType.skipped">
+      <segment>
+        <source>skipped, crawl limit reached</source>
       </segment>
     </unit>
     <unit id="snapshot.summary">

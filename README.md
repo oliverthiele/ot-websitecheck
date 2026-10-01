@@ -418,7 +418,7 @@ problems and warnings" is set.
 | `redirectBroken` | Redirects, but ends in an error, a loop or too many hops |
 | `timeout` | No complete answer within `--timeout`, also after the retries — slow, not necessarily missing; check again |
 | `otherContent` | Answers 200 with a different page, record or language |
-| `identityUnknown` | Answers 200, but the markers needed for a comparison are missing |
+| `identityUnknown` | Answers 200, but the markers needed for a comparison are missing — or the page is larger than 50 MB and was not read |
 | `referenceNotOk` | Already not working on the reference — not compared, but listed with the problems: the sitemap lists a broken URL |
 
 ### Warnings
@@ -458,6 +458,12 @@ page URL with its sitemap group and `lastmod`. Each language is fetched
 completely before it is stored; an interrupted import stays marked as
 incomplete. A sitemap file that fails is stored with the snapshot and reported,
 not skipped. A snapshot without a single page URL is not kept.
+
+A gzip-compressed sitemap (`sitemap.xml.gz`) is decompressed and stored as XML.
+Every response is read up to 50 MB — the largest sitemap file the protocol
+allows; a larger one is stored as "too large". An index nested more than three
+levels deep, or anything beyond 5,000 sitemap files per language, is stored as
+"skipped" instead of being fetched.
 
 | Option | Description |
 |--------|-------------|
@@ -680,7 +686,8 @@ Locks and notes are restored with the snapshots.
 | `--label-suffix` | Appended to each label that is taken by a different record, e.g. `-restored`. |
 | `--dry-run` | Show what would be imported or skipped, write nothing. |
 
-Only archives of the format version this extension writes are read.
+Only archives of the format version this extension writes are read, up to
+64 MB as a file and 256 MB decompressed.
 
 ### `websitecheck:cleanupsnapshots`
 

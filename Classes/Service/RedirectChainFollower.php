@@ -53,7 +53,7 @@ class RedirectChainFollower
                     'timeout' => $timeout,
                     'allow_redirects' => false,
                     'http_errors' => false,
-                ] + $options);
+                ] + $options + ResponseSizeLimit::requestOptions());
             } catch (\Throwable $throwable) {
                 $steps[] = ['url' => $currentUrl, 'status' => 0];
                 return RedirectChain::abortedByTransferFailure($steps, TransferFailure::fromThrowable($throwable));

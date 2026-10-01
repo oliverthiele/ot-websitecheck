@@ -46,14 +46,8 @@ class ImportSnapshotsCommand extends Command
             $io->error('--file must name a readable archive file.');
             return self::FAILURE;
         }
-        $content = file_get_contents($file);
-        if ($content === false) {
-            $io->error(sprintf('"%s" could not be read.', $file));
-            return self::FAILURE;
-        }
-
         try {
-            $archive = $this->snapshotArchive->decode($content);
+            $archive = $this->snapshotArchive->readFile($file);
             $plan = $this->snapshotArchiveImporter->plan($archive, $this->stringValue($input->getOption('label-suffix')));
         } catch (SnapshotArchiveException $exception) {
             $io->error($exception->getMessage());

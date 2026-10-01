@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Tests\Unit\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapDocument;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\TransferFailure;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\SiteBaseProvider;
 use OliverThiele\OtWebsitecheck\Service\SitemapDocumentCrawler;
@@ -80,6 +81,41 @@ final class SitemapDocumentCrawlerTest extends UnitTestCase
         $documents = $this->crawl(['https://www.example.com/sitemap.xml' => new FetchedPage(200, $selfReferencing)]);
 
         self::assertCount(1, $documents);
+    }
+
+    #[Test]
+    public function gzipCompressedSitemapIsStoredDecompressed(): void
+    {
+        $documents = $this->crawl(['https://www.example.com/sitemap.xml' => new FetchedPage(200, (string)gzencode(self::PAGES))]);
+
+        self::assertSame(SitemapDocument::TYPE_URLSET, $documents[0]->type);
+        self::assertSame(self::PAGES, $documents[0]->body);
+        self::assertCount(2, $documents[0]->entries);
+    }
+
+    #[Test]
+    public function responseAbortedByTheSizeLimitIsKeptAsTooLarge(): void
+    {
+        $documents = $this->crawl(['https://www.example.com/sitemap.xml' => new FetchedPage(0, '', TransferFailure::TooLarge)]);
+
+        self::assertSame(SitemapDocument::TYPE_TOO_LARGE, $documents[0]->type);
+    }
+
+    #[Test]
+    public function nestingBeyondTheDepthLimitIsSkipped(): void
+    {
+        $pages = [];
+        for ($level = 0; $level <= SitemapDocumentCrawler::MAXIMUM_DEPTH + 1; $level++) {
+            $pages['https://www.example.com/sitemap.xml' . ($level > 0 ? '?level=' . $level : '')] = new FetchedPage(
+                200,
+                '<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>https://www.example.com/sitemap.xml?level=' . ($level + 1) . '</loc></sitemap></sitemapindex>',
+            );
+        }
+
+        $documents = $this->crawl($pages);
+
+        self::assertCount(SitemapDocumentCrawler::MAXIMUM_DEPTH + 2, $documents);
+        self::assertSame(SitemapDocument::TYPE_SKIPPED, $documents[array_key_last($documents)]->type);
     }
 
     #[Test]

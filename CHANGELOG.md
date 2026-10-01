@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Read gzip-compressed sitemaps (`sitemap.xml.gz`)
+
 ### Changed
 
 - Store `url`, `path` and `source` of the status check results as text like
@@ -21,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Read at most 50 MB per response and stop a sitemap crawl at three nested
+  indexes or 5,000 files; a sitemap of any size could exhaust the memory
+- Read archive files only up to 64 MB, 256 MB decompressed, also when the
+  Sitemaps module lists them
 - Link stored URLs in the backend modules only when they are http or https;
   a `javascript:` URL from a sitemap or a Location header became a clickable
   link

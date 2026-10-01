@@ -128,11 +128,6 @@ class ArchiveFileService
      */
     private function read(ArchiveFile $file): array
     {
-        $content = file_get_contents($file->path);
-        if ($content === false) {
-            throw new SnapshotArchiveException(sprintf('"%s" could not be read.', $file->name), 1789490403);
-        }
-
-        return $this->snapshotArchive->decode($content);
+        return $this->snapshotArchive->readFile($file->path);
     }
 }

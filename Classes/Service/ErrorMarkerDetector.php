@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\TransferFailure;
 
 /**
  * Detects the typical HTML markers TYPO3 leaves behind when a page fails,
@@ -25,6 +26,7 @@ class ErrorMarkerDetector
 
     public const string MARKER_CONNECTION_ERROR = 'connectionError';
     public const string MARKER_TIMEOUT = 'timeout';
+    public const string MARKER_RESPONSE_TOO_LARGE = 'responseTooLarge';
 
     /**
      * The marker of a fetched page: a failed connection is a marker of its own,
@@ -32,11 +34,12 @@ class ErrorMarkerDetector
      */
     public function detectFor(FetchedPage $page): string
     {
-        if ($page->isTimeout()) {
-            return self::MARKER_TIMEOUT;
-        }
-
-        return $page->isConnectionError() ? self::MARKER_CONNECTION_ERROR : $this->detect($page->body);
+        return match ($page->transferFailure) {
+            TransferFailure::Timeout => self::MARKER_TIMEOUT,
+            TransferFailure::TooLarge => self::MARKER_RESPONSE_TOO_LARGE,
+            null => $page->isConnectionError() ? self::MARKER_CONNECTION_ERROR : $this->detect($page->body),
+            default => self::MARKER_CONNECTION_ERROR,
+        };
     }
 
     public function detect(string $html): string
