@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resume the right run with `websitecheck:checksitemap --resume` when the
   latest run was aborted before it stored a result; it reported the previous
   run as complete and checked nothing
+- Remove the rows a re-run of `websitecheck:migrationcheck` no longer
+  produces — after a different `--group`, `--limit`, label or snapshot — so
+  the analysis no longer mixes them with the new ones
 
 ## [0.8.0] — 2026-09-22
 

@@ -57,7 +57,7 @@ class MigrationCheckCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('Check whether the URLs of a reference environment still lead to the same content on a target environment.');
-        $this->addOption('run', null, InputOption::VALUE_REQUIRED, 'Label that groups the results of this check, e.g. "relaunch". Re-running with the same label updates the rows.');
+        $this->addOption('run', null, InputOption::VALUE_REQUIRED, 'Label that groups the results of this check, e.g. "relaunch". Re-running with the same label replaces its rows; review states of unchanged findings are kept.');
         $this->addOption('reference-snapshot', null, InputOption::VALUE_REQUIRED, 'Label of the sitemap snapshot of the reference environment (the state before). Every URL in it is checked.');
         $this->addOption('target-snapshot', null, InputOption::VALUE_REQUIRED, 'Label of the sitemap snapshot of the target environment (the state after). Its host is where the reference paths are requested; its pages are read to suggest where a missing URL should redirect to.');
         $this->addOption('reference-label', null, InputOption::VALUE_REQUIRED, 'Environment label of the reference rows.', 'reference');
@@ -238,13 +238,11 @@ class MigrationCheckCommand extends Command
             ];
             $checkedTargetUrls[$targetUrl] = true;
         }
-        $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
         $targetUrls = array_diff_key($targetSnapshotUrls, $checkedTargetUrls);
-        $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
-        $observations = [];
+        $sitemapObservations = [];
         foreach ($targetUrls as $targetUrl => $group) {
-            $observations[] = [
+            $sitemapObservations[] = [
                 'environment' => $targetSitemapLabel,
                 'role' => Observation::ROLE_TARGET_SITEMAP,
                 'group' => $group,
@@ -252,7 +250,28 @@ class MigrationCheckCommand extends Command
                 'requestOptions' => UrlUtility::requestOptionsFor($targetRequestOptions, $targetUrl, $targetAuthorizedUrls),
             ];
         }
+
+        // A re-run with another selection, other labels or changed snapshots
+        // must not leave rows of the earlier one behind: the analysis reads all
+        // rows of the run. Rows the run produces again stay, with their review.
+        $keptRows = [];
+        foreach ([...$observations, ...$sitemapObservations] as $observation) {
+            $keptRows[$observation['environment']][UrlUtility::pathWithQuery($observation['url'])] = true;
+        }
+        foreach ($referenceRows as $row) {
+            if (isset($referenceUrls[(string)$row['requested_url']])) {
+                $keptRows[(string)$row['environment']][(string)$row['requested_path']] = true;
+            }
+        }
+        $removedCount = $this->observationRepository->deleteRowsOfRunExcept($runLabel, $keptRows);
+        if ($removedCount > 0) {
+            $io->note(sprintf('Removed %d rows of an earlier run "%s" that this selection no longer covers.', $removedCount, $runLabel));
+        }
+
         $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
+
+        $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
+        $this->observeAll($io, $runLabel, $sitemapObservations, $timeout, $maximumHops, $retries, $patterns);
 
         $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
 

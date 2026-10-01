@@ -508,9 +508,14 @@ language — or over http and https stops the check before anything is
 requested, with the colliding URLs listed. Import one snapshot per host for
 such a site.
 
+A re-run with the same `--run` keeps the review state of every row it produces
+again and removes the rows it no longer produces — after a different
+`--group`, `--limit` or label, or a changed snapshot — so the results never mix
+two selections.
+
 | Option | Description |
 |--------|-------------|
-| `--run` | Required. Groups the results; a re-run with the same label updates the rows. |
+| `--run` | Required. Groups the results; a re-run with the same label replaces the rows, see above. |
 | `--reference-snapshot` | Required. Label of the snapshot of the state before; every URL in it is checked. |
 | `--target-snapshot` | Required. Label of the snapshot of the state after; its host is the target host. |
 | `--reference-label`, `--target-label` | Environment labels shown in the module (default: `reference`, `target`). |

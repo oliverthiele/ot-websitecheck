@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Domain\Model\Observation;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
@@ -279,6 +280,43 @@ class ObservationRepository extends AbstractRepository
         return $queryBuilder->delete(self::TABLE)
             ->where($queryBuilder->expr()->eq('run_label', $queryBuilder->createNamedParameter($runLabel)))
             ->executeStatement();
+    }
+
+    /**
+     * Removes every row of a run whose environment and path are not listed in
+     * $keptRows.
+     *
+     * @param array<string, array<string, true>> $keptRows environment => requested path => true
+     * @return int number of removed rows
+     */
+    public function deleteRowsOfRunExcept(string $runLabel, array $keptRows): int
+    {
+        if ($runLabel === '') {
+            return 0;
+        }
+
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('uid', 'environment', 'requested_path')
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->eq('run_label', $queryBuilder->createNamedParameter($runLabel)))
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $removedUids = [];
+        foreach ($rows as $row) {
+            if (!isset($keptRows[RowValue::string($row, 'environment')][RowValue::string($row, 'requested_path')])) {
+                $removedUids[] = RowValue::int($row, 'uid');
+            }
+        }
+
+        foreach (array_chunk($removedUids, self::INSERT_CHUNK_SIZE) as $chunk) {
+            $deleteQueryBuilder = $this->createQueryBuilder(self::TABLE);
+            $deleteQueryBuilder->delete(self::TABLE)
+                ->where($deleteQueryBuilder->expr()->in('uid', $deleteQueryBuilder->createNamedParameter($chunk, ArrayParameterType::INTEGER)))
+                ->executeStatement();
+        }
+
+        return count($removedUids);
     }
 
     private function findUid(string $runLabel, string $environment, string $requestedPath): ?int
