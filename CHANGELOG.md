@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `--fail-on-problems` to `websitecheck:checksitemap`,
+  `websitecheck:crawllinks` and `websitecheck:migrationcheck` for CI: exit with
+  a failure code when a result needs attention
 - Add the marker `redirected` to the status check for a URL that only answers
   through a redirect, and `tooManyRedirects` for more than ten
 - Read gzip-compressed sitemaps (`sitemap.xml.gz`)
@@ -27,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Exit `checksitemap`, `crawllinks` and `migrationcheck` with a failure code
+  when not a single URL got an HTTP answer
 - Read at most 50 MB per response and stop a sitemap crawl at three nested
   indexes or 5,000 files; a sitemap of any size could exhaust the memory
 - Read archive files only up to 64 MB, 256 MB decompressed, also when the

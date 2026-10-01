@@ -56,6 +56,7 @@ class CheckSitemapCommand extends Command
         $this->addOption('retries', null, InputOption::VALUE_REQUIRED, 'How often a URL that timed out or got no connection is requested again. Retries run after all other URLs.', '2');
         $this->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Only check the first N URLs (for a quick test run).');
         $this->addOption('resume', null, InputOption::VALUE_NONE, 'Continue the latest run of this snapshot on this environment and skip the URLs it already checked. Expects the same options as that run.');
+        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a URL answers without HTTP 200, with an error marker or not in time — for CI and monitoring. A run in which no URL answered at all fails without this option, too.');
         $this->addOption('basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth credentials as "user:password", for environments protected at the webserver level.');
         $this->addOption('basic-auth-env', null, InputOption::VALUE_REQUIRED, 'Prefix of the environment variables holding the Basic Auth credentials, read as <prefix>_USER and <prefix>_PASS.', 'WEBSITECHECK_BASIC_AUTH');
     }
@@ -139,6 +140,7 @@ class CheckSitemapCommand extends Command
         $errorMarkerCount = 0;
         $timeoutCount = 0;
         $redirectedCount = 0;
+        $answeredCount = 0;
         $this->retryRounds->run(
             $urls,
             $retries,
@@ -148,8 +150,11 @@ class CheckSitemapCommand extends Command
                 return $page;
             },
             static fn(FetchedPage $page): bool => $page->isRetryable(),
-            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$redirectedCount): void {
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$redirectedCount, &$answeredCount): void {
                 $errorMarker = $this->errorMarkerDetector->detectFor($page);
+                if (!$page->isConnectionError()) {
+                    $answeredCount++;
+                }
                 if (!$page->isOk()) {
                     $notOkCount++;
                 }
@@ -181,6 +186,14 @@ class CheckSitemapCommand extends Command
             $timeoutCount,
             $redirectedCount,
         ));
+
+        if ($answeredCount === 0) {
+            $io->error('Not a single URL answered. Check the host, the network and the Basic Auth credentials.');
+            return self::FAILURE;
+        }
+        if ($input->getOption('fail-on-problems') === true && $notOkCount + $errorMarkerCount + $timeoutCount > 0) {
+            return self::FAILURE;
+        }
 
         return self::SUCCESS;
     }

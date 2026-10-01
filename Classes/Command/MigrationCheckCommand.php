@@ -72,6 +72,7 @@ class MigrationCheckCommand extends Command
         $this->addOption('record-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the record table (group 1) and uid (group 2) from the HTML of a detail page.', IdentityPatterns::DEFAULT_RECORD);
         $this->addOption('reference-run', null, InputOption::VALUE_REQUIRED, 'Take the reference rows from this earlier run instead of requesting the reference again, e.g. after the reference site has been replaced. The run must have compared the same reference snapshot; may equal --run.');
         $this->addOption('analyze-only', null, InputOption::VALUE_NONE, 'Do not request anything; recompute verdicts, warnings and suggestions for the stored rows of --run.');
+        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a target row has a verdict that needs attention (missing, redirectBroken, otherContent, identityUnknown, timeout) — for CI. A run in which no target URL answered at all fails without this option, too.');
         $this->addOption('reference-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the reference environment as "user:password". Falls back to WEBSITECHECK_REFERENCE_BASIC_AUTH_USER/_PASS.');
         $this->addOption('target-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the target environment as "user:password". Falls back to WEBSITECHECK_TARGET_BASIC_AUTH_USER/_PASS.');
     }
@@ -89,8 +90,9 @@ class MigrationCheckCommand extends Command
                 $io->error('--run is required.');
                 return self::FAILURE;
             }
-            $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
-            return self::SUCCESS;
+            $verdictCounts = $this->analyzeRun($runLabel);
+            $this->renderVerdictCounts($io, $verdictCounts, $runLabel);
+            return $this->exitCode($input, $verdictCounts);
         }
 
         if ($runLabel === '' || $referenceLabel === '' || $targetLabel === '' || $referenceLabel === $targetLabel) {
@@ -268,14 +270,32 @@ class MigrationCheckCommand extends Command
             $io->note(sprintf('Removed %d rows of an earlier run "%s" that this selection no longer covers.', $removedCount, $runLabel));
         }
 
-        $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
+        $answeredCount = $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
         $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
-        $this->observeAll($io, $runLabel, $sitemapObservations, $timeout, $maximumHops, $retries, $patterns);
+        $answeredCount += $this->observeAll($io, $runLabel, $sitemapObservations, $timeout, $maximumHops, $retries, $patterns);
 
-        $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
+        $verdictCounts = $this->analyzeRun($runLabel);
+        $this->renderVerdictCounts($io, $verdictCounts, $runLabel);
+        if ($answeredCount === 0) {
+            $io->error('Not a single URL answered. Check the hosts, the network and the Basic Auth credentials.');
+            return self::FAILURE;
+        }
 
-        return self::SUCCESS;
+        return $this->exitCode($input, $verdictCounts);
+    }
+
+    /**
+     * @param array<string, int> $verdictCounts
+     */
+    private function exitCode(InputInterface $input, array $verdictCounts): int
+    {
+        if ($input->getOption('fail-on-problems') !== true) {
+            return self::SUCCESS;
+        }
+        $problemCount = array_sum(array_intersect_key($verdictCounts, array_flip(MigrationAnalyzer::PROBLEM_VERDICTS)));
+
+        return $problemCount > 0 ? self::FAILURE : self::SUCCESS;
     }
 
     /**
@@ -353,6 +373,7 @@ class MigrationCheckCommand extends Command
      * only its last outcome is stored.
      *
      * @param list<array{environment: string, role: string, group: string, url: string, requestOptions: array<string, mixed>}> $observations
+     * @return int how many URLs got an HTTP answer on their first request
      */
     private function observeAll(
         SymfonyStyle $io,
@@ -362,7 +383,8 @@ class MigrationCheckCommand extends Command
         int $maximumHops,
         int $retries,
         IdentityPatterns $patterns,
-    ): void {
+    ): int {
+        $answeredCount = 0;
         $this->retryRounds->run(
             $observations,
             $retries,
@@ -372,7 +394,10 @@ class MigrationCheckCommand extends Command
                 return $redirectChain;
             },
             static fn(RedirectChain $redirectChain): bool => $redirectChain->isRetryable(),
-            function (array $observation, RedirectChain $redirectChain) use ($runLabel, $patterns): void {
+            function (array $observation, RedirectChain $redirectChain) use ($runLabel, $patterns, &$answeredCount): void {
+                if ($redirectChain->getFirstStatus() > 0) {
+                    $answeredCount++;
+                }
                 // An error page renders its own page uid — only a working page has an identity worth comparing.
                 $identity = $redirectChain->getFinalStatus() === 200
                     ? $this->identityExtractor->extract($redirectChain->finalBody, $patterns)
@@ -389,6 +414,8 @@ class MigrationCheckCommand extends Command
             },
         );
         $io->progressFinish();
+
+        return $answeredCount;
     }
 
     /**

@@ -535,6 +535,7 @@ two selections.
 | `--reference-basic-auth`, `--target-basic-auth` | `user:password`, see [Environment variables](#environment-variables). |
 | `--reference-run` | Take the reference rows from this earlier run instead of requesting the reference again. The run must have compared the same `--reference-snapshot`; it may be the `--run` itself. |
 | `--analyze-only` | Request nothing; recompute verdicts, warnings and suggestions for the stored rows of `--run`. |
+| `--fail-on-problems` | Exit with a failure code when a target row has a verdict that needs attention, see [Redirects and exit codes](#redirects-and-exit-codes). Works with `--analyze-only` as well. |
 
 With `--reference-run`, only the target is requested. The reference rows are
 copied from the earlier run with their environment label, which therefore
@@ -562,6 +563,7 @@ typo3 websitecheck:checksitemap --snapshot=dev-current --environment=live-paths 
 | `--retries` | How often a URL that timed out or got no connection is requested again (default: `2`), see [Retries](#retries). |
 | `--limit` | Only check the first N URLs. |
 | `--resume` | Continue the latest run of this snapshot on this environment, see below. |
+| `--fail-on-problems` | Exit with a failure code when a result needs attention, see [Redirects and exit codes](#redirects-and-exit-codes). |
 | `--basic-auth`, `--basic-auth-env` | `user:password`, or the prefix of the environment variables, see [Environment variables](#environment-variables). |
 
 The `source` column holds the label of the snapshot.
@@ -612,6 +614,7 @@ plugin on the same page, so only a couple of samples per shape are checked.
 | `--max-links` | Upper bound on links checked (default: `2000`). |
 | `--pages-limit` | Only read links from the first N pages of the snapshot. |
 | `--all-links` | Also follow links without Extbase arguments. |
+| `--fail-on-problems` | As for `checksitemap`; ignored link arguments count as a problem as well. |
 | `--timeout`, `--retries`, `--basic-auth`, `--basic-auth-env` | As for `checksitemap`. Retries apply to the pages links are read from as well. |
 
 The `source` column holds the page a link was found on, which names the
@@ -642,13 +645,20 @@ the marker `timeout` in the status check, the abort reason and verdict
 `timeout` in the migration check. A connect timeout — the server did not even
 accept the connection — counts as no connection.
 
-### Redirects
+### Redirects and exit codes
 
 `checksitemap` and `crawllinks` follow up to ten redirects and store the status
 of the page they end on. A URL that works only through a redirect gets the
 marker `redirected`, unless the final page shows an error, whose marker wins;
 more than ten redirects give the marker `tooManyRedirects`. The migration check
 follows redirects itself, one hop at a time, see above.
+
+`checksitemap`, `crawllinks` and `migrationcheck` exit with a failure code when
+not a single URL got an HTTP answer — a wrong host, no network or rejected
+credentials. With `--fail-on-problems`, they also fail when a result needs
+attention: a status other than 200, an error marker or a timeout, ignored link
+arguments, or one of the verdicts `missing`, `redirectBroken`, `otherContent`,
+`identityUnknown` and `timeout`. A redirect alone does not fail a run.
 
 ### `websitecheck:exportsnapshots`
 
