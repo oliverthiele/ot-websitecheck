@@ -95,6 +95,10 @@ class MigrationCheckCommand extends Command
             return $this->exitCode($input, $verdictCounts);
         }
 
+        if (mb_strlen($runLabel) > MigrationRunRepository::MAXIMUM_LABEL_LENGTH) {
+            $io->error(sprintf('--run must not be longer than %d characters.', MigrationRunRepository::MAXIMUM_LABEL_LENGTH));
+            return self::FAILURE;
+        }
         if ($runLabel === '' || $referenceLabel === '' || $targetLabel === '' || $referenceLabel === $targetLabel) {
             $io->error('--run is required, and --reference-label and --target-label must differ.');
             return self::FAILURE;

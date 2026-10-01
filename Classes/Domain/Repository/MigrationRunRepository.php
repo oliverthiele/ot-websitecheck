@@ -15,6 +15,7 @@ use Symfony\Component\Uid\Uuid;
 class MigrationRunRepository extends AbstractRepository
 {
     public const string TABLE = 'tx_otwebsitecheck_domain_model_migrationrun';
+    public const int MAXIMUM_LABEL_LENGTH = 100;
 
     /**
      * A re-run with the same label replaces the stored snapshots of the run

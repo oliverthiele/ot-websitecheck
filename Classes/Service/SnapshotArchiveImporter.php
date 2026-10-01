@@ -113,8 +113,9 @@ class SnapshotArchiveImporter
                     $conflicts[] = sprintf('%s "%s"', $type, $item['originalLabel']);
                     continue;
                 }
-                if ($key === 'snapshots' && mb_strlen($item['label']) > SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH) {
-                    throw new SnapshotArchiveException(sprintf('The label "%s" is longer than %d characters.', $item['label'], SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH), 1789490201);
+                $maximumLength = $key === 'snapshots' ? SitemapSnapshotImporter::MAXIMUM_LABEL_LENGTH : MigrationRunRepository::MAXIMUM_LABEL_LENGTH;
+                if (mb_strlen($item['label']) > $maximumLength) {
+                    throw new SnapshotArchiveException(sprintf('The label "%s" is longer than %d characters.', $item['label'], $maximumLength), 1789490201);
                 }
                 $plan[$key][] = ['label' => $item['label'], 'originalLabel' => $item['originalLabel'], 'action' => $item['action']];
             }

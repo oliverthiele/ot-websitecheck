@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Command;
 
+use Doctrine\DBAL\Exception as DbalException;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
 use OliverThiele\OtWebsitecheck\Service\SnapshotArchive;
 use OliverThiele\OtWebsitecheck\Service\SnapshotArchiveImporter;
@@ -68,7 +69,12 @@ class ImportSnapshotsCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->snapshotArchiveImporter->import($archive, $plan);
+        try {
+            $this->snapshotArchiveImporter->import($archive, $plan);
+        } catch (SnapshotArchiveException|DbalException $exception) {
+            $io->error(sprintf('The import was rolled back, nothing was written: %s', $exception->getMessage()));
+            return self::FAILURE;
+        }
         $io->success(sprintf('Imported %s.', $file));
 
         return self::SUCCESS;

@@ -674,7 +674,8 @@ rows, reviewed flags and notes included. A run brings the snapshots it
 compared. Snapshots and runs without a uuid get one on export.
 
 Where the file goes is up to the project — the path has no default, and the
-directory has to exist. Keep the file out of version control.
+directory has to exist. A path in the public directory is refused, as in the
+backend modules. Keep the file out of version control.
 
 | Option | Description |
 |--------|-------------|
