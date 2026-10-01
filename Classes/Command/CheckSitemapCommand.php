@@ -98,7 +98,8 @@ class CheckSitemapCommand extends Command
         $urls = array_keys($this->sitemapSnapshotLocator->findUrls($snapshot, $this->stringList($input->getOption('group'))));
         $authorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($snapshot);
         if ($host !== '') {
-            $urls = array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $urls);
+            // http and https, or www and the bare domain, become the same URL here.
+            $urls = array_values(array_unique(array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $urls)));
             $authorizedUrls = array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $authorizedUrls);
             $io->writeln(sprintf('Requesting every path on host "%s".', $host));
         }

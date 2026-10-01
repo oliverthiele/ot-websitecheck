@@ -47,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keep incomplete snapshots with a note in `cleanupsnapshots`, do not count
   locked, noted or used snapshots towards `--keep`, and treat start URLs that
   differ only in case or a trailing slash as one
+- Request a URL only once in `checksitemap --host` when the rewrite makes two
+  snapshot URLs equal
 - Delete a snapshot with its sitemaps and URLs in one transaction
 - Send Basic Auth credentials only to the start URL and language sitemaps
   they were given for. A sitemap index could list a sub-sitemap on any host,
