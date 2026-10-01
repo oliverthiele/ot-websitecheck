@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   path, so such URLs overwrote each other
 - Add an index on the role of migration check rows. Requires a database
   schema update
+- Declare `guzzlehttp/psr7`, `psr/clock` and `symfony/uid` as dependencies;
+  the code uses them directly
 - Switch all label files to XLIFF 2.0. File names, unit ids, texts and
   placeholders are unchanged, so `LLL:` references and overrides keep working;
   override files in XLIFF 1.2 still load next to them
