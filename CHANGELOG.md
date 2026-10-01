@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store `url`, `path` and `source` of the status check results as text like
   the other tables, and declare only the indexes of that table in
   `ext_tables.sql`. Requires a database schema update
+- Stop `websitecheck:migrationcheck` before requesting anything when a snapshot
+  lists the same path on more than one host or scheme; rows are matched by
+  path, so such URLs overwrote each other
 
 ### Fixed
 

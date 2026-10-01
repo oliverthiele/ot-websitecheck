@@ -188,6 +188,23 @@ class MigrationCheckCommand extends Command
                 return self::FAILURE;
             }
         }
+        $targetSnapshotUrls = $this->sitemapSnapshotLocator->findUrls($targetSnapshot, $groups);
+        foreach (['reference' => [$referenceSnapshot, $referenceUrls], 'target' => [$targetSnapshot, $targetSnapshotUrls]] as $side => [$snapshot, $urls]) {
+            $collisions = $this->findPathCollisions(array_keys($urls));
+            if ($collisions !== []) {
+                $io->error(sprintf(
+                    'The %s snapshot "%s" lists the same path on more than one host or scheme. A migration check matches reference and target by path, so these URLs would overwrite each other. Import one snapshot per host, or narrow the selection with --group.',
+                    $side,
+                    $snapshot->label,
+                ));
+                $io->listing(array_map(
+                    static fn(string $path, array $collidingUrls): string => $path . ': ' . implode(', ', $collidingUrls),
+                    array_keys(array_slice($collisions, 0, 5, true)),
+                    array_slice($collisions, 0, 5, true),
+                ));
+                return self::FAILURE;
+            }
+        }
         $this->migrationRunRepository->storeRun($runLabel, $referenceSnapshot->uid, $targetSnapshot->uid, $targetHost, time());
 
         $io->section(sprintf(
@@ -223,10 +240,7 @@ class MigrationCheckCommand extends Command
         }
         $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 
-        $targetUrls = array_diff_key(
-            $this->sitemapSnapshotLocator->findUrls($targetSnapshot, $groups),
-            $checkedTargetUrls,
-        );
+        $targetUrls = array_diff_key($targetSnapshotUrls, $checkedTargetUrls);
         $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
         $observations = [];
         foreach ($targetUrls as $targetUrl => $group) {
@@ -243,6 +257,24 @@ class MigrationCheckCommand extends Command
         $this->renderVerdictCounts($io, $this->analyzeRun($runLabel), $runLabel);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Paths that more than one URL leads to — the same path on two hosts or
+     * over http and https. Rows of a run are keyed by path, so such URLs would
+     * replace each other.
+     *
+     * @param list<string> $urls
+     * @return array<string, list<string>> path => the URLs sharing it
+     */
+    private function findPathCollisions(array $urls): array
+    {
+        $urlsByPath = [];
+        foreach ($urls as $url) {
+            $urlsByPath[UrlUtility::pathWithQuery($url)][] = $url;
+        }
+
+        return array_filter($urlsByPath, static fn(array $urlsOfPath): bool => count($urlsOfPath) > 1);
     }
 
     /**

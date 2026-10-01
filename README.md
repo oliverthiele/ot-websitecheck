@@ -502,6 +502,12 @@ A redirect target is only suggested when exactly one path on the target matches.
 Without record markers every record of a detail page shares its page uid, so
 detail pages get no suggestion rather than a wrong one.
 
+Reference and target rows are matched by path, so each snapshot may list a path
+only once. A snapshot that lists the same path on two hosts — one domain per
+language — or over http and https stops the check before anything is
+requested, with the colliding URLs listed. Import one snapshot per host for
+such a site.
+
 | Option | Description |
 |--------|-------------|
 | `--run` | Required. Groups the results; a re-run with the same label updates the rows. |
