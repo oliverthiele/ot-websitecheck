@@ -2,6 +2,7 @@
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
     xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:ws="http://typo3.org/ns/OliverThiele/OtWebsitecheck/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -115,7 +116,7 @@
                                 <f:else><span class="text-muted">—</span></f:else>
                             </f:if>
                         </td>
-                        <td><a href="{result.url}" target="_blank" rel="noreferrer" title="{result.url}">{result.path}</a></td>
+                        <td><ws:webLink url="{result.url}" target="_blank" rel="noreferrer" title="{result.url}">{result.path}</ws:webLink></td>
                         <td>{result.environment}</td>
                         <td>
                             <f:if condition="{result.http_status} == 200">

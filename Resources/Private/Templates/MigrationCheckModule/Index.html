@@ -2,6 +2,7 @@
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
     xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:ws="http://typo3.org/ns/OliverThiele/OtWebsitecheck/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -295,12 +296,12 @@
                 <br/><small class="text-danger">{f:translate(key: '{languageFile}abortReason.{row.abortReason}')}</small>
             </f:if>
         </td>
-        <td><a href="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</a></td>
+        <td><ws:webLink url="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</ws:webLink></td>
         <td>
             <f:for each="{row.chain}" as="step" iteration="stepIteration">
                 <f:if condition="{stepIteration.isFirst}">
-                    <f:then><a href="{step.url}" target="_blank" rel="noreferrer">{step.label}</a></f:then>
-                    <f:else> → <a href="{step.url}" target="_blank" rel="noreferrer">{step.label}</a> ({step.status})</f:else>
+                    <f:then><ws:webLink url="{step.url}" target="_blank" rel="noreferrer">{step.label}</ws:webLink></f:then>
+                    <f:else> → <ws:webLink url="{step.url}" target="_blank" rel="noreferrer">{step.label}</ws:webLink> ({step.status})</f:else>
                 </f:if>
             </f:for>
         </td>

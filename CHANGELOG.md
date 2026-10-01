@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Link stored URLs in the backend modules only when they are http or https;
+  a `javascript:` URL from a sitemap or a Location header became a clickable
+  link
 - Send Basic Auth credentials only to the start URL and language sitemaps
   they were given for. A sitemap index could list a sub-sitemap on any host,
   and `checksitemap`, `crawllinks` and `migrationcheck` sent the credentials to
