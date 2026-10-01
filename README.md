@@ -267,8 +267,13 @@ The fallback reads `$_ENV`, not `getenv()` — projects loading `.env` files via
 | `WEBSITECHECK_REFERENCE_BASIC_AUTH_USER`, `WEBSITECHECK_REFERENCE_BASIC_AUTH_PASS` | `migrationcheck`, reference environment |
 | `WEBSITECHECK_TARGET_BASIC_AUTH_USER`, `WEBSITECHECK_TARGET_BASIC_AUTH_PASS` | `migrationcheck`, target environment |
 
-Credentials are only sent to the host they belong to, never to a host a
-redirect leads to.
+Credentials are only sent to the URLs they were given for: the start URL and
+the sitemap of every language, the way the import found them — given with
+`--sitemap` or listed on the start page — and from there everything on the same
+host and port. A sub-sitemap, page or redirect target on another host, on
+another port or over plain http where the credentials were given for https gets
+no credentials. The checks take these URLs from the snapshot they read; with
+`--host`, from the snapshot with its host replaced.
 
 ---
 

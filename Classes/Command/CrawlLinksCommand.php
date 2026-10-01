@@ -13,6 +13,7 @@ use OliverThiele\OtWebsitecheck\Service\PageLinkCollector;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -106,6 +107,7 @@ class CrawlLinksCommand extends Command
         $io->title(sprintf('Website Check — links: snapshot "%s" (%s)', $snapshot->label, $environment));
 
         $pages = array_keys($this->sitemapSnapshotLocator->findUrls($snapshot, $this->stringList($input->getOption('group'))));
+        $authorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($snapshot);
         if ($pagesLimit > 0) {
             $pages = array_slice($pages, 0, $pagesLimit);
         }
@@ -126,8 +128,8 @@ class CrawlLinksCommand extends Command
         $this->retryRounds->run(
             $pages,
             $retries,
-            function (string $pageUrl) use ($timeout, $requestOptions, $io): FetchedPage {
-                $page = $this->pageFetcher->fetch($pageUrl, $timeout, $requestOptions);
+            function (string $pageUrl) use ($timeout, $requestOptions, $authorizedUrls, $io): FetchedPage {
+                $page = $this->pageFetcher->fetch($pageUrl, $timeout, UrlUtility::requestOptionsFor($requestOptions, $pageUrl, $authorizedUrls));
                 $io->progressAdvance();
                 return $page;
             },
@@ -187,8 +189,9 @@ class CrawlLinksCommand extends Command
         $this->retryRounds->run(
             $linkItems,
             $retries,
-            function (array $linkItem) use ($timeout, $requestOptions, $io, &$baselineCache): array {
-                $result = $this->checkLink($linkItem['link'], $timeout, $requestOptions, $baselineCache);
+            function (array $linkItem) use ($timeout, $requestOptions, $authorizedUrls, $io, &$baselineCache): array {
+                $linkRequestOptions = UrlUtility::requestOptionsFor($requestOptions, $linkItem['link'], $authorizedUrls);
+                $result = $this->checkLink($linkItem['link'], $timeout, $linkRequestOptions, $baselineCache);
                 $io->progressAdvance();
                 return $result;
             },

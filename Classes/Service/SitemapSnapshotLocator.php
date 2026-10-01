@@ -50,4 +50,20 @@ class SitemapSnapshotLocator
 
         return array_filter($urls, static fn(string $group): bool => in_array($group, $groups, true));
     }
+
+    /**
+     * The URLs Basic Auth credentials for this snapshot are meant for: its start
+     * URL and the sitemap of every language, i.e. what the import was given or
+     * found on the start page. A page URL some sitemap lists on another host is
+     * not among them, see UrlUtility::requestOptionsFor().
+     *
+     * @return list<string>
+     */
+    public function findAuthorizedUrls(SitemapSnapshot $snapshot): array
+    {
+        return array_values(array_unique([
+            $snapshot->startUrl,
+            ...$this->sitemapSnapshotRepository->findRootDocumentUrls($snapshot->uid),
+        ]));
+    }
 }

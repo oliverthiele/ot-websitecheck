@@ -17,6 +17,7 @@ use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -194,16 +195,30 @@ class MigrationCheckCommand extends Command
             count($referenceUrls),
             $referenceRunLabel,
         ));
+        $referenceAuthorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($referenceSnapshot);
+        $targetAuthorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($targetSnapshot);
         $observations = [];
         /** @var array<string, bool> $checkedTargetUrls */
         $checkedTargetUrls = [];
         foreach ($referenceUrls as $referenceUrl => $group) {
             if ($referenceRunLabel === '') {
-                $observations[] = ['environment' => $referenceLabel, 'role' => Observation::ROLE_REFERENCE, 'group' => $group, 'url' => $referenceUrl, 'requestOptions' => $referenceRequestOptions];
+                $observations[] = [
+                    'environment' => $referenceLabel,
+                    'role' => Observation::ROLE_REFERENCE,
+                    'group' => $group,
+                    'url' => $referenceUrl,
+                    'requestOptions' => UrlUtility::requestOptionsFor($referenceRequestOptions, $referenceUrl, $referenceAuthorizedUrls),
+                ];
             }
 
             $targetUrl = $this->urlHostRewriter->replace($referenceUrl, $targetHost);
-            $observations[] = ['environment' => $targetLabel, 'role' => Observation::ROLE_TARGET, 'group' => $group, 'url' => $targetUrl, 'requestOptions' => $targetRequestOptions];
+            $observations[] = [
+                'environment' => $targetLabel,
+                'role' => Observation::ROLE_TARGET,
+                'group' => $group,
+                'url' => $targetUrl,
+                'requestOptions' => UrlUtility::requestOptionsFor($targetRequestOptions, $targetUrl, $targetAuthorizedUrls),
+            ];
             $checkedTargetUrls[$targetUrl] = true;
         }
         $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
@@ -215,7 +230,13 @@ class MigrationCheckCommand extends Command
         $io->section(sprintf('Reading %d further pages from the target snapshot', count($targetUrls)));
         $observations = [];
         foreach ($targetUrls as $targetUrl => $group) {
-            $observations[] = ['environment' => $targetSitemapLabel, 'role' => Observation::ROLE_TARGET_SITEMAP, 'group' => $group, 'url' => $targetUrl, 'requestOptions' => $targetRequestOptions];
+            $observations[] = [
+                'environment' => $targetSitemapLabel,
+                'role' => Observation::ROLE_TARGET_SITEMAP,
+                'group' => $group,
+                'url' => $targetUrl,
+                'requestOptions' => UrlUtility::requestOptionsFor($targetRequestOptions, $targetUrl, $targetAuthorizedUrls),
+            ];
         }
         $this->observeAll($io, $runLabel, $observations, $timeout, $maximumHops, $retries, $patterns);
 

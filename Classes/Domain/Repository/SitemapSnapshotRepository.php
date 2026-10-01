@@ -179,6 +179,24 @@ class SitemapSnapshotRepository extends AbstractRepository
     }
 
     /**
+     * @return list<string> the sitemap of every language the import started from — not the ones an index listed
+     */
+    public function findRootDocumentUrls(int $snapshotUid): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_DOCUMENT);
+        $rows = $queryBuilder->select('url')
+            ->from(self::TABLE_DOCUMENT)
+            ->where(
+                $queryBuilder->expr()->eq('snapshot', $queryBuilder->createNamedParameter($snapshotUid, ParameterType::INTEGER)),
+                $queryBuilder->expr()->eq('parent_url', $queryBuilder->createNamedParameter('')),
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(static fn(array $row): string => RowValue::string($row, 'url'), $rows);
+    }
+
+    /**
      * @param bool $lock Also lock the snapshot; false leaves the lock as it is.
      */
     public function markComplete(int $snapshotUid, bool $lock = false): void

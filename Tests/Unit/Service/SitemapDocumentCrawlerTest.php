@@ -82,6 +82,33 @@ final class SitemapDocumentCrawlerTest extends UnitTestCase
         self::assertCount(1, $documents);
     }
 
+    #[Test]
+    public function basicAuthIsNotSentToASitemapTheIndexListsOnAnotherHost(): void
+    {
+        $index = '<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+            . '<sitemap><loc>https://www.example.com/sitemap.xml?tx_seo%5Bsitemap%5D=pages</loc></sitemap>'
+            . '<sitemap><loc>https://other.example.org/sitemap.xml</loc></sitemap>'
+            . '<sitemap><loc>http://www.example.com/sitemap.xml?tx_seo%5Bsitemap%5D=news</loc></sitemap>'
+            . '</sitemapindex>';
+        $sentOptions = [];
+        $pageFetcher = self::createStub(PageFetcher::class);
+        $pageFetcher->method('fetch')->willReturnCallback(
+            static function (string $url, int $timeout, array $requestOptions) use ($index, &$sentOptions): FetchedPage {
+                $sentOptions[$url] = $requestOptions;
+                return $url === 'https://www.example.com/sitemap.xml' ? new FetchedPage(200, $index) : new FetchedPage(200, self::PAGES);
+            },
+        );
+        $sitemapGroupExtractor = new SitemapGroupExtractor(self::createStub(SiteBaseProvider::class));
+
+        (new SitemapDocumentCrawler($pageFetcher, $sitemapGroupExtractor))
+            ->crawl('https://www.example.com/sitemap.xml', 5, ['auth' => ['user', 'secret']]);
+
+        self::assertArrayHasKey('auth', $sentOptions['https://www.example.com/sitemap.xml']);
+        self::assertArrayHasKey('auth', $sentOptions['https://www.example.com/sitemap.xml?tx_seo%5Bsitemap%5D=pages']);
+        self::assertArrayNotHasKey('auth', $sentOptions['https://other.example.org/sitemap.xml']);
+        self::assertArrayNotHasKey('auth', $sentOptions['http://www.example.com/sitemap.xml?tx_seo%5Bsitemap%5D=news']);
+    }
+
     /**
      * @param array<string, FetchedPage> $pages
      * @return list<SitemapDocument>

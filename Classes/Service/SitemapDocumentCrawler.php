@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\SitemapDocument;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 
 /**
  * Fetches a sitemap and every sitemap it links to, and returns each file as it
@@ -21,13 +22,15 @@ class SitemapDocumentCrawler
 
     /**
      * @param array<string, mixed> $requestOptions Additional Guzzle request options, e.g. ['auth' => ['user', 'pass']].
+     *                                             The credentials are meant for $sitemapUrl: a sitemap the index lists
+     *                                             on another host, port or over plain http is requested without them.
      * @return list<SitemapDocument> The given sitemap first, followed by the sitemaps it links to.
      */
     public function crawl(string $sitemapUrl, int $timeout, array $requestOptions = []): array
     {
         $documents = [];
         $visitedUrls = [];
-        $this->crawlRecursive($sitemapUrl, '', $timeout, $requestOptions, $documents, $visitedUrls);
+        $this->crawlRecursive($sitemapUrl, '', $sitemapUrl, $timeout, $requestOptions, $documents, $visitedUrls);
 
         return $documents;
     }
@@ -40,6 +43,7 @@ class SitemapDocumentCrawler
     private function crawlRecursive(
         string $sitemapUrl,
         string $parentUrl,
+        string $authorizedUrl,
         int $timeout,
         array $requestOptions,
         array &$documents,
@@ -51,7 +55,7 @@ class SitemapDocumentCrawler
         $visitedUrls[$sitemapUrl] = true;
         $group = $this->sitemapGroupExtractor->extract($sitemapUrl);
 
-        $page = $this->pageFetcher->fetch($sitemapUrl, $timeout, $requestOptions);
+        $page = $this->pageFetcher->fetch($sitemapUrl, $timeout, UrlUtility::requestOptionsFor($requestOptions, $sitemapUrl, [$authorizedUrl]));
         if ($page->isConnectionError()) {
             $documents[] = new SitemapDocument($sitemapUrl, $parentUrl, $group, SitemapDocument::TYPE_UNREACHABLE, 0, '');
             return;
@@ -85,7 +89,7 @@ class SitemapDocumentCrawler
         foreach ($xml->sitemap as $sitemap) {
             $location = trim((string)$sitemap->loc);
             if ($location !== '') {
-                $this->crawlRecursive($location, $sitemapUrl, $timeout, $requestOptions, $documents, $visitedUrls);
+                $this->crawlRecursive($location, $sitemapUrl, $authorizedUrl, $timeout, $requestOptions, $documents, $visitedUrls);
             }
         }
     }

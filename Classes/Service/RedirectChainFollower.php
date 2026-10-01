@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\UriResolver;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\TransferFailure;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use TYPO3\CMS\Core\Http\RequestFactory;
 
 /**
@@ -28,12 +29,13 @@ class RedirectChainFollower
     }
 
     /**
-     * @param array<string, mixed> $requestOptions Guzzle options. An "auth" entry is only sent to the host of $url,
-     *                                             never to a host a redirect leads to.
+     * @param array<string, mixed> $requestOptions Guzzle options. An "auth" entry is only sent where $url itself
+     *                                             would get it — same host and port, no step down to http —, never
+     *                                             to a host a redirect leads to. Whether $url may get it is up to the
+     *                                             caller, see UrlUtility::requestOptionsFor().
      */
     public function follow(string $url, int $timeout, int $maximumHops, array $requestOptions = []): RedirectChain
     {
-        $initialHost = parse_url($url, PHP_URL_HOST);
         $steps = [];
         $visitedUrls = [];
         $currentUrl = $url;
@@ -44,10 +46,7 @@ class RedirectChainFollower
             }
             $visitedUrls[$currentUrl] = true;
 
-            $options = $requestOptions;
-            if (parse_url($currentUrl, PHP_URL_HOST) !== $initialHost) {
-                unset($options['auth']);
-            }
+            $options = UrlUtility::requestOptionsFor($requestOptions, $currentUrl, [$url]);
 
             try {
                 $response = $this->requestFactory->request($currentUrl, 'GET', [

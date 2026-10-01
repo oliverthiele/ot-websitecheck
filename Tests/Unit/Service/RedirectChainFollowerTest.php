@@ -119,6 +119,48 @@ final class RedirectChainFollowerTest extends UnitTestCase
         self::assertArrayNotHasKey('auth', $sentOptions['https://other.example.org/']);
     }
 
+    #[Test]
+    public function basicAuthIsNotSentAfterARedirectToPlainHttpOrAnotherPort(): void
+    {
+        $sentOptions = [];
+        $requestFactory = self::createStub(RequestFactory::class);
+        $requestFactory->method('request')->willReturnCallback(
+            static function (string $url, string $method, array $options) use (&$sentOptions): Response {
+                $sentOptions[$url] = $options;
+                return match ($url) {
+                    'https://www.example.com/' => new Response('php://temp', 301, ['Location' => 'http://www.example.com/insecure/']),
+                    'http://www.example.com/insecure/' => new Response('php://temp', 301, ['Location' => 'https://www.example.com:8443/']),
+                    default => new Response('php://temp', 200),
+                };
+            },
+        );
+
+        (new RedirectChainFollower($requestFactory))->follow('https://www.example.com/', 5, 10, ['auth' => ['user', 'secret']]);
+
+        self::assertArrayHasKey('auth', $sentOptions['https://www.example.com/']);
+        self::assertArrayNotHasKey('auth', $sentOptions['http://www.example.com/insecure/']);
+        self::assertArrayNotHasKey('auth', $sentOptions['https://www.example.com:8443/']);
+    }
+
+    #[Test]
+    public function basicAuthIsKeptOnARedirectFromHttpToHttpsOnTheSameHost(): void
+    {
+        $sentOptions = [];
+        $requestFactory = self::createStub(RequestFactory::class);
+        $requestFactory->method('request')->willReturnCallback(
+            static function (string $url, string $method, array $options) use (&$sentOptions): Response {
+                $sentOptions[$url] = $options;
+                return $url === 'http://staging.example.com/'
+                    ? new Response('php://temp', 301, ['Location' => 'https://staging.example.com/'])
+                    : new Response('php://temp', 200);
+            },
+        );
+
+        (new RedirectChainFollower($requestFactory))->follow('http://staging.example.com/', 5, 10, ['auth' => ['user', 'secret']]);
+
+        self::assertArrayHasKey('auth', $sentOptions['https://staging.example.com/']);
+    }
+
     /**
      * @param array<string, array{0: int, 1: string}> $answers URL => [status, Location header]
      */

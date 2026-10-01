@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Send Basic Auth credentials only to the start URL and language sitemaps
+  they were given for. A sitemap index could list a sub-sitemap on any host,
+  and `checksitemap`, `crawllinks` and `migrationcheck` sent the credentials to
+  every URL of a snapshot, so a foreign host named in a sitemap received them
+- Withhold Basic Auth credentials on a redirect to another port or from https
+  to plain http; until now only a change of host was checked
+
 ## [0.8.0] — 2026-09-22
 
 ### Added

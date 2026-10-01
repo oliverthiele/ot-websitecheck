@@ -13,6 +13,7 @@ use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -94,8 +95,10 @@ class CheckSitemapCommand extends Command
         $io->title(sprintf('Website Check: snapshot "%s" (%s)', $snapshot->label, $environment));
 
         $urls = array_keys($this->sitemapSnapshotLocator->findUrls($snapshot, $this->stringList($input->getOption('group'))));
+        $authorizedUrls = $this->sitemapSnapshotLocator->findAuthorizedUrls($snapshot);
         if ($host !== '') {
             $urls = array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $urls);
+            $authorizedUrls = array_map(fn(string $url): string => $this->urlHostRewriter->replace($url, $host), $authorizedUrls);
             $io->writeln(sprintf('Requesting every path on host "%s".', $host));
         }
         if ($limit > 0) {
@@ -136,8 +139,8 @@ class CheckSitemapCommand extends Command
         $this->retryRounds->run(
             $urls,
             $retries,
-            function (string $url) use ($timeout, $requestOptions, $io): FetchedPage {
-                $page = $this->pageFetcher->fetch($url, $timeout, $requestOptions);
+            function (string $url) use ($timeout, $requestOptions, $authorizedUrls, $io): FetchedPage {
+                $page = $this->pageFetcher->fetch($url, $timeout, UrlUtility::requestOptionsFor($requestOptions, $url, $authorizedUrls));
                 $io->progressAdvance();
                 return $page;
             },
