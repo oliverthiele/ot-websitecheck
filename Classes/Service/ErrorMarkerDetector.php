@@ -26,20 +26,27 @@ class ErrorMarkerDetector
 
     public const string MARKER_CONNECTION_ERROR = 'connectionError';
     public const string MARKER_TIMEOUT = 'timeout';
+    public const string MARKER_TOO_MANY_REDIRECTS = 'tooManyRedirects';
     public const string MARKER_RESPONSE_TOO_LARGE = 'responseTooLarge';
+    public const string MARKER_REDIRECTED = 'redirected';
 
     /**
      * The marker of a fetched page: a failed connection is a marker of its own,
-     * and a timeout one apart from it — a slow page is not a broken one.
+     * and a timeout one apart from it — a slow page is not a broken one. A page
+     * reached only through a redirect is marked as such unless its body shows
+     * an error; the status is that of the final page.
      */
     public function detectFor(FetchedPage $page): string
     {
-        return match ($page->transferFailure) {
+        $marker = match ($page->transferFailure) {
             TransferFailure::Timeout => self::MARKER_TIMEOUT,
+            TransferFailure::TooManyRedirects => self::MARKER_TOO_MANY_REDIRECTS,
             TransferFailure::TooLarge => self::MARKER_RESPONSE_TOO_LARGE,
             null => $page->isConnectionError() ? self::MARKER_CONNECTION_ERROR : $this->detect($page->body),
             default => self::MARKER_CONNECTION_ERROR,
         };
+
+        return $marker === '' && $page->isRedirected() ? self::MARKER_REDIRECTED : $marker;
     }
 
     public function detect(string $html): string

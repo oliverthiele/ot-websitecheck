@@ -177,6 +177,7 @@ class CrawlLinksCommand extends Command
         $notOk = 0;
         $withMarker = 0;
         $timedOut = 0;
+        $redirected = 0;
         $ignoredArguments = 0;
         $findings = [];
 
@@ -196,7 +197,7 @@ class CrawlLinksCommand extends Command
                 return $result;
             },
             static fn(array $result): bool => $result['retryable'],
-            function (array $linkItem, array $result) use ($environment, &$notOk, &$withMarker, &$timedOut, &$ignoredArguments, &$findings): void {
+            function (array $linkItem, array $result) use ($environment, &$notOk, &$withMarker, &$timedOut, &$redirected, &$ignoredArguments, &$findings): void {
                 ['link' => $link, 'foundOn' => $foundOn] = $linkItem;
                 $httpStatus = $result['page']->httpStatus;
                 $errorMarker = $result['errorMarker'];
@@ -208,6 +209,8 @@ class CrawlLinksCommand extends Command
                     $ignoredArguments++;
                 } elseif ($errorMarker === ErrorMarkerDetector::MARKER_TIMEOUT) {
                     $timedOut++;
+                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
+                    $redirected++;
                 } elseif ($errorMarker !== '') {
                     $withMarker++;
                 }
@@ -230,11 +233,12 @@ class CrawlLinksCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d links checked, %d without HTTP 200, %d with an error marker, %d timed out, %d whose arguments had no effect.',
+            '%d links checked, %d without HTTP 200, %d with an error marker, %d timed out, %d only through a redirect, %d whose arguments had no effect.',
             count($linksToCheck),
             $notOk,
             $withMarker,
             $timedOut,
+            $redirected,
             $ignoredArguments,
         ));
 
@@ -264,7 +268,7 @@ class CrawlLinksCommand extends Command
         $errorMarker = $this->errorMarkerDetector->detectFor($linkedPage);
         $retryable = $linkedPage->isRetryable();
 
-        if ($linkedPage->isOk() && $errorMarker === '') {
+        if ($linkedPage->isOk() && ($errorMarker === '' || $errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED)) {
             $baseUrl = $this->pageLinkCollector->withoutArguments($link);
             if ($baseUrl !== $link) {
                 if (!array_key_exists($baseUrl, $baselineCache)) {

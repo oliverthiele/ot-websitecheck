@@ -138,6 +138,7 @@ class CheckSitemapCommand extends Command
         $notOkCount = 0;
         $errorMarkerCount = 0;
         $timeoutCount = 0;
+        $redirectedCount = 0;
         $this->retryRounds->run(
             $urls,
             $retries,
@@ -147,13 +148,15 @@ class CheckSitemapCommand extends Command
                 return $page;
             },
             static fn(FetchedPage $page): bool => $page->isRetryable(),
-            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount): void {
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$redirectedCount): void {
                 $errorMarker = $this->errorMarkerDetector->detectFor($page);
                 if (!$page->isOk()) {
                     $notOkCount++;
                 }
                 if ($page->isTimeout()) {
                     $timeoutCount++;
+                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
+                    $redirectedCount++;
                 } elseif ($errorMarker !== '') {
                     $errorMarkerCount++;
                 }
@@ -171,11 +174,12 @@ class CheckSitemapCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out.',
+            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d only through a redirect.',
             count($urls),
             $notOkCount,
             $errorMarkerCount,
             $timeoutCount,
+            $redirectedCount,
         ));
 
         return self::SUCCESS;

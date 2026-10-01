@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add the marker `redirected` to the status check for a URL that only answers
+  through a redirect, and `tooManyRedirects` for more than ten
 - Read gzip-compressed sitemaps (`sitemap.xml.gz`)
 
 ### Changed

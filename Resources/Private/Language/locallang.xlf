@@ -417,6 +417,16 @@
         <source>Link arguments have no effect</source>
       </segment>
     </unit>
+    <unit id="errorMarker.redirected">
+      <segment>
+        <source>Only through a redirect</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.tooManyRedirects">
+      <segment>
+        <source>Too many redirects</source>
+      </segment>
+    </unit>
     <unit id="errorMarker.responseTooLarge">
       <segment>
         <source>Response too large</source>

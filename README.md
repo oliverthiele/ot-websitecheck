@@ -16,7 +16,8 @@ URL of the live site still leads to the same page or record on the new one.
 
 - **Status check** — checks the HTTP status of every URL of a sitemap snapshot and
   detects TYPO3 error pages in the response body (production "Oops, an error
-  occurred!", uncaught exceptions, 404 and access-denied pages)
+  occurred!", uncaught exceptions, 404 and access-denied pages); a URL that only
+  answers through a redirect is marked as such
 - **Link crawl** — follows the plugin links found on those pages, including
   the ones a sitemap never lists, and reports links whose arguments have no
   effect
@@ -640,6 +641,14 @@ What is left after the last round is stored apart from a missing connection:
 the marker `timeout` in the status check, the abort reason and verdict
 `timeout` in the migration check. A connect timeout — the server did not even
 accept the connection — counts as no connection.
+
+### Redirects
+
+`checksitemap` and `crawllinks` follow up to ten redirects and store the status
+of the page they end on. A URL that works only through a redirect gets the
+marker `redirected`, unless the final page shows an error, whose marker wins;
+more than ten redirects give the marker `tooManyRedirects`. The migration check
+follows redirects itself, one hop at a time, see above.
 
 ### `websitecheck:exportsnapshots`
 

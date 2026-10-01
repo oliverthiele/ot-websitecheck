@@ -501,6 +501,18 @@
         <target>Link-Argumente ohne Wirkung</target>
       </segment>
     </unit>
+    <unit id="errorMarker.redirected">
+      <segment>
+        <source>Only through a redirect</source>
+        <target>Nur über eine Weiterleitung</target>
+      </segment>
+    </unit>
+    <unit id="errorMarker.tooManyRedirects">
+      <segment>
+        <source>Too many redirects</source>
+        <target>Zu viele Weiterleitungen</target>
+      </segment>
+    </unit>
     <unit id="errorMarker.responseTooLarge">
       <segment>
         <source>Response too large</source>

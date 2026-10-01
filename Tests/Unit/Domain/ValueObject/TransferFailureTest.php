@@ -33,7 +33,7 @@ final class TransferFailureTest extends UnitTestCase
         yield 'connection refused' => [new ConnectException('', $request), TransferFailure::Network];
         yield 'connect timeout is unreachable, not slow' => [new ConnectTimeoutException('', $request), TransferFailure::Network];
         yield 'connection reset' => [new NetworkException('', $request), TransferFailure::Network];
-        yield 'too many redirects' => [new TooManyRedirectsException('', $request, new Response(301)), TransferFailure::Request];
+        yield 'too many redirects' => [new TooManyRedirectsException('', $request, new Response(301)), TransferFailure::TooManyRedirects];
         yield 'aborted by the size limit' => [new RequestException('', $request, 0, new ResponseTooLargeException('')), TransferFailure::TooLarge];
         yield 'invalid request' => [new RequestException('', $request), TransferFailure::Request];
         yield 'anything else' => [new \RuntimeException(''), TransferFailure::Request];
@@ -52,6 +52,7 @@ final class TransferFailureTest extends UnitTestCase
         self::assertTrue(TransferFailure::Timeout->isRetryable());
         self::assertTrue(TransferFailure::Network->isRetryable());
         self::assertFalse(TransferFailure::Request->isRetryable());
+        self::assertFalse(TransferFailure::TooManyRedirects->isRetryable());
         self::assertFalse(TransferFailure::TooLarge->isRetryable());
     }
 }
