@@ -1,832 +1,1376 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-  <file source-language="en" datatype="plaintext"
-        original="EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf"
-        product-name="ot-websitecheck">
-    <header/>
-    <body>
-      <trans-unit id="filter.run" resname="filter.run">
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en">
+  <file id="ot-websitecheck-locallang"
+        original="EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf">
+    <unit id="filter.run">
+      <segment>
         <source>Run</source>
-      </trans-unit>
-      <trans-unit id="filter.allGroups" resname="filter.allGroups">
+      </segment>
+    </unit>
+    <unit id="filter.allGroups">
+      <segment>
         <source>— all sitemap groups —</source>
-      </trans-unit>
-      <trans-unit id="filter.allLanguages" resname="filter.allLanguages">
+      </segment>
+    </unit>
+    <unit id="filter.allLanguages">
+      <segment>
         <source>— all languages —</source>
-      </trans-unit>
-      <trans-unit id="filter.allVerdicts" resname="filter.allVerdicts">
+      </segment>
+    </unit>
+    <unit id="filter.allVerdicts">
+      <segment>
         <source>— all verdicts —</source>
-      </trans-unit>
-      <trans-unit id="filter.onlyProblems" resname="filter.onlyProblems">
+      </segment>
+    </unit>
+    <unit id="filter.onlyProblems">
+      <segment>
         <source>only problems and warnings</source>
-      </trans-unit>
-      <trans-unit id="filter.onlyUnreviewed" resname="filter.onlyUnreviewed">
+      </segment>
+    </unit>
+    <unit id="filter.onlyUnreviewed">
+      <segment>
         <source>only not yet reviewed</source>
-      </trans-unit>
-      <trans-unit id="filter.showTargetSitemap" resname="filter.showTargetSitemap">
+      </segment>
+    </unit>
+    <unit id="filter.showTargetSitemap">
+      <segment>
         <source>show pages from the target sitemap</source>
-      </trans-unit>
-      <trans-unit id="filter.submit" resname="filter.submit">
+      </segment>
+    </unit>
+    <unit id="filter.submit">
+      <segment>
         <source>Filter</source>
-      </trans-unit>
-      <trans-unit id="summary.title" resname="summary.title">
+      </segment>
+    </unit>
+    <unit id="summary.title">
+      <segment>
         <source>Verdicts of the target rows in this run</source>
-      </trans-unit>
-      <trans-unit id="button.deleteRun" resname="button.deleteRun">
+      </segment>
+    </unit>
+    <unit id="button.deleteRun">
+      <segment>
         <source>Delete run "%1$s"</source>
-      </trans-unit>
-      <trans-unit id="button.edit" resname="button.edit">
+      </segment>
+    </unit>
+    <unit id="button.edit">
+      <segment>
         <source>Edit</source>
-      </trans-unit>
-      <trans-unit id="flash.deleteRun.success" resname="flash.deleteRun.success">
+      </segment>
+    </unit>
+    <unit id="flash.deleteRun.success">
+      <segment>
         <source>%1$s row(s) of run "%2$s" deleted.</source>
-      </trans-unit>
-      <trans-unit id="empty.noRuns" resname="empty.noRuns">
+      </segment>
+    </unit>
+    <unit id="empty.noRuns">
+      <segment>
         <source>No migration check has been run yet. Compose the command below and run it on the command line.</source>
-      </trans-unit>
-      <trans-unit id="command.title" resname="command.title">
+      </segment>
+    </unit>
+    <unit id="command.title">
+      <segment>
         <source>Compose a migration check</source>
-      </trans-unit>
-      <trans-unit id="command.intro" resname="command.intro">
+      </segment>
+    </unit>
+    <unit id="command.intro">
+      <segment>
         <source>The check runs on the command line: it requests every URL and can take a while. Choose what to compare, then copy the command.</source>
-      </trans-unit>
-      <trans-unit id="command.reference" resname="command.reference">
+      </segment>
+    </unit>
+    <unit id="command.reference">
+      <segment>
         <source>Reference snapshot (before)</source>
-      </trans-unit>
-      <trans-unit id="command.reference.help" resname="command.reference.help">
+      </segment>
+    </unit>
+    <unit id="command.reference.help">
+      <segment>
         <source>The state to keep, usually the locked snapshot of the live site. Every URL in it is checked.</source>
-      </trans-unit>
-      <trans-unit id="command.target" resname="command.target">
+      </segment>
+    </unit>
+    <unit id="command.target">
+      <segment>
         <source>Target snapshot (after)</source>
-      </trans-unit>
-      <trans-unit id="command.target.help" resname="command.target.help">
+      </segment>
+    </unit>
+    <unit id="command.target.help">
+      <segment>
         <source>The new state, e.g. staging. The URLs of the reference are requested on its host.</source>
-      </trans-unit>
-      <trans-unit id="command.referenceRun" resname="command.referenceRun">
+      </segment>
+    </unit>
+    <unit id="command.referenceRun">
+      <segment>
         <source>Reference results</source>
-      </trans-unit>
-      <trans-unit id="command.referenceRun.none" resname="command.referenceRun.none">
+      </segment>
+    </unit>
+    <unit id="command.referenceRun.none">
+      <segment>
         <source>Request the reference again</source>
-      </trans-unit>
-      <trans-unit id="command.referenceRun.option" resname="command.referenceRun.option">
+      </segment>
+    </unit>
+    <unit id="command.referenceRun.option">
+      <segment>
         <source>Reuse from run "%1$s"</source>
-      </trans-unit>
-      <trans-unit id="command.referenceRun.help" resname="command.referenceRun.help">
+      </segment>
+    </unit>
+    <unit id="command.referenceRun.help">
+      <segment>
         <source>Once the new site is live, the old one no longer answers. Take its results from an earlier run with the same reference snapshot instead.</source>
-      </trans-unit>
-      <trans-unit id="command.run" resname="command.run">
+      </segment>
+    </unit>
+    <unit id="command.run">
+      <segment>
         <source>Run label</source>
-      </trans-unit>
-      <trans-unit id="command.run.help" resname="command.run.help">
+      </segment>
+    </unit>
+    <unit id="command.run.help">
+      <segment>
         <source>Groups the results. The same label again updates that run.</source>
-      </trans-unit>
-      <trans-unit id="command.referenceLabel" resname="command.referenceLabel">
+      </segment>
+    </unit>
+    <unit id="command.referenceLabel">
+      <segment>
         <source>Reference label</source>
-      </trans-unit>
-      <trans-unit id="command.targetLabel" resname="command.targetLabel">
+      </segment>
+    </unit>
+    <unit id="command.targetLabel">
+      <segment>
         <source>Target label</source>
-      </trans-unit>
-      <trans-unit id="command.labels.help" resname="command.labels.help">
+      </segment>
+    </unit>
+    <unit id="command.labels.help">
+      <segment>
         <source>The labels name the two environments in the results and must differ.</source>
-      </trans-unit>
-      <trans-unit id="command.limit" resname="command.limit">
+      </segment>
+    </unit>
+    <unit id="command.limit">
+      <segment>
         <source>Limit</source>
-      </trans-unit>
-      <trans-unit id="command.limit.help" resname="command.limit.help">
+      </segment>
+    </unit>
+    <unit id="command.limit.help">
+      <segment>
         <source>Only the first URLs, for a test run.</source>
-      </trans-unit>
-      <trans-unit id="command.prefix" resname="command.prefix">
+      </segment>
+    </unit>
+    <unit id="command.prefix">
+      <segment>
         <source>Call</source>
-      </trans-unit>
-      <trans-unit id="command.output" resname="command.output">
+      </segment>
+    </unit>
+    <unit id="command.output">
+      <segment>
         <source>Command</source>
-      </trans-unit>
-      <trans-unit id="command.copy" resname="command.copy">
+      </segment>
+    </unit>
+    <unit id="command.copy">
+      <segment>
         <source>Copy</source>
-      </trans-unit>
-      <trans-unit id="command.hint" resname="command.hint">
+      </segment>
+    </unit>
+    <unit id="command.hint">
+      <segment>
         <source>Run it in the project root, then reload this page. Protected environments: add --reference-basic-auth or --target-basic-auth, or use the environment variables described in the README.</source>
-      </trans-unit>
-      <trans-unit id="command.locked" resname="command.locked">
+      </segment>
+    </unit>
+    <unit id="command.locked">
+      <segment>
         <source>locked</source>
-      </trans-unit>
-      <trans-unit id="command.noSnapshots" resname="command.noSnapshots">
+      </segment>
+    </unit>
+    <unit id="command.noSnapshots">
+      <segment>
         <source>A migration check compares two sitemap snapshots. Import them first, one of the state before and one of the state after.</source>
-      </trans-unit>
-      <trans-unit id="command.openSitemaps" resname="command.openSitemaps">
+      </segment>
+    </unit>
+    <unit id="command.openSitemaps">
+      <segment>
         <source>Go to Sitemaps</source>
-      </trans-unit>
-      <trans-unit id="command.warning.sameSnapshot" resname="command.warning.sameSnapshot">
+      </segment>
+    </unit>
+    <unit id="command.warning.sameSnapshot">
+      <segment>
         <source>Reference and target are the same snapshot.</source>
-      </trans-unit>
-      <trans-unit id="command.warning.sameLabels" resname="command.warning.sameLabels">
+      </segment>
+    </unit>
+    <unit id="command.warning.sameLabels">
+      <segment>
         <source>The reference and target labels must differ.</source>
-      </trans-unit>
-      <trans-unit id="command.warning.labelClash" resname="command.warning.labelClash">
+      </segment>
+    </unit>
+    <unit id="command.warning.labelClash">
+      <segment>
         <source>The reused reference results carry the label "%1$s"; choose another target label.</source>
-      </trans-unit>
-      <trans-unit id="command.warning.missingValue" resname="command.warning.missingValue">
+      </segment>
+    </unit>
+    <unit id="command.warning.missingValue">
+      <segment>
         <source>Fill in the run label and both environment labels.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.title" resname="statusCommand.title">
+      </segment>
+    </unit>
+    <unit id="statusCommand.title">
+      <segment>
         <source>Compose a status or link check</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.intro" resname="statusCommand.intro">
+      </segment>
+    </unit>
+    <unit id="statusCommand.intro">
+      <segment>
         <source>Both checks run on the command line. The status check requests every URL of a snapshot and records its HTTP status and TYPO3 error pages; the link check follows the plugin links on those pages.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.type" resname="statusCommand.type">
+      </segment>
+    </unit>
+    <unit id="statusCommand.type">
+      <segment>
         <source>Check</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.type.checksitemap" resname="statusCommand.type.checksitemap">
+      </segment>
+    </unit>
+    <unit id="statusCommand.type.checksitemap">
+      <segment>
         <source>Status of the sitemap URLs (websitecheck:checksitemap)</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.type.crawllinks" resname="statusCommand.type.crawllinks">
+      </segment>
+    </unit>
+    <unit id="statusCommand.type.crawllinks">
+      <segment>
         <source>Plugin links on the pages (websitecheck:crawllinks)</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.snapshot" resname="statusCommand.snapshot">
+      </segment>
+    </unit>
+    <unit id="statusCommand.snapshot">
+      <segment>
         <source>Snapshot</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.snapshot.help" resname="statusCommand.snapshot.help">
+      </segment>
+    </unit>
+    <unit id="statusCommand.snapshot.help">
+      <segment>
         <source>Its URLs are requested — on its own host, unless another host is given.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.environment" resname="statusCommand.environment">
+      </segment>
+    </unit>
+    <unit id="statusCommand.environment">
+      <segment>
         <source>Environment label</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.environment.help" resname="statusCommand.environment.help">
+      </segment>
+    </unit>
+    <unit id="statusCommand.environment.help">
+      <segment>
         <source>Stored with every result and offered in the filter below. Link checks get a label of their own, so they do not replace the results of a status check.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.host" resname="statusCommand.host">
+      </segment>
+    </unit>
+    <unit id="statusCommand.host">
+      <segment>
         <source>Other host (optional)</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.host.help" resname="statusCommand.host.help">
+      </segment>
+    </unit>
+    <unit id="statusCommand.host.help">
+      <segment>
         <source>Requests the paths of the snapshot on this host, e.g. to check the URLs of live against staging.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.groups" resname="statusCommand.groups">
+      </segment>
+    </unit>
+    <unit id="statusCommand.groups">
+      <segment>
         <source>Sitemap groups (optional)</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.groups.help" resname="statusCommand.groups.help">
+      </segment>
+    </unit>
+    <unit id="statusCommand.groups.help">
+      <segment>
         <source>Separated by commas. All groups when empty.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.limit.help" resname="statusCommand.limit.help">
+      </segment>
+    </unit>
+    <unit id="statusCommand.limit.help">
+      <segment>
         <source>Only the first URLs — or, for links, pages — for a test run.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.samples" resname="statusCommand.samples">
+      </segment>
+    </unit>
+    <unit id="statusCommand.samples">
+      <segment>
         <source>Links per shape</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.samples.help" resname="statusCommand.samples.help">
+      </segment>
+    </unit>
+    <unit id="statusCommand.samples.help">
+      <segment>
         <source>Links that differ only in a record uid share a shape; this many of each are checked.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.maxLinks" resname="statusCommand.maxLinks">
+      </segment>
+    </unit>
+    <unit id="statusCommand.maxLinks">
+      <segment>
         <source>Maximum links</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.allLinks" resname="statusCommand.allLinks">
+      </segment>
+    </unit>
+    <unit id="statusCommand.allLinks">
+      <segment>
         <source>Also follow links without plugin arguments</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.hint" resname="statusCommand.hint">
+      </segment>
+    </unit>
+    <unit id="statusCommand.hint">
+      <segment>
         <source>Run it in the project root, then reload this page. Protected environments: add --basic-auth, or use the environment variables described in the README.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.noSnapshots" resname="statusCommand.noSnapshots">
+      </segment>
+    </unit>
+    <unit id="statusCommand.noSnapshots">
+      <segment>
         <source>Both checks read their URLs from a sitemap snapshot. Import one first.</source>
-      </trans-unit>
-      <trans-unit id="statusCommand.warning.missingEnvironment" resname="statusCommand.warning.missingEnvironment">
+      </segment>
+    </unit>
+    <unit id="statusCommand.warning.missingEnvironment">
+      <segment>
         <source>Enter an environment label.</source>
-      </trans-unit>
-      <trans-unit id="statusResults.empty" resname="statusResults.empty">
+      </segment>
+    </unit>
+    <unit id="statusResults.empty">
+      <segment>
         <source>No status or link check has been run yet. Compose one above and run it on the command line.</source>
-      </trans-unit>
-      <trans-unit id="statusResults.summary" resname="statusResults.summary">
+      </segment>
+    </unit>
+    <unit id="statusResults.summary">
+      <segment>
         <source>%1$s results — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
-      </trans-unit>
-      <trans-unit id="statusResults.summaryForEnvironment" resname="statusResults.summaryForEnvironment">
+      </segment>
+    </unit>
+    <unit id="statusResults.summaryForEnvironment">
+      <segment>
         <source>%1$s results for "%4$s" — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
-      </trans-unit>
-      <trans-unit id="statusResults.sources" resname="statusResults.sources">
+      </segment>
+    </unit>
+    <unit id="statusResults.sources">
+      <segment>
         <source>Sources — the snapshot, or the page a link was found on:</source>
-      </trans-unit>
-      <trans-unit id="statusResults.allEnvironments" resname="statusResults.allEnvironments">
+      </segment>
+    </unit>
+    <unit id="statusResults.allEnvironments">
+      <segment>
         <source>— all environments —</source>
-      </trans-unit>
-      <trans-unit id="statusResults.onlyProblems" resname="statusResults.onlyProblems">
+      </segment>
+    </unit>
+    <unit id="statusResults.onlyProblems">
+      <segment>
         <source>only problems (no HTTP 200, or an error marker)</source>
-      </trans-unit>
-      <trans-unit id="statusResults.deleteAll" resname="statusResults.deleteAll">
+      </segment>
+    </unit>
+    <unit id="statusResults.deleteAll">
+      <segment>
         <source>Delete all results (every environment)</source>
-      </trans-unit>
-      <trans-unit id="statusResults.deleteEnvironment" resname="statusResults.deleteEnvironment">
+      </segment>
+    </unit>
+    <unit id="statusResults.deleteEnvironment">
+      <segment>
         <source>Delete all results for "%1$s"</source>
-      </trans-unit>
-      <trans-unit id="statusResults.column.pageUid" resname="statusResults.column.pageUid">
+      </segment>
+    </unit>
+    <unit id="statusResults.column.pageUid">
+      <segment>
         <source>Page uid</source>
-      </trans-unit>
-      <trans-unit id="statusResults.column.path" resname="statusResults.column.path">
+      </segment>
+    </unit>
+    <unit id="statusResults.column.path">
+      <segment>
         <source>Path</source>
-      </trans-unit>
-      <trans-unit id="statusResults.column.errorMarker" resname="statusResults.column.errorMarker">
+      </segment>
+    </unit>
+    <unit id="statusResults.column.errorMarker">
+      <segment>
         <source>Error marker</source>
-      </trans-unit>
-      <trans-unit id="statusResults.column.checkedAt" resname="statusResults.column.checkedAt">
+      </segment>
+    </unit>
+    <unit id="statusResults.column.checkedAt">
+      <segment>
         <source>Checked at</source>
-      </trans-unit>
-      <trans-unit id="flash.deleteResult.success" resname="flash.deleteResult.success">
+      </segment>
+    </unit>
+    <unit id="flash.deleteResult.success">
+      <segment>
         <source>The result was deleted.</source>
-      </trans-unit>
-      <trans-unit id="flash.deleteResults.success" resname="flash.deleteResults.success">
+      </segment>
+    </unit>
+    <unit id="flash.deleteResults.success">
+      <segment>
         <source>%1$s results deleted.</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.productionException" resname="errorMarker.productionException">
+      </segment>
+    </unit>
+    <unit id="errorMarker.productionException">
+      <segment>
         <source>TYPO3 error page ("Oops, an error occurred")</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.developmentException" resname="errorMarker.developmentException">
+      </segment>
+    </unit>
+    <unit id="errorMarker.developmentException">
+      <segment>
         <source>TYPO3 exception (development)</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.pageNotFound" resname="errorMarker.pageNotFound">
+      </segment>
+    </unit>
+    <unit id="errorMarker.pageNotFound">
+      <segment>
         <source>TYPO3 "page not found"</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.accessDenied" resname="errorMarker.accessDenied">
+      </segment>
+    </unit>
+    <unit id="errorMarker.accessDenied">
+      <segment>
         <source>TYPO3 "access denied"</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.connectionError" resname="errorMarker.connectionError">
+      </segment>
+    </unit>
+    <unit id="errorMarker.connectionError">
+      <segment>
         <source>No connection</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.timeout" resname="errorMarker.timeout">
+      </segment>
+    </unit>
+    <unit id="errorMarker.timeout">
+      <segment>
         <source>Timeout</source>
-      </trans-unit>
-      <trans-unit id="errorMarker.argumentsIgnored" resname="errorMarker.argumentsIgnored">
+      </segment>
+    </unit>
+    <unit id="errorMarker.argumentsIgnored">
+      <segment>
         <source>Link arguments have no effect</source>
-      </trans-unit>
-      <trans-unit id="empty.noResults" resname="empty.noResults">
+      </segment>
+    </unit>
+    <unit id="empty.noResults">
+      <segment>
         <source>No results match the current filters.</source>
-      </trans-unit>
-      <trans-unit id="section.noGroup" resname="section.noGroup">
+      </segment>
+    </unit>
+    <unit id="section.noGroup">
+      <segment>
         <source>(no sitemap group)</source>
-      </trans-unit>
-      <trans-unit id="identity.page" resname="identity.page">
+      </segment>
+    </unit>
+    <unit id="identity.page">
+      <segment>
         <source>Page %1$s</source>
-      </trans-unit>
-      <trans-unit id="identity.record" resname="identity.record">
+      </segment>
+    </unit>
+    <unit id="identity.record">
+      <segment>
         <source>%1$s %2$s on page %3$s</source>
-      </trans-unit>
-      <trans-unit id="identity.unknown" resname="identity.unknown">
+      </segment>
+    </unit>
+    <unit id="identity.unknown">
+      <segment>
         <source>Unknown page</source>
-      </trans-unit>
-      <trans-unit id="column.language" resname="column.language">
+      </segment>
+    </unit>
+    <unit id="column.language">
+      <segment>
         <source>Language</source>
-      </trans-unit>
-      <trans-unit id="column.environment" resname="column.environment">
+      </segment>
+    </unit>
+    <unit id="column.environment">
+      <segment>
         <source>Environment</source>
-      </trans-unit>
-      <trans-unit id="column.status" resname="column.status">
+      </segment>
+    </unit>
+    <unit id="column.status">
+      <segment>
         <source>Code</source>
-      </trans-unit>
-      <trans-unit id="column.finalPath" resname="column.finalPath">
+      </segment>
+    </unit>
+    <unit id="column.finalPath">
+      <segment>
         <source>Final path</source>
-      </trans-unit>
-      <trans-unit id="column.redirects" resname="column.redirects">
+      </segment>
+    </unit>
+    <unit id="column.redirects">
+      <segment>
         <source>Redirects</source>
-      </trans-unit>
-      <trans-unit id="column.verdict" resname="column.verdict">
+      </segment>
+    </unit>
+    <unit id="column.verdict">
+      <segment>
         <source>Verdict</source>
-      </trans-unit>
-      <trans-unit id="column.reviewed" resname="column.reviewed">
+      </segment>
+    </unit>
+    <unit id="column.reviewed">
+      <segment>
         <source>Reviewed</source>
-      </trans-unit>
-      <trans-unit id="label.suggestedTarget" resname="label.suggestedTarget">
+      </segment>
+    </unit>
+    <unit id="label.suggestedTarget">
+      <segment>
         <source>Suggested target</source>
-      </trans-unit>
-      <trans-unit id="label.note" resname="label.note">
+      </segment>
+    </unit>
+    <unit id="label.note">
+      <segment>
         <source>Note</source>
-      </trans-unit>
-      <trans-unit id="reviewed.yes" resname="reviewed.yes">
+      </segment>
+    </unit>
+    <unit id="reviewed.yes">
+      <segment>
         <source>yes</source>
-      </trans-unit>
-      <trans-unit id="reviewed.no" resname="reviewed.no">
+      </segment>
+    </unit>
+    <unit id="reviewed.no">
+      <segment>
         <source>no</source>
-      </trans-unit>
-      <trans-unit id="verdict.notAnalyzed" resname="verdict.notAnalyzed">
+      </segment>
+    </unit>
+    <unit id="verdict.notAnalyzed">
+      <segment>
         <source>Not analysed yet</source>
-      </trans-unit>
-      <trans-unit id="verdict.reference" resname="verdict.reference">
+      </segment>
+    </unit>
+    <unit id="verdict.reference">
+      <segment>
         <source>Reference</source>
-      </trans-unit>
-      <trans-unit id="verdict.referenceNotOk" resname="verdict.referenceNotOk">
+      </segment>
+    </unit>
+    <unit id="verdict.referenceNotOk">
+      <segment>
         <source>Reference not OK</source>
-      </trans-unit>
-      <trans-unit id="verdict.ok" resname="verdict.ok">
+      </segment>
+    </unit>
+    <unit id="verdict.ok">
+      <segment>
         <source>OK</source>
-      </trans-unit>
-      <trans-unit id="verdict.movedWithRedirect" resname="verdict.movedWithRedirect">
+      </segment>
+    </unit>
+    <unit id="verdict.movedWithRedirect">
+      <segment>
         <source>Moved with redirect</source>
-      </trans-unit>
-      <trans-unit id="verdict.missing" resname="verdict.missing">
+      </segment>
+    </unit>
+    <unit id="verdict.missing">
+      <segment>
         <source>Missing</source>
-      </trans-unit>
-      <trans-unit id="verdict.redirectBroken" resname="verdict.redirectBroken">
+      </segment>
+    </unit>
+    <unit id="verdict.redirectBroken">
+      <segment>
         <source>Redirect broken</source>
-      </trans-unit>
-      <trans-unit id="verdict.otherContent" resname="verdict.otherContent">
+      </segment>
+    </unit>
+    <unit id="verdict.otherContent">
+      <segment>
         <source>Other content</source>
-      </trans-unit>
-      <trans-unit id="verdict.identityUnknown" resname="verdict.identityUnknown">
+      </segment>
+    </unit>
+    <unit id="verdict.identityUnknown">
+      <segment>
         <source>Identity unknown</source>
-      </trans-unit>
-      <trans-unit id="verdict.listed" resname="verdict.listed">
+      </segment>
+    </unit>
+    <unit id="verdict.listed">
+      <segment>
         <source>Listed in target sitemap</source>
-      </trans-unit>
-      <trans-unit id="verdict.timeout" resname="verdict.timeout">
+      </segment>
+    </unit>
+    <unit id="verdict.timeout">
+      <segment>
         <source>Timeout</source>
-      </trans-unit>
-      <trans-unit id="summary.filterBy" resname="summary.filterBy">
+      </segment>
+    </unit>
+    <unit id="summary.filterBy">
+      <segment>
         <source>Show only these rows</source>
-      </trans-unit>
-      <trans-unit id="verdict.notAnalyzed.help" resname="verdict.notAnalyzed.help">
+      </segment>
+    </unit>
+    <unit id="verdict.notAnalyzed.help">
+      <segment>
         <source>The run has not been analysed yet. Verdicts are computed once all URLs are checked.</source>
-      </trans-unit>
-      <trans-unit id="verdict.reference.help" resname="verdict.reference.help">
+      </segment>
+    </unit>
+    <unit id="verdict.reference.help">
+      <segment>
         <source>The reference row: how the URL answered before the migration.</source>
-      </trans-unit>
-      <trans-unit id="verdict.referenceNotOk.help" resname="verdict.referenceNotOk.help">
+      </segment>
+    </unit>
+    <unit id="verdict.referenceNotOk.help">
+      <segment>
         <source>The URL already fails on the reference, so there is nothing to compare. It is listed in the sitemap search engines know, though. Possible causes: a detail page (news, job offer, product) listed in the page sitemap that only works with a record in its URL; an error in a plugin or content element; a page for logged-in users only.</source>
-      </trans-unit>
-      <trans-unit id="verdict.ok.help" resname="verdict.ok.help">
+      </segment>
+    </unit>
+    <unit id="verdict.ok.help">
+      <segment>
         <source>Same path, same page or record.</source>
-      </trans-unit>
-      <trans-unit id="verdict.movedWithRedirect.help" resname="verdict.movedWithRedirect.help">
+      </segment>
+    </unit>
+    <unit id="verdict.movedWithRedirect.help">
+      <segment>
         <source>The URL redirects to the same page or record. Nothing to do, unless a warning says otherwise.</source>
-      </trans-unit>
-      <trans-unit id="verdict.missing.help" resname="verdict.missing.help">
+      </segment>
+    </unit>
+    <unit id="verdict.missing.help">
+      <segment>
         <source>The URL answers with an error on the target and does not redirect. Possible causes: the page was moved or renamed without a redirect; it was not migrated, is hidden or not translated; its slug changed; an error on the target itself — check the status code.</source>
-      </trans-unit>
-      <trans-unit id="verdict.redirectBroken.help" resname="verdict.redirectBroken.help">
+      </segment>
+    </unit>
+    <unit id="verdict.redirectBroken.help">
+      <segment>
         <source>The URL redirects, but ends in an error, a loop or too many redirects. Possible causes: the redirect target was deleted or moved; redirect rules lead into each other; rules for https, www or a trailing slash undo each other.</source>
-      </trans-unit>
-      <trans-unit id="verdict.otherContent.help" resname="verdict.otherContent.help">
+      </segment>
+    </unit>
+    <unit id="verdict.otherContent.help">
+      <segment>
         <source>The URL answers with 200, but shows a different page, record or language. Possible causes: a redirect to a parent or start page; the slug is used by another page now; a language fallback shows the default language.</source>
-      </trans-unit>
-      <trans-unit id="verdict.identityUnknown.help" resname="verdict.identityUnknown.help">
+      </segment>
+    </unit>
+    <unit id="verdict.identityUnknown.help">
+      <segment>
         <source>The URL answers with 200, but the markers needed for a comparison are missing. Possible causes: one environment does not render the page uid in the body tag or the record meta tag; a page template replaces the body tag.</source>
-      </trans-unit>
-      <trans-unit id="verdict.listed.help" resname="verdict.listed.help">
+      </segment>
+    </unit>
+    <unit id="verdict.listed.help">
+      <segment>
         <source>A page from the target sitemap, requested to suggest redirect targets.</source>
-      </trans-unit>
-      <trans-unit id="verdict.timeout.help" resname="verdict.timeout.help">
+      </segment>
+    </unit>
+    <unit id="verdict.timeout.help">
+      <segment>
         <source>No complete answer within the timeout, also after the retries. The page may exist and only render slowly, e.g. right after a cache flush. Run the check again before treating it as missing.</source>
-      </trans-unit>
-      <trans-unit id="status.serverError" resname="status.serverError">
+      </segment>
+    </unit>
+    <unit id="status.serverError">
+      <segment>
         <source>HTTP %1$s: server error</source>
-      </trans-unit>
-      <trans-unit id="status.serverError.help" resname="status.serverError.help">
+      </segment>
+    </unit>
+    <unit id="status.serverError.help">
+      <segment>
         <source>Possible causes: a detail page listed in the page sitemap that needs a record in its URL — the plugin fails without one; an exception in a plugin or content element; a database or configuration error on this environment. The TYPO3 log of this environment names the exception.</source>
-      </trans-unit>
-      <trans-unit id="status.notFound" resname="status.notFound">
+      </segment>
+    </unit>
+    <unit id="status.notFound">
+      <segment>
         <source>HTTP %1$s: not found</source>
-      </trans-unit>
-      <trans-unit id="status.notFound.help" resname="status.notFound.help">
+      </segment>
+    </unit>
+    <unit id="status.notFound.help">
+      <segment>
         <source>Possible causes: the page was moved or renamed without a redirect; it is hidden, deleted or not translated; the record of a detail page no longer exists.</source>
-      </trans-unit>
-      <trans-unit id="status.accessDenied" resname="status.accessDenied">
+      </segment>
+    </unit>
+    <unit id="status.accessDenied">
+      <segment>
         <source>HTTP %1$s: access denied</source>
-      </trans-unit>
-      <trans-unit id="status.accessDenied.help" resname="status.accessDenied.help">
+      </segment>
+    </unit>
+    <unit id="status.accessDenied.help">
+      <segment>
         <source>Possible causes: the page is restricted to logged-in users; Basic Auth for this environment is missing or wrong; a web server rule blocks the request.</source>
-      </trans-unit>
-      <trans-unit id="status.clientError" resname="status.clientError">
+      </segment>
+    </unit>
+    <unit id="status.clientError">
+      <segment>
         <source>HTTP %1$s: request refused</source>
-      </trans-unit>
-      <trans-unit id="status.clientError.help" resname="status.clientError.help">
+      </segment>
+    </unit>
+    <unit id="status.clientError.help">
+      <segment>
         <source>The server refused the request. Possible causes: a web server or firewall rule, rate limiting, or arguments in the URL the site does not accept.</source>
-      </trans-unit>
-      <trans-unit id="status.noAnswer" resname="status.noAnswer">
+      </segment>
+    </unit>
+    <unit id="status.noAnswer">
+      <segment>
         <source>No answer</source>
-      </trans-unit>
-      <trans-unit id="status.noAnswer.help" resname="status.noAnswer.help">
+      </segment>
+    </unit>
+    <unit id="status.noAnswer.help">
+      <segment>
         <source>The request got no HTTP answer. Possible causes: the host is unreachable, a DNS or certificate error, or a timeout — a higher --timeout may help.</source>
-      </trans-unit>
-      <trans-unit id="warning.redirectChain" resname="warning.redirectChain">
+      </segment>
+    </unit>
+    <unit id="warning.redirectChain">
+      <segment>
         <source>Redirect chain</source>
-      </trans-unit>
-      <trans-unit id="warning.redirectChain.description" resname="warning.redirectChain.description">
+      </segment>
+    </unit>
+    <unit id="warning.redirectChain.description">
+      <segment>
         <source>More than one redirect before the final page. Point the first redirect directly at the final URL.</source>
-      </trans-unit>
-      <trans-unit id="warning.temporaryRedirect" resname="warning.temporaryRedirect">
+      </segment>
+    </unit>
+    <unit id="warning.temporaryRedirect">
+      <segment>
         <source>Temporary redirect</source>
-      </trans-unit>
-      <trans-unit id="warning.temporaryRedirect.description" resname="warning.temporaryRedirect.description">
+      </segment>
+    </unit>
+    <unit id="warning.temporaryRedirect.description">
+      <segment>
         <source>The chain contains a 302, 303 or 307. A permanent move should answer 301 or 308.</source>
-      </trans-unit>
-      <trans-unit id="warning.redirectToRootPage" resname="warning.redirectToRootPage">
+      </segment>
+    </unit>
+    <unit id="warning.redirectToRootPage">
+      <segment>
         <source>Redirect to start page</source>
-      </trans-unit>
-      <trans-unit id="warning.redirectToRootPage.description" resname="warning.redirectToRootPage.description">
+      </segment>
+    </unit>
+    <unit id="warning.redirectToRootPage.description">
+      <segment>
         <source>A deep URL redirects to a start page. Search engines often treat this as a soft 404.</source>
-      </trans-unit>
-      <trans-unit id="warning.listedUrlRedirects" resname="warning.listedUrlRedirects">
+      </segment>
+    </unit>
+    <unit id="warning.listedUrlRedirects">
+      <segment>
         <source>Sitemap URL redirects</source>
-      </trans-unit>
-      <trans-unit id="warning.listedUrlRedirects.description" resname="warning.listedUrlRedirects.description">
+      </segment>
+    </unit>
+    <unit id="warning.listedUrlRedirects.description">
+      <segment>
         <source>The sitemap lists a URL that redirects. A sitemap should only contain final URLs.</source>
-      </trans-unit>
-      <trans-unit id="warning.languageChanged" resname="warning.languageChanged">
+      </segment>
+    </unit>
+    <unit id="warning.languageChanged">
+      <segment>
         <source>Language changed</source>
-      </trans-unit>
-      <trans-unit id="warning.languageChanged.description" resname="warning.languageChanged.description">
+      </segment>
+    </unit>
+    <unit id="warning.languageChanged.description">
+      <segment>
         <source>The target page is in a different language than the reference page.</source>
-      </trans-unit>
-      <trans-unit id="warning.recordIdentityUnknown" resname="warning.recordIdentityUnknown">
+      </segment>
+    </unit>
+    <unit id="warning.recordIdentityUnknown">
+      <segment>
         <source>Record unknown</source>
-      </trans-unit>
-      <trans-unit id="warning.recordIdentityUnknown.description" resname="warning.recordIdentityUnknown.description">
+      </segment>
+    </unit>
+    <unit id="warning.recordIdentityUnknown.description">
+      <segment>
         <source>Several URLs render this page without a record marker — probably a detail page. Which record is shown cannot be compared.</source>
-      </trans-unit>
-      <trans-unit id="warning.duplicateDetailPage" resname="warning.duplicateDetailPage">
+      </segment>
+    </unit>
+    <unit id="warning.duplicateDetailPage">
+      <segment>
         <source>Duplicate detail page</source>
-      </trans-unit>
-      <trans-unit id="warning.duplicateDetailPage.description" resname="warning.duplicateDetailPage.description">
+      </segment>
+    </unit>
+    <unit id="warning.duplicateDetailPage.description">
+      <segment>
         <source>The same record is rendered by more than one page. That is duplicate content.</source>
-      </trans-unit>
-      <trans-unit id="abortReason.loop" resname="abortReason.loop">
+      </segment>
+    </unit>
+    <unit id="abortReason.loop">
+      <segment>
         <source>redirect loop</source>
-      </trans-unit>
-      <trans-unit id="abortReason.hopLimit" resname="abortReason.hopLimit">
+      </segment>
+    </unit>
+    <unit id="abortReason.hopLimit">
+      <segment>
         <source>too many redirects</source>
-      </trans-unit>
-      <trans-unit id="abortReason.missingLocation" resname="abortReason.missingLocation">
+      </segment>
+    </unit>
+    <unit id="abortReason.missingLocation">
+      <segment>
         <source>redirect without Location header</source>
-      </trans-unit>
-      <trans-unit id="abortReason.connectionError" resname="abortReason.connectionError">
+      </segment>
+    </unit>
+    <unit id="abortReason.connectionError">
+      <segment>
         <source>connection error</source>
-      </trans-unit>
-      <trans-unit id="abortReason.timeout" resname="abortReason.timeout">
+      </segment>
+    </unit>
+    <unit id="abortReason.timeout">
+      <segment>
         <source>timeout</source>
-      </trans-unit>
-      <trans-unit id="snapshot.noLanguage" resname="snapshot.noLanguage">
+      </segment>
+    </unit>
+    <unit id="snapshot.noLanguage">
+      <segment>
         <source>(no language)</source>
-      </trans-unit>
-      <trans-unit id="empty.noSnapshots" resname="empty.noSnapshots">
+      </segment>
+    </unit>
+    <unit id="empty.noSnapshots">
+      <segment>
         <source>No sitemap snapshots stored yet.</source>
-      </trans-unit>
-      <trans-unit id="button.editNote" resname="button.editNote">
+      </segment>
+    </unit>
+    <unit id="button.editNote">
+      <segment>
         <source>Edit note</source>
-      </trans-unit>
-      <trans-unit id="button.delete" resname="button.delete">
+      </segment>
+    </unit>
+    <unit id="button.delete">
+      <segment>
         <source>Delete</source>
-      </trans-unit>
-      <trans-unit id="flash.deleteSnapshot.success" resname="flash.deleteSnapshot.success">
+      </segment>
+    </unit>
+    <unit id="flash.deleteSnapshot.success">
+      <segment>
         <source>The snapshot was deleted.</source>
-      </trans-unit>
-      <trans-unit id="flash.deleteSnapshot.notFound" resname="flash.deleteSnapshot.notFound">
+      </segment>
+    </unit>
+    <unit id="flash.deleteSnapshot.notFound">
+      <segment>
         <source>The snapshot does not exist (any more).</source>
-      </trans-unit>
-      <trans-unit id="flash.deleteSnapshot.locked" resname="flash.deleteSnapshot.locked">
+      </segment>
+    </unit>
+    <unit id="flash.deleteSnapshot.locked">
+      <segment>
         <source>The snapshot is locked and was not deleted. Unlock it first.</source>
-      </trans-unit>
-      <trans-unit id="button.lock.locked" resname="button.lock.locked">
+      </segment>
+    </unit>
+    <unit id="button.lock.locked">
+      <segment>
         <source>Locked — neither the module nor the cleanup command deletes this snapshot. Click to unlock.</source>
-      </trans-unit>
-      <trans-unit id="button.lock.unlocked" resname="button.lock.unlocked">
+      </segment>
+    </unit>
+    <unit id="button.lock.unlocked">
+      <segment>
         <source>Not locked. Click to protect this snapshot from deletion.</source>
-      </trans-unit>
-      <trans-unit id="error.lock.requestFailed" resname="error.lock.requestFailed">
+      </segment>
+    </unit>
+    <unit id="error.lock.requestFailed">
+      <segment>
         <source>The lock could not be changed.</source>
-      </trans-unit>
-      <trans-unit id="documentType.invalid" resname="documentType.invalid">
+      </segment>
+    </unit>
+    <unit id="documentType.invalid">
+      <segment>
         <source>no valid sitemap</source>
-      </trans-unit>
-      <trans-unit id="documentType.unreachable" resname="documentType.unreachable">
+      </segment>
+    </unit>
+    <unit id="documentType.unreachable">
+      <segment>
         <source>not reachable</source>
-      </trans-unit>
-      <trans-unit id="snapshot.summary" resname="snapshot.summary">
+      </segment>
+    </unit>
+    <unit id="snapshot.summary">
+      <segment>
         <source>%1$s languages · %2$s sitemap indexes · %3$s sitemaps · %4$s URLs</source>
-      </trans-unit>
-      <trans-unit id="snapshot.failedCount" resname="snapshot.failedCount">
+      </segment>
+    </unit>
+    <unit id="snapshot.failedCount">
+      <segment>
         <source>%1$s failed</source>
-      </trans-unit>
-      <trans-unit id="snapshot.incomplete" resname="snapshot.incomplete">
+      </segment>
+    </unit>
+    <unit id="snapshot.incomplete">
+      <segment>
         <source>incomplete — import was interrupted</source>
-      </trans-unit>
-      <trans-unit id="snapshot.index" resname="snapshot.index">
+      </segment>
+    </unit>
+    <unit id="snapshot.index">
+      <segment>
         <source>Sitemap index</source>
-      </trans-unit>
-      <trans-unit id="column.sitemapGroup" resname="column.sitemapGroup">
+      </segment>
+    </unit>
+    <unit id="column.sitemapGroup">
+      <segment>
         <source>Sitemap group</source>
-      </trans-unit>
-      <trans-unit id="column.urls" resname="column.urls">
+      </segment>
+    </unit>
+    <unit id="column.urls">
+      <segment>
         <source>URLs</source>
-      </trans-unit>
-      <trans-unit id="button.showRaw" resname="button.showRaw">
+      </segment>
+    </unit>
+    <unit id="button.showRaw">
+      <segment>
         <source>Raw content</source>
-      </trans-unit>
-      <trans-unit id="import.title" resname="import.title">
+      </segment>
+    </unit>
+    <unit id="import.title">
+      <segment>
         <source>Import sitemaps</source>
-      </trans-unit>
-      <trans-unit id="import.base" resname="import.base">
+      </segment>
+    </unit>
+    <unit id="import.base">
+      <segment>
         <source>Site URL (base and base variants of the site configuration)</source>
-      </trans-unit>
-      <trans-unit id="import.basicAuthUser" resname="import.basicAuthUser">
+      </segment>
+    </unit>
+    <unit id="import.basicAuthUser">
+      <segment>
         <source>Basic Auth user</source>
-      </trans-unit>
-      <trans-unit id="import.basicAuthPassword" resname="import.basicAuthPassword">
+      </segment>
+    </unit>
+    <unit id="import.basicAuthPassword">
+      <segment>
         <source>Basic Auth password</source>
-      </trans-unit>
-      <trans-unit id="import.basicAuthHint" resname="import.basicAuthHint">
+      </segment>
+    </unit>
+    <unit id="import.basicAuthHint">
+      <segment>
         <source>Only needed for protected environments. The credentials are used for this import and are not stored.</source>
-      </trans-unit>
-      <trans-unit id="import.discover" resname="import.discover">
+      </segment>
+    </unit>
+    <unit id="import.discover">
+      <segment>
         <source>Find sitemaps</source>
-      </trans-unit>
-      <trans-unit id="import.foundSitemaps" resname="import.foundSitemaps">
+      </segment>
+    </unit>
+    <unit id="import.foundSitemaps">
+      <segment>
         <source>Sitemaps found per language</source>
-      </trans-unit>
-      <trans-unit id="import.label" resname="import.label">
+      </segment>
+    </unit>
+    <unit id="import.label">
+      <segment>
         <source>Label (optional)</source>
-      </trans-unit>
-      <trans-unit id="environment.live" resname="environment.live">
+      </segment>
+    </unit>
+    <unit id="environment.live">
+      <segment>
         <source>Live</source>
-      </trans-unit>
-      <trans-unit id="environment.staging" resname="environment.staging">
+      </segment>
+    </unit>
+    <unit id="environment.staging">
+      <segment>
         <source>Staging</source>
-      </trans-unit>
-      <trans-unit id="environment.development" resname="environment.development">
+      </segment>
+    </unit>
+    <unit id="environment.development">
+      <segment>
         <source>Development</source>
-      </trans-unit>
-      <trans-unit id="environment.local" resname="environment.local">
+      </segment>
+    </unit>
+    <unit id="environment.local">
+      <segment>
         <source>Local</source>
-      </trans-unit>
-      <trans-unit id="import.environment" resname="import.environment">
+      </segment>
+    </unit>
+    <unit id="import.environment">
+      <segment>
         <source>Environment</source>
-      </trans-unit>
-      <trans-unit id="import.environmentNone" resname="import.environmentNone">
+      </segment>
+    </unit>
+    <unit id="import.environmentNone">
+      <segment>
         <source>— not specified —</source>
-      </trans-unit>
-      <trans-unit id="import.start" resname="import.start">
+      </segment>
+    </unit>
+    <unit id="import.start">
+      <segment>
         <source>Import selected sitemaps</source>
-      </trans-unit>
-      <trans-unit id="import.finished" resname="import.finished">
+      </segment>
+    </unit>
+    <unit id="import.finished">
+      <segment>
         <source>Import finished</source>
-      </trans-unit>
-      <trans-unit id="import.noSelection" resname="import.noSelection">
+      </segment>
+    </unit>
+    <unit id="import.noSelection">
+      <segment>
         <source>Select at least one language.</source>
-      </trans-unit>
-      <trans-unit id="import.noBases" resname="import.noBases">
+      </segment>
+    </unit>
+    <unit id="import.noBases">
+      <segment>
         <source>No site with a base URL is configured.</source>
-      </trans-unit>
-      <trans-unit id="import.notAllowed" resname="import.notAllowed">
+      </segment>
+    </unit>
+    <unit id="import.notAllowed">
+      <segment>
         <source>not on a host of the configured sites — use the CLI command</source>
-      </trans-unit>
-      <trans-unit id="import.status.waiting" resname="import.status.waiting">
+      </segment>
+    </unit>
+    <unit id="import.status.waiting">
+      <segment>
         <source>waiting</source>
-      </trans-unit>
-      <trans-unit id="import.status.running" resname="import.status.running">
+      </segment>
+    </unit>
+    <unit id="import.status.running">
+      <segment>
         <source>importing …</source>
-      </trans-unit>
-      <trans-unit id="import.status.done" resname="import.status.done">
+      </segment>
+    </unit>
+    <unit id="import.status.done">
+      <segment>
         <source>%1$s URLs in %2$s files</source>
-      </trans-unit>
-      <trans-unit id="import.status.failedFiles" resname="import.status.failedFiles">
+      </segment>
+    </unit>
+    <unit id="import.status.failedFiles">
+      <segment>
         <source>%1$s files failed</source>
-      </trans-unit>
-      <trans-unit id="error.import.accessDenied" resname="error.import.accessDenied">
+      </segment>
+    </unit>
+    <unit id="error.import.accessDenied">
+      <segment>
         <source>Only administrators can import sitemaps.</source>
-      </trans-unit>
-      <trans-unit id="error.import.unknownBase" resname="error.import.unknownBase">
+      </segment>
+    </unit>
+    <unit id="error.import.unknownBase">
+      <segment>
         <source>This URL is not a base of a configured site.</source>
-      </trans-unit>
-      <trans-unit id="error.import.unknownHost" resname="error.import.unknownHost">
+      </segment>
+    </unit>
+    <unit id="error.import.unknownHost">
+      <segment>
         <source>The sitemap is not on a host of the configured sites.</source>
-      </trans-unit>
-      <trans-unit id="error.import.labelTooLong" resname="error.import.labelTooLong">
+      </segment>
+    </unit>
+    <unit id="error.import.labelTooLong">
+      <segment>
         <source>The label must not be longer than 100 characters.</source>
-      </trans-unit>
-      <trans-unit id="error.import.labelExists" resname="error.import.labelExists">
+      </segment>
+    </unit>
+    <unit id="error.import.labelExists">
+      <segment>
         <source>A snapshot with this label already exists.</source>
-      </trans-unit>
-      <trans-unit id="error.import.snapshotNotImporting" resname="error.import.snapshotNotImporting">
+      </segment>
+    </unit>
+    <unit id="error.import.snapshotNotImporting">
+      <segment>
         <source>The snapshot does not exist or its import has already been finished.</source>
-      </trans-unit>
-      <trans-unit id="error.import.noUrls" resname="error.import.noUrls">
+      </segment>
+    </unit>
+    <unit id="error.import.noUrls">
+      <segment>
         <source>No page URLs found — the snapshot was not stored.</source>
-      </trans-unit>
-      <trans-unit id="error.import.requestFailed" resname="error.import.requestFailed">
+      </segment>
+    </unit>
+    <unit id="error.import.requestFailed">
+      <segment>
         <source>The request failed. Check the connection and the Basic Auth credentials.</source>
-      </trans-unit>
-      <trans-unit id="column.sitemap" resname="column.sitemap">
+      </segment>
+    </unit>
+    <unit id="column.sitemap">
+      <segment>
         <source>Sitemap</source>
-      </trans-unit>
-      <trans-unit id="button.openSitemap" resname="button.openSitemap">
+      </segment>
+    </unit>
+    <unit id="button.openSitemap">
+      <segment>
         <source>Open</source>
-      </trans-unit>
-      <trans-unit id="format.thousandsSeparator" resname="format.thousandsSeparator">
+      </segment>
+    </unit>
+    <unit id="format.thousandsSeparator">
+      <segment>
         <source>,</source>
-      </trans-unit>
-      <trans-unit id="column.sitemaps" resname="column.sitemaps">
+      </segment>
+    </unit>
+    <unit id="column.sitemaps">
+      <segment>
         <source>Sitemaps</source>
-      </trans-unit>
-      <trans-unit id="column.sitemapGroups" resname="column.sitemapGroups">
+      </segment>
+    </unit>
+    <unit id="column.sitemapGroups">
+      <segment>
         <source>Sitemap groups</source>
-      </trans-unit>
-      <trans-unit id="column.actions" resname="column.actions">
+      </segment>
+    </unit>
+    <unit id="column.actions">
+      <segment>
         <source>Actions</source>
-      </trans-unit>
-      <trans-unit id="snapshot.missing" resname="snapshot.missing">
+      </segment>
+    </unit>
+    <unit id="snapshot.missing">
+      <segment>
         <source>missing</source>
-      </trans-unit>
-      <trans-unit id="button.expandAll" resname="button.expandAll">
+      </segment>
+    </unit>
+    <unit id="button.expandAll">
+      <segment>
         <source>Expand all languages</source>
-      </trans-unit>
-      <trans-unit id="button.collapseAll" resname="button.collapseAll">
+      </segment>
+    </unit>
+    <unit id="button.collapseAll">
+      <segment>
         <source>Collapse all languages</source>
-      </trans-unit>
-      <trans-unit id="run.snapshots" resname="run.snapshots">
+      </segment>
+    </unit>
+    <unit id="run.snapshots">
+      <segment>
         <source>Compares snapshot "%1$s" (before) with snapshot "%2$s" (after), requested on %3$s</source>
-      </trans-unit>
-      <trans-unit id="run.snapshotDeleted" resname="run.snapshotDeleted">
+      </segment>
+    </unit>
+    <unit id="run.snapshotDeleted">
+      <segment>
         <source>(deleted snapshot)</source>
-      </trans-unit>
-          <trans-unit id="guide.documentation" resname="guide.documentation">
+      </segment>
+    </unit>
+    <unit id="guide.documentation">
+      <segment>
         <source>Documentation</source>
-      </trans-unit>
-      <trans-unit id="guide.sitemaps.title" resname="guide.sitemaps.title">
+      </segment>
+    </unit>
+    <unit id="guide.sitemaps.title">
+      <segment>
         <source>How sitemap snapshots work</source>
-      </trans-unit>
-      <trans-unit id="guide.sitemaps.purpose" resname="guide.sitemaps.purpose">
+      </segment>
+    </unit>
+    <unit id="guide.sitemaps.purpose">
+      <segment>
         <source>A snapshot stores the sitemaps of every language of a site at one point in time, raw XML included. It is the URL list every check works with, and it stays available after the site itself has changed.</source>
-      </trans-unit>
-      <trans-unit id="guide.sitemaps.step1" resname="guide.sitemaps.step1">
+      </segment>
+    </unit>
+    <unit id="guide.sitemaps.step1">
+      <segment>
         <source>Choose a base URL of a configured site and find its sitemaps. The environment is suggested from the site configuration.</source>
-      </trans-unit>
-      <trans-unit id="guide.sitemaps.step2" resname="guide.sitemaps.step2">
+      </segment>
+    </unit>
+    <unit id="guide.sitemaps.step2">
+      <segment>
         <source>Select the languages, give the snapshot a label if you like, and import it.</source>
-      </trans-unit>
-      <trans-unit id="guide.sitemaps.step3" resname="guide.sitemaps.step3">
+      </segment>
+    </unit>
+    <unit id="guide.sitemaps.step3">
+      <segment>
         <source>Lock every snapshot you must not lose, e.g. the live state before a relaunch: the lock icon protects it from deletion, also by the cleanup command.</source>
-      </trans-unit>
-      <trans-unit id="guide.sitemaps.note" resname="guide.sitemaps.note">
+      </segment>
+    </unit>
+    <unit id="guide.sitemaps.note">
+      <segment>
         <source>URLs outside the configured sites and scheduled imports need the command line: websitecheck:importsitemaps. Before the database is replaced, save the snapshots you need as files below.</source>
-      </trans-unit>
-      <trans-unit id="guide.status.title" resname="guide.status.title">
+      </segment>
+    </unit>
+    <unit id="guide.status.title">
+      <segment>
         <source>How the status check works</source>
-      </trans-unit>
-      <trans-unit id="guide.status.purpose" resname="guide.status.purpose">
+      </segment>
+    </unit>
+    <unit id="guide.status.purpose">
+      <segment>
         <source>Checks whether every URL of a sitemap snapshot works: the HTTP status and TYPO3 error pages per URL. The link check also follows the plugin links on those pages, which no sitemap lists, and reports links whose arguments have no effect.</source>
-      </trans-unit>
-      <trans-unit id="guide.status.step1" resname="guide.status.step1">
+      </segment>
+    </unit>
+    <unit id="guide.status.step1">
+      <segment>
         <source>Import a sitemap snapshot of the environment to check in the Sitemaps module.</source>
-      </trans-unit>
-      <trans-unit id="guide.status.step2" resname="guide.status.step2">
+      </segment>
+    </unit>
+    <unit id="guide.status.step2">
+      <segment>
         <source>Compose the check below and run the command on the command line. Every URL is requested, which can take a while.</source>
-      </trans-unit>
-      <trans-unit id="guide.status.step3" resname="guide.status.step3">
+      </segment>
+    </unit>
+    <unit id="guide.status.step3">
+      <segment>
         <source>Reload this page and review the results: filter by environment and problems, mark findings as reviewed and add a note where needed.</source>
-      </trans-unit>
-      <trans-unit id="guide.status.note" resname="guide.status.note">
+      </segment>
+    </unit>
+    <unit id="guide.status.note">
+      <segment>
         <source>Moved URLs and redirects are the job of the migration check: it compares two environments page by page.</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.title" resname="guide.migration.title">
+      </segment>
+    </unit>
+    <unit id="guide.migration.title">
+      <segment>
         <source>How the migration check works</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.purpose" resname="guide.migration.purpose">
+      </segment>
+    </unit>
+    <unit id="guide.migration.purpose">
+      <segment>
         <source>Checks whether the URLs search engines know from the old site still lead to the same page or record on the new one — directly or through a redirect.</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.step1" resname="guide.migration.step1">
+      </segment>
+    </unit>
+    <unit id="guide.migration.step1">
+      <segment>
         <source>Before the switch: import the sitemaps of the live site and lock the snapshot.</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.step2" resname="guide.migration.step2">
+      </segment>
+    </unit>
+    <unit id="guide.migration.step2">
+      <segment>
         <source>Import a snapshot of the new site, e.g. staging, compose the check below and run it. Repeat after every change to the new site.</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.step3" resname="guide.migration.step3">
+      </segment>
+    </unit>
+    <unit id="guide.migration.step3">
+      <segment>
         <source>Review the results: missing redirects per page and record, with a suggested target where one can be derived.</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.step4" resname="guide.migration.step4">
+      </segment>
+    </unit>
+    <unit id="guide.migration.step4">
+      <segment>
         <source>After the switch: import a snapshot of the new live site and reuse the reference results of the last run — the old site no longer answers. Export the last run beforehand if the database gets replaced.</source>
-      </trans-unit>
-      <trans-unit id="guide.migration.note" resname="guide.migration.note">
+      </segment>
+    </unit>
+    <unit id="guide.migration.note">
+      <segment>
         <source>Both sites have to render the page and record markers described in the documentation; without them pages cannot be compared.</source>
-      </trans-unit>
-      <trans-unit id="help.statusHost.title" resname="help.statusHost.title">
+      </segment>
+    </unit>
+    <unit id="help.statusHost.title">
+      <segment>
         <source>Other host</source>
-      </trans-unit>
-      <trans-unit id="help.statusHost" resname="help.statusHost">
+      </segment>
+    </unit>
+    <unit id="help.statusHost">
+      <segment>
         <source>Requests the paths of the snapshot on another host. Example: the snapshot was taken on www.example.com, the host is staging.example.com — you see before the switch whether every URL search engines know answers on the new system. Or the other way round: a sitemap provider only exists on staging while the pages are live already. Redirects and content are compared by the migration check.</source>
-      </trans-unit>
-      <trans-unit id="help.statusEnvironment.title" resname="help.statusEnvironment.title">
+      </segment>
+    </unit>
+    <unit id="help.statusEnvironment.title">
+      <segment>
         <source>Environment label</source>
-      </trans-unit>
-      <trans-unit id="help.statusEnvironment" resname="help.statusEnvironment">
+      </segment>
+    </unit>
+    <unit id="help.statusEnvironment">
+      <segment>
         <source>Results are stored per environment label and URL; a new run with the same label replaces them. Use one label per environment and check, e.g. "staging" for the status check and "staging-links" for the link check of the same site.</source>
-      </trans-unit>
-      <trans-unit id="help.statusSamples.title" resname="help.statusSamples.title">
+      </segment>
+    </unit>
+    <unit id="help.statusSamples.title">
+      <segment>
         <source>Links per shape</source>
-      </trans-unit>
-      <trans-unit id="help.statusSamples" resname="help.statusSamples">
+      </segment>
+    </unit>
+    <unit id="help.statusSamples">
+      <segment>
         <source>A shape is the path of a link plus the names of its arguments. /news/detail?tx_news_pi1[news]=12 and …[news]=13 share one shape, so a list of a hundred news items is checked with this many links, not a hundred.</source>
-      </trans-unit>
-      <trans-unit id="help.migrationReference.title" resname="help.migrationReference.title">
+      </segment>
+    </unit>
+    <unit id="help.migrationReference.title">
+      <segment>
         <source>Reference snapshot</source>
-      </trans-unit>
-      <trans-unit id="help.migrationReference" resname="help.migrationReference">
+      </segment>
+    </unit>
+    <unit id="help.migrationReference">
+      <segment>
         <source>The URLs of the old site as search engines know them. Take the locked live snapshot from before the switch — a newer live snapshot already lists the URLs of the new site.</source>
-      </trans-unit>
-      <trans-unit id="help.migrationReferenceRun.title" resname="help.migrationReferenceRun.title">
+      </segment>
+    </unit>
+    <unit id="help.migrationReferenceRun.title">
+      <segment>
         <source>Reference results</source>
-      </trans-unit>
-      <trans-unit id="help.migrationReferenceRun" resname="help.migrationReferenceRun">
+      </segment>
+    </unit>
+    <unit id="help.migrationReferenceRun">
+      <segment>
         <source>Before the switch, both sites answer and every run requests both. After it, www.example.com shows the new site: a run named "relaunch" from before the switch still knows how every old URL answered, and a run "after-relaunch" reuses those rows and only requests the new site.</source>
-      </trans-unit>
-      <trans-unit id="help.migrationLabels.title" resname="help.migrationLabels.title">
+      </segment>
+    </unit>
+    <unit id="help.migrationLabels.title">
+      <segment>
         <source>Environment labels</source>
-      </trans-unit>
-      <trans-unit id="help.migrationLabels" resname="help.migrationLabels">
+      </segment>
+    </unit>
+    <unit id="help.migrationLabels">
+      <segment>
         <source>They name the two sides in the results, e.g. "live" and "staging". After the switch both are live: "live-before" and "live-after" keep them apart.</source>
-      </trans-unit>
-      <trans-unit id="help.sitemapsEnvironment.title" resname="help.sitemapsEnvironment.title">
+      </segment>
+    </unit>
+    <unit id="help.sitemapsEnvironment.title">
+      <segment>
         <source>Environment</source>
-      </trans-unit>
-      <trans-unit id="help.sitemapsEnvironment" resname="help.sitemapsEnvironment">
+      </segment>
+    </unit>
+    <unit id="help.sitemapsEnvironment">
+      <segment>
         <source>Says where the snapshot comes from. The migration check suggests the locked live snapshot as reference and the newest staging, development or local one as target — so tag live snapshots as live.</source>
-      </trans-unit>
-      <trans-unit id="help.sitemapsLabel.title" resname="help.sitemapsLabel.title">
+      </segment>
+    </unit>
+    <unit id="help.sitemapsLabel.title">
+      <segment>
         <source>Label</source>
-      </trans-unit>
-      <trans-unit id="help.sitemapsLabel" resname="help.sitemapsLabel">
+      </segment>
+    </unit>
+    <unit id="help.sitemapsLabel">
+      <segment>
         <source>The name the checks use to find the snapshot, e.g. "live-before-relaunch". It has to be unique. Left empty, it is the host and the time, e.g. "www.example.com 2026-01-31 14:05".</source>
-      </trans-unit>
-          <trans-unit id="archive.title" resname="archive.title">
+      </segment>
+    </unit>
+    <unit id="archive.title">
+      <segment>
         <source>Saved files</source>
-      </trans-unit>
-      <trans-unit id="archive.help" resname="archive.help">
+      </segment>
+    </unit>
+    <unit id="archive.help">
+      <segment>
         <source>A database that is replaced — e.g. by a fresh import of the live database — takes every snapshot and every stored check result with it. A saved file brings them back, and it moves them to another installation, e.g. from staging to the new live system. The files are the same as those of websitecheck:exportsnapshots.</source>
-      </trans-unit>
-      <trans-unit id="archive.intro" resname="archive.intro">
+      </segment>
+    </unit>
+    <unit id="archive.intro">
+      <segment>
         <source>Snapshots and migration check runs saved to %1$s. Reading a file in skips what is already here; a label used by another record stops it. Keep the directory out of version control.</source>
-      </trans-unit>
-      <trans-unit id="archive.empty" resname="archive.empty">
+      </segment>
+    </unit>
+    <unit id="archive.empty">
+      <segment>
         <source>No saved files yet. Save a snapshot with the button in its header, or a migration check run in the migration check module.</source>
-      </trans-unit>
-      <trans-unit id="archive.disabled" resname="archive.disabled">
+      </segment>
+    </unit>
+    <unit id="archive.disabled">
+      <segment>
         <source>Saving to files is switched off. Set an archive directory in Settings → Extension Configuration → ot_websitecheck, e.g. data/websitecheck, to save snapshots here before the database is replaced.</source>
-      </trans-unit>
-      <trans-unit id="archive.column.file" resname="archive.column.file">
+      </segment>
+    </unit>
+    <unit id="archive.column.file">
+      <segment>
         <source>File</source>
-      </trans-unit>
-      <trans-unit id="archive.column.contents" resname="archive.column.contents">
+      </segment>
+    </unit>
+    <unit id="archive.column.contents">
+      <segment>
         <source>Contents</source>
-      </trans-unit>
-      <trans-unit id="archive.entry.snapshot" resname="archive.entry.snapshot">
+      </segment>
+    </unit>
+    <unit id="archive.entry.snapshot">
+      <segment>
         <source>Snapshot "%1$s" (%2$s URLs)</source>
-      </trans-unit>
-      <trans-unit id="archive.entry.run" resname="archive.entry.run">
+      </segment>
+    </unit>
+    <unit id="archive.entry.run">
+      <segment>
         <source>Migration check run "%1$s" (%2$s result rows)</source>
-      </trans-unit>
-      <trans-unit id="archive.action.import" resname="archive.action.import">
+      </segment>
+    </unit>
+    <unit id="archive.action.import">
+      <segment>
         <source>new</source>
-      </trans-unit>
-      <trans-unit id="archive.action.skip" resname="archive.action.skip">
+      </segment>
+    </unit>
+    <unit id="archive.action.skip">
+      <segment>
         <source>already here</source>
-      </trans-unit>
-      <trans-unit id="archive.action.skipRenamed" resname="archive.action.skipRenamed">
+      </segment>
+    </unit>
+    <unit id="archive.action.skipRenamed">
+      <segment>
         <source>already here as "%1$s"</source>
-      </trans-unit>
-      <trans-unit id="archive.action.conflict" resname="archive.action.conflict">
+      </segment>
+    </unit>
+    <unit id="archive.action.conflict">
+      <segment>
         <source>label taken by another record</source>
-      </trans-unit>
-      <trans-unit id="archive.import" resname="archive.import">
+      </segment>
+    </unit>
+    <unit id="archive.import">
+      <segment>
         <source>Read in</source>
-      </trans-unit>
-      <trans-unit id="archive.import.conflicts" resname="archive.import.conflicts">
+      </segment>
+    </unit>
+    <unit id="archive.import.conflicts">
+      <segment>
         <source>A label in this file is used by another record here. Rename or delete that record, or read the file in with websitecheck:importsnapshots --label-suffix.</source>
-      </trans-unit>
-      <trans-unit id="archive.delete.confirmTitle" resname="archive.delete.confirmTitle">
+      </segment>
+    </unit>
+    <unit id="archive.delete.confirmTitle">
+      <segment>
         <source>Delete the file?</source>
-      </trans-unit>
-      <trans-unit id="archive.delete.confirm" resname="archive.delete.confirm">
+      </segment>
+    </unit>
+    <unit id="archive.delete.confirm">
+      <segment>
         <source>"%1$s" is deleted from the directory. It may be the only copy of these snapshots.</source>
-      </trans-unit>
-      <trans-unit id="archive.save" resname="archive.save">
+      </segment>
+    </unit>
+    <unit id="archive.save">
+      <segment>
         <source>Save as file</source>
-      </trans-unit>
-      <trans-unit id="archive.save.help" resname="archive.save.help">
+      </segment>
+    </unit>
+    <unit id="archive.save.help">
+      <segment>
         <source>Saves this snapshot to the archive directory, so it survives a replaced database.</source>
-      </trans-unit>
-      <trans-unit id="archive.saveRun" resname="archive.saveRun">
+      </segment>
+    </unit>
+    <unit id="archive.saveRun">
+      <segment>
         <source>Save run as file</source>
-      </trans-unit>
-      <trans-unit id="archive.saveRun.help" resname="archive.saveRun.help">
+      </segment>
+    </unit>
+    <unit id="archive.saveRun.help">
+      <segment>
         <source>Saves this run with its results and the snapshots it compared — after the switch, its reference results can no longer be requested.</source>
-      </trans-unit>
-      <trans-unit id="flash.archive.saved" resname="flash.archive.saved">
+      </segment>
+    </unit>
+    <unit id="flash.archive.saved">
+      <segment>
         <source>Saved as %1$s.</source>
-      </trans-unit>
-      <trans-unit id="flash.archive.runSaved" resname="flash.archive.runSaved">
+      </segment>
+    </unit>
+    <unit id="flash.archive.runSaved">
+      <segment>
         <source>The run was saved as %1$s, with the snapshots it compared. Read it in from the Sitemaps module.</source>
-      </trans-unit>
-      <trans-unit id="flash.archive.imported" resname="flash.archive.imported">
+      </segment>
+    </unit>
+    <unit id="flash.archive.imported">
+      <segment>
         <source>%1$s snapshots and %2$s runs read in from %3$s.</source>
-      </trans-unit>
-      <trans-unit id="flash.archive.deleted" resname="flash.archive.deleted">
+      </segment>
+    </unit>
+    <unit id="flash.archive.deleted">
+      <segment>
         <source>%1$s was deleted.</source>
-      </trans-unit>
-      <trans-unit id="flash.archive.failed" resname="flash.archive.failed">
+      </segment>
+    </unit>
+    <unit id="flash.archive.failed">
+      <segment>
         <source>That did not work</source>
-      </trans-unit>
-    </body>
+      </segment>
+    </unit>
   </file>
 </xliff>

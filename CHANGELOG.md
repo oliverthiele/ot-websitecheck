@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stop `websitecheck:migrationcheck` before requesting anything when a snapshot
   lists the same path on more than one host or scheme; rows are matched by
   path, so such URLs overwrote each other
+- Switch all label files to XLIFF 2.0. File names, unit ids, texts and
+  placeholders are unchanged, so `LLL:` references and overrides keep working;
+  override files in XLIFF 1.2 still load next to them
 
 ### Fixed
 
