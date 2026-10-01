@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Store `url`, `path` and `source` of the status check results as text like
+  the other tables, and declare only the indexes of that table in
+  `ext_tables.sql`. Requires a database schema update
+
 ### Fixed
 
 - Send Basic Auth credentials only to the start URL and language sitemaps
@@ -15,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   every URL of a snapshot, so a foreign host named in a sitemap received them
 - Withhold Basic Auth credentials on a redirect to another port or from https
   to plain http; until now only a change of host was checked
+- Store links and pages longer than 1024 characters in the status check;
+  `crawllinks` and `checksitemap` aborted with a database error on them
 
 ## [0.8.0] — 2026-09-22
 
