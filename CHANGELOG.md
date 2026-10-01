@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show the status check results 500 rows per page
 - Show the migration check results 200 pages and records per page; the
   verdict counts and filters still cover the whole run
+- Add functional tests for the repositories and the archive round trip,
+  run on SQLite
 
 ### Changed
 

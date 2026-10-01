@@ -1,0 +1,5 @@
+"tx_otwebsitecheck_domain_model_observation"
+,"uid","run_label","environment","requested_path","reviewed","note"
+,1,"relaunch","live","/a/",0,""
+,2,"relaunch","staging","/a/",1,"checked"
+,6,"earlier","live-old","/a/",0,""
