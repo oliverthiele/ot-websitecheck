@@ -10,11 +10,15 @@ use OliverThiele\OtWebsitecheck\Domain\Model\SitemapSnapshot;
  * Decides which sitemap snapshots a cleanup removes, so a scheduled import
  * does not pile up snapshots forever.
  *
- * Kept, whatever their age:
- * - locked snapshots — complete or not, they are never removed
- * - the newest complete snapshots per start URL, up to the given number
+ * Kept, whatever their age, complete or not:
+ * - locked snapshots
  * - snapshots a migration check run compared — its results refer to them
  * - snapshots with a note — someone marked them as worth keeping
+ *
+ * Kept besides: the newest complete snapshots per start URL, up to the given
+ * number. The snapshots kept for one of the reasons above do not count
+ * towards it. Start URLs that differ only in the case of scheme and host or
+ * in a trailing slash count as one.
  *
  * Removed besides: imports that never finished and are older than the given
  * point in time; an import still running is younger than that.
@@ -37,26 +41,40 @@ class SnapshotRetentionPolicy
         $selected = [];
         $completeCountByStartUrl = [];
         foreach ($snapshots as $snapshot) {
-            if ($snapshot->locked) {
-                continue;
-            }
-            if (!$snapshot->isComplete()) {
-                if ($snapshot->fetchedAt < $incompleteBefore && !in_array($snapshot->uid, $protectedSnapshotUids, true)) {
-                    $selected[] = $snapshot;
-                }
-                continue;
-            }
-
-            $position = $completeCountByStartUrl[$snapshot->startUrl] = ($completeCountByStartUrl[$snapshot->startUrl] ?? 0) + 1;
-            if ($position <= $keepPerStartUrl
+            if ($snapshot->locked
                 || in_array($snapshot->uid, $protectedSnapshotUids, true)
                 || trim($snapshot->note) !== ''
             ) {
                 continue;
             }
-            $selected[] = $snapshot;
+            if (!$snapshot->isComplete()) {
+                if ($snapshot->fetchedAt < $incompleteBefore) {
+                    $selected[] = $snapshot;
+                }
+                continue;
+            }
+
+            $startUrl = $this->normalizeStartUrl($snapshot->startUrl);
+            $position = $completeCountByStartUrl[$startUrl] = ($completeCountByStartUrl[$startUrl] ?? 0) + 1;
+            if ($position > $keepPerStartUrl) {
+                $selected[] = $snapshot;
+            }
         }
 
         return $selected;
+    }
+
+    private function normalizeStartUrl(string $startUrl): string
+    {
+        $scheme = parse_url($startUrl, PHP_URL_SCHEME);
+        $host = parse_url($startUrl, PHP_URL_HOST);
+        if (!is_string($scheme) || !is_string($host)) {
+            return rtrim($startUrl, '/');
+        }
+        $prefix = $scheme . '://' . $host;
+        // Only scheme and host are case-insensitive; the path keeps its case.
+        $rest = substr($startUrl, strlen($prefix));
+
+        return rtrim(strtolower($prefix) . $rest, '/');
     }
 }

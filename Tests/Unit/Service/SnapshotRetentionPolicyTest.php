@@ -77,6 +77,42 @@ final class SnapshotRetentionPolicyTest extends UnitTestCase
         self::assertSame([1], $this->selectedUids($snapshots, [], 0));
     }
 
+    #[Test]
+    public function incompleteSnapshotWithNoteIsKept(): void
+    {
+        $snapshots = [
+            $this->snapshot(1, 'https://www.example.com/', self::NOW - 90_000, SitemapSnapshot::STATUS_IMPORTING, note: 'aborted, but look at it'),
+            $this->snapshot(2, 'https://www.example.com/', self::NOW - 90_000, SitemapSnapshot::STATUS_IMPORTING),
+        ];
+
+        self::assertSame([2], $this->selectedUids($snapshots, [], 10));
+    }
+
+    #[Test]
+    public function snapshotsKeptForAReasonDoNotTakeUpTheNewestSlots(): void
+    {
+        $snapshots = [
+            $this->snapshot(1, 'https://www.example.com/', self::NOW - 400),
+            $this->snapshot(2, 'https://www.example.com/', self::NOW - 300),
+            $this->snapshot(3, 'https://www.example.com/', self::NOW - 200, note: 'keep'),
+            $this->snapshot(4, 'https://www.example.com/', self::NOW - 100, locked: true),
+        ];
+
+        self::assertSame([1], $this->selectedUids($snapshots, [], 1));
+    }
+
+    #[Test]
+    public function startUrlsDifferingInCaseOrTrailingSlashAreOneGroup(): void
+    {
+        $snapshots = [
+            $this->snapshot(1, 'https://www.example.com', self::NOW - 300),
+            $this->snapshot(2, 'HTTPS://WWW.EXAMPLE.COM/', self::NOW - 200),
+            $this->snapshot(3, 'https://www.example.com/', self::NOW - 100),
+        ];
+
+        self::assertSame([2, 1], $this->selectedUids($snapshots, [], 1));
+    }
+
     /**
      * @param list<SitemapSnapshot> $snapshots
      * @param list<int> $protectedUids

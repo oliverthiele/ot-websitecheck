@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refuse run labels longer than 100 characters in `migrationcheck` and in
   archive imports, and report a database error during an archive import
   instead of an uncaught exception
+- Keep incomplete snapshots with a note in `cleanupsnapshots`, do not count
+  locked, noted or used snapshots towards `--keep`, and treat start URLs that
+  differ only in case or a trailing slash as one
 - Send Basic Auth credentials only to the start URL and language sitemaps
   they were given for. A sitemap index could list a sub-sitemap on any host,
   and `checksitemap`, `crawllinks` and `migrationcheck` sent the credentials to

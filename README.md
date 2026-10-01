@@ -716,12 +716,16 @@ typo3 websitecheck:cleanupsnapshots --keep=10 --dry-run
 ```
 
 The counterpart of a scheduled import. Removes old sitemap snapshots and
-imports that never finished. Always kept:
+imports that never finished. Always kept, complete or not:
 
-- locked snapshots — complete or not
-- the newest complete snapshots per start URL, up to `--keep`
+- locked snapshots
 - snapshots a migration check run compared — its results refer to them
 - snapshots with a note
+
+Kept besides: the newest complete snapshots per start URL, up to `--keep`. The
+snapshots kept for one of the reasons above do not count towards it. Start URLs
+that differ only in the case of scheme and host or in a trailing slash count as
+one.
 
 A snapshot is locked with the lock icon in its header in the backend module,
 with the "Locked" field when editing the record, or right away with
