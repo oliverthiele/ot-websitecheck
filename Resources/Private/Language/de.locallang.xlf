@@ -57,6 +57,12 @@
         <target>Ergebnisse der Zielzeilen in diesem Lauf</target>
       </segment>
     </unit>
+    <unit id="migrationResults.pagination">
+      <segment>
+        <source>Pages and records %1$s–%2$s of %3$s</source>
+        <target>Seiten und Datensätze %1$s–%2$s von %3$s</target>
+      </segment>
+    </unit>
     <unit id="button.deleteRun">
       <segment>
         <source>Delete run "%1$s"</source>

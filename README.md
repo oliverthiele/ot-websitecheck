@@ -310,8 +310,9 @@ tool:
   newest snapshot and an environment label from it — with `-links` for a link
   check, so its results do not replace those of a status check.
 - **Migration check** — a form that composes the `migrationcheck` command, and
-  the results, see [Migration check results](#migration-check-results). A run
-  can be saved as a file together with the snapshots it compared. The
+  the results, see [Migration check results](#migration-check-results), 200
+  pages and records per page. A run can be saved as a file together with the
+  snapshots it compared. The
   form offers every complete snapshot and suggests the pair to compare: a
   locked live snapshot, otherwise the newest live one, as reference; the
   newest staging snapshot, otherwise development, then local, as target. It

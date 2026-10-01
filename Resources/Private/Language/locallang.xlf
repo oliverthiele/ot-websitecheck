@@ -47,6 +47,11 @@
         <source>Verdicts of the target rows in this run</source>
       </segment>
     </unit>
+    <unit id="migrationResults.pagination">
+      <segment>
+        <source>Pages and records %1$s–%2$s of %3$s</source>
+      </segment>
+    </unit>
     <unit id="button.deleteRun">
       <segment>
         <source>Delete run "%1$s"</source>

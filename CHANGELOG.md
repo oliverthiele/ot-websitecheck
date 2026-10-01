@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   through a redirect, and `tooManyRedirects` for more than ten
 - Read gzip-compressed sitemaps (`sitemap.xml.gz`)
 - Show the status check results 500 rows per page
+- Show the migration check results 200 pages and records per page; the
+  verdict counts and filters still cover the whole run
 
 ### Changed
 
