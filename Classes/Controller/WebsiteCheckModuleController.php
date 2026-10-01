@@ -19,20 +19,37 @@ class WebsiteCheckModuleController extends AbstractModuleController
 {
     use AllowedMethodsTrait;
 
+    private const int RESULTS_PER_PAGE = 500;
+
     public function __construct(
         private readonly CheckResultRepository $checkResultRepository,
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
     ) {
     }
 
-    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false): ResponseInterface
+    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, int $page = 1): ResponseInterface
     {
         $environments = $this->checkResultRepository->findDistinctEnvironments();
+        // A crawl of a large site stores tens of thousands of rows; the table
+        // shows one page of them.
+        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed);
+        $pageCount = max(1, (int)ceil($total / self::RESULTS_PER_PAGE));
+        $page = min(max(1, $page), $pageCount);
+        $offset = ($page - 1) * self::RESULTS_PER_PAGE;
         $environmentOptions = ['' => $this->translate('statusResults.allEnvironments')] + array_combine($environments, $environments);
 
         $moduleTemplate = $this->createModuleTemplate();
         $moduleTemplate->assignMultiple([
-            'results' => $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed),
+            'results' => $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset),
+            'pagination' => [
+                'page' => $page,
+                'pageCount' => $pageCount,
+                'total' => $total,
+                'from' => $total > 0 ? $offset + 1 : 0,
+                'to' => min($offset + self::RESULTS_PER_PAGE, $total),
+                'previousPage' => $page > 1 ? $page - 1 : 0,
+                'nextPage' => $page < $pageCount ? $page + 1 : 0,
+            ],
             'environmentOptions' => $environmentOptions,
             // Results of any environment — the filter must stay even when the chosen one has none.
             'hasResults' => $environments !== [],

@@ -76,9 +76,10 @@ class CheckResultRepository extends AbstractRepository
     }
 
     /**
+     * @param int $limit rows per page, 0 for all
      * @return array<int, array<string, mixed>>
      */
-    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false): array
+    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         // Group by page uid first, then path: the same page uid/path can carry
@@ -92,8 +93,21 @@ class CheckResultRepository extends AbstractRepository
             ->addOrderBy('environment', 'ASC');
 
         $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
+        if ($limit > 0) {
+            $queryBuilder->setMaxResults($limit)->setFirstResult(max(0, $offset));
+        }
 
         return $queryBuilder->executeQuery()->fetchAllAssociative();
+    }
+
+    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false): int
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->count('uid')->from(self::TABLE);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
+        $count = $queryBuilder->executeQuery()->fetchOne();
+
+        return is_numeric($count) ? (int)$count : 0;
     }
 
     /**

@@ -153,6 +153,17 @@
             </tbody>
         </table>
     </div>
+    <f:if condition="{pagination.pageCount} > 1">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <span>{f:translate(key: '{languageFile}statusResults.pagination', arguments: {0: pagination.from, 1: pagination.to, 2: pagination.total})}</span>
+            <f:if condition="{pagination.previousPage}">
+                <f:link.action action="index" arguments="{environment: currentEnvironment, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', page: pagination.previousPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.previousPage')}</f:link.action>
+            </f:if>
+            <f:if condition="{pagination.nextPage}">
+                <f:link.action action="index" arguments="{environment: currentEnvironment, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', page: pagination.nextPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.nextPage')}</f:link.action>
+            </f:if>
+        </div>
+    </f:if>
     <f:if condition="{results}">
         <f:else>
             <f:be.infobox state="-1">{f:translate(key: '{languageFile}empty.noResults')}</f:be.infobox>

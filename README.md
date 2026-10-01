@@ -285,9 +285,9 @@ tool:
 
 - **Status check** — a form that composes the `checksitemap` or `crawllinks`
   command for a snapshot, and the results, filterable by environment, only
-  problems and only not yet reviewed. The form suggests the newest snapshot
-  and an environment label from it — with `-links` for a link check, so its
-  results do not replace those of a status check.
+  problems and only not yet reviewed, 500 rows per page. The form suggests the
+  newest snapshot and an environment label from it — with `-links` for a link
+  check, so its results do not replace those of a status check.
 - **Migration check** — a form that composes the `migrationcheck` command, and
   the results, see [Migration check results](#migration-check-results). A run
   can be saved as a file together with the snapshots it compared. The

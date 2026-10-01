@@ -69,6 +69,18 @@
         <target>Bearbeiten</target>
       </segment>
     </unit>
+    <unit id="button.previousPage">
+      <segment>
+        <source>Previous</source>
+        <target>Zurück</target>
+      </segment>
+    </unit>
+    <unit id="button.nextPage">
+      <segment>
+        <source>Next</source>
+        <target>Weiter</target>
+      </segment>
+    </unit>
     <unit id="flash.deleteRun.success">
       <segment>
         <source>%1$s row(s) of run "%2$s" deleted.</source>
@@ -385,6 +397,12 @@
       <segment>
         <source>%1$s results — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
         <target>%1$s Ergebnisse — %2$s ohne HTTP 200 oder mit Fehlermarker, davon %3$s noch nicht geprüft.</target>
+      </segment>
+    </unit>
+    <unit id="statusResults.pagination">
+      <segment>
+        <source>Results %1$s–%2$s of %3$s</source>
+        <target>Ergebnisse %1$s–%2$s von %3$s</target>
       </segment>
     </unit>
     <unit id="statusResults.summaryForEnvironment">
