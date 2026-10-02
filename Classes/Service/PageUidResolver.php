@@ -35,6 +35,15 @@ class PageUidResolver
 
     public function resolve(string $url): ?int
     {
+        return $this->resolveArguments($url)?->getPageId();
+    }
+
+    /**
+     * The page and the arguments the local routing reads from a URL — e.g.
+     * whether a detail page is called with a record or without one.
+     */
+    public function resolveArguments(string $url): ?PageArguments
+    {
         $path = parse_url($url, PHP_URL_PATH);
         $path = is_string($path) ? $path : '/';
         $queryString = parse_url($url, PHP_URL_QUERY);
@@ -67,7 +76,7 @@ class PageUidResolver
                 }
 
                 if ($result instanceof PageArguments) {
-                    return $result->getPageId();
+                    return $result;
                 }
             }
         }

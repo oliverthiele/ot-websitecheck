@@ -6,11 +6,13 @@ namespace OliverThiele\OtWebsitecheck\Command;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
+use OliverThiele\OtWebsitecheck\Service\RequiredParameterPages;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
@@ -43,6 +45,7 @@ class CheckSitemapCommand extends Command
         private readonly UrlHostRewriter $urlHostRewriter,
         private readonly RetryRounds $retryRounds,
         private readonly CanonicalExtractor $canonicalExtractor,
+        private readonly RequiredParameterPages $requiredParameterPages,
     ) {
         parent::__construct();
     }
@@ -157,10 +160,16 @@ class CheckSitemapCommand extends Command
                 $finalUrl = $page->finalUrl !== '' ? $page->finalUrl : $url;
                 $canonicalUrl = $page->isOk() ? $this->canonicalExtractor->extract($page->body, $finalUrl) : '';
                 $errorMarker = $this->errorMarkerDetector->detectFor($page, $this->canonicalExtractor->isElsewhere($canonicalUrl, $finalUrl));
+                $pageArguments = $this->pageUidResolver->resolveArguments($url);
+                // A detail page without a record answers with a fallback or an
+                // error by design; what is wrong is that the sitemap lists it.
+                if (!$page->isConnectionError() && $this->requiredParameterPages->isCalledWithoutParameter($pageArguments, new PageIdentity())) {
+                    $errorMarker = ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD;
+                }
                 if (!$page->isConnectionError()) {
                     $answeredCount++;
                 }
-                if (!$page->isOk()) {
+                if (!$page->isOk() && $errorMarker !== ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD) {
                     $notOkCount++;
                 }
                 if ($page->isTimeout()) {
@@ -171,7 +180,7 @@ class CheckSitemapCommand extends Command
                     $errorMarkerCount++;
                 }
 
-                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl);
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $pageArguments?->getPageId(), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {
@@ -184,7 +193,7 @@ class CheckSitemapCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d only through a redirect or with a canonical URL elsewhere.',
+            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d with a notice (redirect, canonical URL elsewhere, detail page without record).',
             count($urls),
             $notOkCount,
             $errorMarkerCount,

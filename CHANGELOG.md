@@ -26,6 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   status check module, and filter its results by marker
 - Record the `X-Redirect-By` header of every redirect in the redirect chain of
   the migration check
+- Add the extension setting `requiresParameterField`: a checkbox field of the
+  pages that marks pages showing content only with a parameter. A URL calling
+  such a page without one gets the verdict `detailPageWithoutRecord` in the
+  migration check — instead of `missing` and the like — and the marker
+  `detailPageWithoutRecord` in `websitecheck:checksitemap`; neither fails a
+  run. The sitemap row gets the warning `listedDetailPageWithoutRecord`
+- Add the warning `pageAlsoRendersRecords` to the migration check for a
+  sitemap URL whose page renders records under other URLs
 
 ### Changed
 

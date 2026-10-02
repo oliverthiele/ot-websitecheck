@@ -462,6 +462,11 @@
         <source>Canonical URL elsewhere</source>
       </segment>
     </unit>
+    <unit id="errorMarker.detailPageWithoutRecord">
+      <segment>
+        <source>Detail page without record</source>
+      </segment>
+    </unit>
     <unit id="errorMarker.tooManyRedirects">
       <segment>
         <source>Too many redirects</source>
@@ -612,6 +617,11 @@
         <source>Timeout</source>
       </segment>
     </unit>
+    <unit id="verdict.detailPageWithoutRecord">
+      <segment>
+        <source>Detail page without record</source>
+      </segment>
+    </unit>
     <unit id="summary.filterBy">
       <segment>
         <source>Show only these rows</source>
@@ -675,6 +685,11 @@
     <unit id="verdict.timeout.help">
       <segment>
         <source>No complete answer within the timeout, also after the retries. The page may exist and only render slowly, e.g. right after a cache flush. Run the check again before treating it as missing.</source>
+      </segment>
+    </unit>
+    <unit id="verdict.detailPageWithoutRecord.help">
+      <segment>
+        <source>The URL calls a page that shows content only with a parameter — the detail page of a plugin — without one. Whatever it answers, there is no page of its own to keep: the detail views are checked one by one. The page is marked in its page properties.</source>
       </segment>
     </unit>
     <unit id="status.serverError">
@@ -825,6 +840,26 @@
     <unit id="warning.listedUrlNotCanonical.description">
       <segment>
         <source>The sitemap lists a URL whose page names another URL as canonical. A sitemap should only contain canonical URLs.</source>
+      </segment>
+    </unit>
+    <unit id="warning.listedDetailPageWithoutRecord">
+      <segment>
+        <source>Sitemap lists a detail page</source>
+      </segment>
+    </unit>
+    <unit id="warning.listedDetailPageWithoutRecord.description">
+      <segment>
+        <source>The sitemap lists a page that shows content only with a parameter, called without one. Exclude it from the page sitemap.</source>
+      </segment>
+    </unit>
+    <unit id="warning.pageAlsoRendersRecords">
+      <segment>
+        <source>Page also renders records</source>
+      </segment>
+    </unit>
+    <unit id="warning.pageAlsoRendersRecords.description">
+      <segment>
+        <source>The same page renders records under other URLs. If it shows content only with a record, this URL is a detail page without one and does not belong in the sitemap; if it shows a list as well, nothing is wrong.</source>
       </segment>
     </unit>
     <unit id="abortReason.loop">

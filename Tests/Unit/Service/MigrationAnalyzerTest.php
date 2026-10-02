@@ -328,6 +328,45 @@ final class MigrationAnalyzerTest extends UnitTestCase
         self::assertSame([], $results[$original->uid]['warnings']);
     }
 
+    #[Test]
+    public function detailPageCalledWithoutRecordIsNoMissingPage(): void
+    {
+        $reference = $this->reference('/products/detail/', new PageIdentity(30, 'en'));
+        $target = $this->target('/products/detail/', [['url' => 'https://target.example.com/products/detail/', 'status' => 404]]);
+        $elsewhere = $this->observation(Observation::ROLE_TARGET_SITEMAP, 'target-sitemap', '/products/', [['url' => 'https://target.example.com/products/', 'status' => 200]], new PageIdentity(30, 'en'));
+
+        $results = $this->subject->analyze([$reference, $target, $elsewhere], [$reference->uid => true]);
+
+        self::assertSame(MigrationAnalyzer::VERDICT_DETAIL_PAGE_WITHOUT_RECORD, $results[$target->uid]['verdict']);
+        self::assertSame('', $results[$target->uid]['suggestedTarget']);
+        self::assertSame([MigrationAnalyzer::WARNING_LISTED_DETAIL_PAGE_WITHOUT_RECORD], $results[$reference->uid]['warnings']);
+        self::assertNotContains(MigrationAnalyzer::VERDICT_DETAIL_PAGE_WITHOUT_RECORD, MigrationAnalyzer::PROBLEM_VERDICTS);
+    }
+
+    #[Test]
+    public function detailPageWithoutRecordThatStillWorksKeepsItsVerdict(): void
+    {
+        $reference = $this->reference('/products/detail/', new PageIdentity(30, 'en'));
+        $target = $this->target('/products/detail/', [['url' => 'https://target.example.com/products/detail/', 'status' => 200]], new PageIdentity(30, 'en'));
+
+        self::assertSame(MigrationAnalyzer::VERDICT_OK, $this->subject->analyze([$reference, $target], [$reference->uid => true])[$target->uid]['verdict']);
+    }
+
+    #[Test]
+    public function pageRenderingRecordsUnderOtherUrlsIsOnlyAHint(): void
+    {
+        // Could be a detail page without record — or a list on the same page.
+        $bare = $this->reference('/products/', new PageIdentity(30, 'en'));
+        $record = $this->reference('/products/item-5', new PageIdentity(30, 'en', 'tx_myextension_domain_model_item', 5));
+        $target = $this->target('/products/', [['url' => 'https://target.example.com/products/', 'status' => 404]]);
+
+        $results = $this->subject->analyze([$bare, $record, $target]);
+
+        self::assertSame([MigrationAnalyzer::WARNING_PAGE_ALSO_RENDERS_RECORDS], $results[$bare->uid]['warnings']);
+        self::assertSame([], $results[$record->uid]['warnings']);
+        self::assertSame(MigrationAnalyzer::VERDICT_MISSING, $results[$target->uid]['verdict']);
+    }
+
     /**
      * @param list<Observation> $observations
      */

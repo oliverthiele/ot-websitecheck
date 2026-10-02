@@ -14,7 +14,9 @@ use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\IdentityExtractor;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
+use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
+use OliverThiele\OtWebsitecheck\Service\RequiredParameterPages;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
@@ -52,6 +54,8 @@ class MigrationCheckCommand extends Command
         private readonly UrlHostRewriter $urlHostRewriter,
         private readonly RetryRounds $retryRounds,
         private readonly CanonicalExtractor $canonicalExtractor,
+        private readonly RequiredParameterPages $requiredParameterPages,
+        private readonly PageUidResolver $pageUidResolver,
     ) {
         parent::__construct();
     }
@@ -429,12 +433,36 @@ class MigrationCheckCommand extends Command
     }
 
     /**
+     * The rows that call a page marked as requiring a parameter without one.
+     * Read from the local page tree, so it only applies where the checked
+     * environments share its page uids — or its routing, for the paths.
+     *
+     * @param list<Observation> $observations
+     * @return array<int, true> observation uid => true
+     */
+    private function findDetailPagesWithoutRecord(array $observations): array
+    {
+        if ($this->requiredParameterPages->getMarkedPageUids() === []) {
+            return [];
+        }
+        $detailPages = [];
+        foreach ($observations as $observation) {
+            $pageArguments = $this->pageUidResolver->resolveArguments($observation->requestedUrl);
+            if ($this->requiredParameterPages->isCalledWithoutParameter($pageArguments, $observation->identity)) {
+                $detailPages[$observation->uid] = true;
+            }
+        }
+
+        return $detailPages;
+    }
+
+    /**
      * @return array<string, int> Number of target rows per verdict.
      */
     private function analyzeRun(string $runLabel): array
     {
         $observations = $this->observationRepository->findByRun($runLabel);
-        $results = $this->migrationAnalyzer->analyze($observations);
+        $results = $this->migrationAnalyzer->analyze($observations, $this->findDetailPagesWithoutRecord($observations));
 
         $verdictCounts = [];
         foreach ($observations as $observation) {

@@ -555,6 +555,12 @@
         <target>Canonical-URL zeigt woanders hin</target>
       </segment>
     </unit>
+    <unit id="errorMarker.detailPageWithoutRecord">
+      <segment>
+        <source>Detail page without record</source>
+        <target>Detailseite ohne Datensatz</target>
+      </segment>
+    </unit>
     <unit id="errorMarker.tooManyRedirects">
       <segment>
         <source>Too many redirects</source>
@@ -735,6 +741,12 @@
         <target>Zeitüberschreitung</target>
       </segment>
     </unit>
+    <unit id="verdict.detailPageWithoutRecord">
+      <segment>
+        <source>Detail page without record</source>
+        <target>Detailseite ohne Datensatz</target>
+      </segment>
+    </unit>
     <unit id="summary.filterBy">
       <segment>
         <source>Show only these rows</source>
@@ -811,6 +823,12 @@
       <segment>
         <source>No complete answer within the timeout, also after the retries. The page may exist and only render slowly, e.g. right after a cache flush. Run the check again before treating it as missing.</source>
         <target>Keine vollständige Antwort innerhalb des Timeouts, auch nach den Wiederholungen. Die Seite kann vorhanden sein und nur langsam rendern, etwa direkt nach einem Cache-Flush. Die Prüfung erneut ausführen, bevor die Seite als fehlend gilt.</target>
+      </segment>
+    </unit>
+    <unit id="verdict.detailPageWithoutRecord.help">
+      <segment>
+        <source>The URL calls a page that shows content only with a parameter — the detail page of a plugin — without one. Whatever it answers, there is no page of its own to keep: the detail views are checked one by one. The page is marked in its page properties.</source>
+        <target>Die URL ruft eine Seite, die nur mit einem Parameter Inhalt zeigt — die Detailseite eines Plugins —, ohne einen auf. Was sie auch antwortet, es gibt keine eigene Seite zu erhalten: Die Detailansichten werden einzeln geprüft. Die Seite ist in ihren Seiteneigenschaften gekennzeichnet.</target>
       </segment>
     </unit>
     <unit id="status.serverError">
@@ -991,6 +1009,30 @@
       <segment>
         <source>The sitemap lists a URL whose page names another URL as canonical. A sitemap should only contain canonical URLs.</source>
         <target>Die Sitemap enthält eine URL, deren Seite eine andere URL als Canonical nennt. Eine Sitemap sollte nur kanonische URLs enthalten.</target>
+      </segment>
+    </unit>
+    <unit id="warning.listedDetailPageWithoutRecord">
+      <segment>
+        <source>Sitemap lists a detail page</source>
+        <target>Sitemap enthält Detailseite</target>
+      </segment>
+    </unit>
+    <unit id="warning.listedDetailPageWithoutRecord.description">
+      <segment>
+        <source>The sitemap lists a page that shows content only with a parameter, called without one. Exclude it from the page sitemap.</source>
+        <target>Die Sitemap enthält eine Seite, die nur mit einem Parameter Inhalt zeigt, aufgerufen ohne Parameter. Die Seite aus der Seiten-Sitemap nehmen.</target>
+      </segment>
+    </unit>
+    <unit id="warning.pageAlsoRendersRecords">
+      <segment>
+        <source>Page also renders records</source>
+        <target>Seite zeigt auch Datensätze</target>
+      </segment>
+    </unit>
+    <unit id="warning.pageAlsoRendersRecords.description">
+      <segment>
+        <source>The same page renders records under other URLs. If it shows content only with a record, this URL is a detail page without one and does not belong in the sitemap; if it shows a list as well, nothing is wrong.</source>
+        <target>Dieselbe Seite zeigt unter anderen URLs Datensätze. Zeigt sie nur mit einem Datensatz Inhalt, ist diese URL eine Detailseite ohne Datensatz und gehört nicht in die Sitemap; zeigt sie auch eine Liste, ist alles in Ordnung.</target>
       </segment>
     </unit>
     <unit id="abortReason.loop">

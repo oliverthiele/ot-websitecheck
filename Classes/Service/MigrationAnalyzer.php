@@ -30,6 +30,7 @@ class MigrationAnalyzer
     public const string VERDICT_IDENTITY_UNKNOWN = 'identityUnknown';
     public const string VERDICT_TIMEOUT = 'timeout';
     public const string VERDICT_LISTED = 'listed';
+    public const string VERDICT_DETAIL_PAGE_WITHOUT_RECORD = 'detailPageWithoutRecord';
 
     /**
      * Verdicts on a target row that need attention.
@@ -53,6 +54,8 @@ class MigrationAnalyzer
     public const string WARNING_SHORTCUT_IN_CHAIN = 'shortcutInChain';
     public const string WARNING_CANONICAL_DIFFERS = 'canonicalDiffers';
     public const string WARNING_LISTED_URL_NOT_CANONICAL = 'listedUrlNotCanonical';
+    public const string WARNING_LISTED_DETAIL_PAGE_WITHOUT_RECORD = 'listedDetailPageWithoutRecord';
+    public const string WARNING_PAGE_ALSO_RENDERS_RECORDS = 'pageAlsoRendersRecords';
 
     private const array TEMPORARY_REDIRECT_STATUS_CODES = [302, 303, 307];
 
@@ -60,6 +63,18 @@ class MigrationAnalyzer
      * X-Redirect-By of a redirect TYPO3 makes for a shortcut or mount point page.
      */
     private const string SHORTCUT_REDIRECT_BY = 'TYPO3 Shortcut/Mountpoint';
+
+    /**
+     * Target verdicts a detail page called without a record replaces: whatever
+     * such a URL answers, there is no page of its own to keep.
+     */
+    private const array VERDICTS_OF_A_DETAIL_PAGE_WITHOUT_RECORD = [
+        self::VERDICT_MISSING,
+        self::VERDICT_REDIRECT_BROKEN,
+        self::VERDICT_OTHER_CONTENT,
+        self::VERDICT_IDENTITY_UNKNOWN,
+        self::VERDICT_REFERENCE_NOT_OK,
+    ];
 
     /**
      * A path that consists of nothing but an optional language segment, e.g.
@@ -73,9 +88,11 @@ class MigrationAnalyzer
      * compared with the reference row of the same path that was stored last.
      *
      * @param list<Observation> $observations All rows of one run.
+     * @param array<int, true> $detailPagesWithoutRecord uids of the rows that call a page marked as requiring a
+     *                                                    parameter without one, see RequiredParameterPages
      * @return array<int, array{verdict: string, warnings: list<string>, suggestedTarget: string}> Keyed by observation uid.
      */
-    public function analyze(array $observations): array
+    public function analyze(array $observations, array $detailPagesWithoutRecord = []): array
     {
         $referenceByPath = [];
         $workingReferenceByFinalPath = [];
@@ -94,7 +111,7 @@ class MigrationAnalyzer
             }
         }
 
-        $crossRowWarnings = $this->collectCrossRowWarnings($observations);
+        $crossRowWarnings = $this->collectCrossRowWarnings($observations, $detailPagesWithoutRecord);
 
         $results = [];
         foreach ($observations as $observation) {
@@ -103,7 +120,7 @@ class MigrationAnalyzer
 
             if ($observation->role === Observation::ROLE_REFERENCE) {
                 $verdict = $observation->finalStatus === 200 ? self::VERDICT_REFERENCE : self::VERDICT_REFERENCE_NOT_OK;
-                $warnings = [...$warnings, ...$this->collectListingWarnings($observation)];
+                $warnings = [...$warnings, ...$this->collectListingWarnings($observation, $detailPagesWithoutRecord)];
             } elseif ($observation->role === Observation::ROLE_TARGET) {
                 $reference = $referenceByPath[$observation->requestedPath] ?? null;
                 $canonicalReference = $reference === null ? null : $this->findCanonicalReference($reference, $workingReferenceByFinalPath);
@@ -113,6 +130,13 @@ class MigrationAnalyzer
                 }
                 if ($reference !== null && in_array($verdict, [self::VERDICT_MISSING, self::VERDICT_REDIRECT_BROKEN, self::VERDICT_OTHER_CONTENT], true)) {
                     $suggestedTarget = $this->findSuggestedTarget($reference, $canonicalReference, $observation, $candidatesOnTarget);
+                }
+                if ($reference !== null
+                    && (isset($detailPagesWithoutRecord[$reference->uid]) || isset($detailPagesWithoutRecord[$observation->uid]))
+                    && in_array($verdict, self::VERDICTS_OF_A_DETAIL_PAGE_WITHOUT_RECORD, true)
+                ) {
+                    $verdict = self::VERDICT_DETAIL_PAGE_WITHOUT_RECORD;
+                    $suggestedTarget = '';
                 }
                 if ($verdict === self::VERDICT_REDIRECT_NOT_FINAL) {
                     if ($this->declaresCanonicalElsewhere($observation)) {
@@ -124,7 +148,7 @@ class MigrationAnalyzer
                 }
             } elseif ($observation->role === Observation::ROLE_TARGET_SITEMAP) {
                 $verdict = self::VERDICT_LISTED;
-                $warnings = [...$warnings, ...$this->collectListingWarnings($observation)];
+                $warnings = [...$warnings, ...$this->collectListingWarnings($observation, $detailPagesWithoutRecord)];
             } else {
                 $verdict = '';
             }
@@ -218,10 +242,14 @@ class MigrationAnalyzer
      * What a URL listed in a sitemap should not do: redirect, or name another
      * URL as canonical. A sitemap lists the URLs a search engine should index.
      *
+     * @param array<int, true> $detailPagesWithoutRecord
      * @return list<string>
      */
-    private function collectListingWarnings(Observation $observation): array
+    private function collectListingWarnings(Observation $observation, array $detailPagesWithoutRecord): array
     {
+        if (isset($detailPagesWithoutRecord[$observation->uid])) {
+            return [self::WARNING_LISTED_DETAIL_PAGE_WITHOUT_RECORD];
+        }
         if ($observation->hopCount > 0) {
             return [self::WARNING_LISTED_URL_REDIRECTS];
         }
@@ -350,12 +378,14 @@ class MigrationAnalyzer
      * together.
      *
      * @param list<Observation> $observations
+     * @param array<int, true> $detailPagesWithoutRecord
      * @return array<int, list<string>> Keyed by observation uid.
      */
-    private function collectCrossRowWarnings(array $observations): array
+    private function collectCrossRowWarnings(array $observations, array $detailPagesWithoutRecord): array
     {
         $finalPathsByPage = [];
         $pageUidsByRecord = [];
+        $pagesRenderingRecords = [];
         foreach ($observations as $observation) {
             if ($observation->finalStatus !== 200) {
                 continue;
@@ -364,6 +394,7 @@ class MigrationAnalyzer
             if ($identity->hasRecord()) {
                 $recordKey = implode('|', [$observation->environment, $identity->recordTable, $identity->recordUid, $identity->language]);
                 $pageUidsByRecord[$recordKey][$identity->pageUid] = true;
+                $pagesRenderingRecords[$observation->environment . '|' . $identity->pageUid] = true;
             } elseif ($identity->hasPage()) {
                 $pageKey = implode('|', [$observation->environment, $identity->pageUid, $identity->language]);
                 $finalPathsByPage[$pageKey][$observation->finalPath] = true;
@@ -388,6 +419,15 @@ class MigrationAnalyzer
                 // always a detail page — every record would pass as "same page".
                 if (count($finalPathsByPage[$pageKey] ?? []) > 1) {
                     $warnings[$observation->uid][] = self::WARNING_RECORD_IDENTITY_UNKNOWN;
+                }
+                // The page renders records under other URLs: this URL may call
+                // a detail page without one — or a list on the same page, so
+                // only a hint. A page marked as requiring a parameter is certain.
+                if ($observation->role !== Observation::ROLE_TARGET
+                    && !isset($detailPagesWithoutRecord[$observation->uid])
+                    && isset($pagesRenderingRecords[$observation->environment . '|' . $identity->pageUid])
+                ) {
+                    $warnings[$observation->uid][] = self::WARNING_PAGE_ALSO_RENDERS_RECORDS;
                 }
             }
         }

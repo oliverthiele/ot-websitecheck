@@ -174,6 +174,36 @@ page.meta.websitecheck:record {
 Add one `TEXT` per detail plugin. The value is empty on all other pages, so no
 tag is rendered there.
 
+### Pages that require a parameter
+
+The detail page of a plugin shows content only with a record in its URL.
+Called without one it shows a fallback — often the list — or an error. When a
+sitemap lists such a page, the checks report it as missing on the target or as
+broken, although there is no page of its own to keep: the detail views are
+checked one by one.
+
+TYPO3 has no page property for this. When the project adds a checkbox field to
+the pages for it, name the field in **Settings > Extension Configuration >
+ot_websitecheck** as `requiresParameterField`. A URL that calls a marked page
+without arguments is then reported as a detail page without record:
+
+- the migration check gives its target row the verdict `detailPageWithoutRecord`
+  instead of `missing`, `redirectBroken`, `otherContent`, `identityUnknown` or
+  `referenceNotOk`, and the sitemap row the warning
+  `listedDetailPageWithoutRecord`
+- `checksitemap` gives it the marker `detailPageWithoutRecord`
+
+Neither fails a run with `--fail-on-problems`. The pages are read from the
+local database, and a URL is matched to its page through the local routing —
+so this applies where the checked environments share the local page tree,
+e.g. a relaunch on a migrated database. Without the field, the migration check
+still hints at such a page with the warning `pageAlsoRendersRecords`: the same
+page renders records under other URLs. That is only a hint, since a list and
+its detail view may share one page.
+
+A recipe for such a field, which also takes the pages out of the sitemap, is in
+[Documentation/Recipes.md](Documentation/Recipes.md).
+
 ### Requirements for sitemap snapshots
 
 The sitemap import finds the languages of a site from the outside, the way a
@@ -451,6 +481,7 @@ problems and warnings" is set.
 | `otherContent` | Answers 200 with a different page, record or language |
 | `identityUnknown` | Answers 200, but the markers needed for a comparison are missing — or the page is larger than 50 MB and was not read |
 | `referenceNotOk` | Already not working on the reference — not compared, but listed with the problems: the sitemap lists a broken URL |
+| `detailPageWithoutRecord` | A page marked as requiring a parameter, called without one — see [Pages that require a parameter](#pages-that-require-a-parameter). Not a problem |
 
 ### Warnings
 
@@ -463,6 +494,8 @@ problems and warnings" is set.
 | `redirectToRootPage` | A deep URL redirects to a start page, often treated as a soft 404 |
 | `listedUrlRedirects` | A sitemap lists a URL that redirects |
 | `listedUrlNotCanonical` | A sitemap lists a URL whose page names another URL as canonical |
+| `listedDetailPageWithoutRecord` | A sitemap lists a page marked as requiring a parameter, without one |
+| `pageAlsoRendersRecords` | The page renders records under other URLs — maybe a detail page called without a record |
 | `languageChanged` | The target page is in a different language |
 | `recordIdentityUnknown` | Several URLs render the same page without a record marker |
 | `duplicateDetailPage` | The same record is rendered by more than one page |

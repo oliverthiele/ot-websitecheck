@@ -31,6 +31,7 @@ class ErrorMarkerDetector
     public const string MARKER_REDIRECTED = 'redirected';
     public const string MARKER_REDIRECT_CHAIN = 'redirectChain';
     public const string MARKER_CANONICAL_ELSEWHERE = 'canonicalElsewhere';
+    public const string MARKER_DETAIL_PAGE_WITHOUT_RECORD = 'detailPageWithoutRecord';
 
     /**
      * Markers of a page that works: they point at something to tidy up, not at
@@ -40,6 +41,7 @@ class ErrorMarkerDetector
         self::MARKER_REDIRECTED,
         self::MARKER_REDIRECT_CHAIN,
         self::MARKER_CANONICAL_ELSEWHERE,
+        self::MARKER_DETAIL_PAGE_WITHOUT_RECORD,
     ];
 
     /**
