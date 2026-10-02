@@ -12,6 +12,11 @@
         <source>Page UID</source>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.language_uid">
+      <segment>
+        <source>Site language uid</source>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.url">
       <segment>
         <source>URL</source>

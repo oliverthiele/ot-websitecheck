@@ -11,6 +11,7 @@ use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
 use OliverThiele\OtWebsitecheck\Service\ArchiveDirectory;
 use OliverThiele\OtWebsitecheck\Service\ArchiveFileService;
+use OliverThiele\OtWebsitecheck\Service\BackendPageLinks;
 use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\MigrationCheckSuggestion;
@@ -18,6 +19,7 @@ use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
 /**
@@ -45,6 +47,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly ArchiveDirectory $archiveDirectory,
         private readonly ArchiveFileService $archiveFileService,
         private readonly FindingGuide $findingGuide,
+        private readonly BackendPageLinks $backendPageLinks,
     ) {
     }
 
@@ -372,6 +375,7 @@ class MigrationCheckModuleController extends AbstractModuleController
             'recordTable' => $identity->recordTable,
             'recordUid' => $identity->recordUid,
             'title' => $title,
+            'recordUrl' => $identity->hasRecord() ? $this->backendPageLinks->forRecord($identity->recordTable, $identity->recordUid, $this->getReturnUrl()) : '',
         ];
     }
 
@@ -398,6 +402,10 @@ class MigrationCheckModuleController extends AbstractModuleController
             'role' => $observation->role,
             'language' => $observation->identity->language,
             'pageUid' => $observation->identity->pageUid,
+            'backendUrl' => $this->backendPageLinks->forPage(
+                $observation->identity->pageUid,
+                $this->backendPageLinks->findLanguageId($observation->identity->pageUid, $observation->identity->language),
+            ),
             'firstStatus' => $observation->firstStatus,
             'finalStatus' => $observation->finalStatus,
             'firstStatusSeverity' => match (true) {
@@ -508,6 +516,16 @@ class MigrationCheckModuleController extends AbstractModuleController
             MigrationAnalyzer::VERDICT_DETAIL_PAGE_WITHOUT_RECORD => 'info',
             default => 'default',
         };
+    }
+
+    /**
+     * The module page as it is shown now, to come back to after editing.
+     */
+    private function getReturnUrl(): string
+    {
+        $normalizedParams = $this->request->getAttribute('normalizedParams');
+
+        return $normalizedParams instanceof NormalizedParams ? $normalizedParams->getRequestUri() : '';
     }
 
     private function shortenUrl(string $url, string $host): string

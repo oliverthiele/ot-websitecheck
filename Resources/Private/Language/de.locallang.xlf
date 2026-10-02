@@ -759,6 +759,30 @@
         <target>Was das bedeutet und was zu tun ist</target>
       </segment>
     </unit>
+    <unit id="preview.newWindow">
+      <segment>
+        <source>Open in a new window</source>
+        <target>In neuem Fenster öffnen</target>
+      </segment>
+    </unit>
+    <unit id="preview.close">
+      <segment>
+        <source>Close</source>
+        <target>Schließen</target>
+      </segment>
+    </unit>
+    <unit id="backend.openPage">
+      <segment>
+        <source>Open page %1$s in the page module (language: %2$s)</source>
+        <target>Seite %1$s im Seitenmodul öffnen (Sprache: %2$s)</target>
+      </segment>
+    </unit>
+    <unit id="backend.editRecord">
+      <segment>
+        <source>Edit the record</source>
+        <target>Datensatz bearbeiten</target>
+      </segment>
+    </unit>
     <unit id="actor.editor">
       <segment>
         <source>Editor</source>

@@ -15,6 +15,7 @@
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/status-filter.js"/>
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/module-guide.js"/>
     <f:asset.module identifier="@typo3/backend/popover.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/page-preview.js"/>
     <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
     <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
 
@@ -121,11 +122,14 @@
                     <tr>
                         <td>
                             <f:if condition="{result.page_uid}">
-                                <f:then>{result.page_uid}</f:then>
+                                <f:then>
+                                    {result.page_uid}
+                                    <f:render partial="BackendLink" arguments="{url: result.backendUrl, title: '{f:translate(key: \'{languageFile}backend.openPage\', arguments: {0: result.page_uid, 1: result.languageTitle})}'}"/>
+                                </f:then>
                                 <f:else><span class="text-muted">—</span></f:else>
                             </f:if>
                         </td>
-                        <td><ws:webLink url="{result.url}" target="_blank" rel="noreferrer" title="{result.url}">{result.path}</ws:webLink></td>
+                        <td><f:render partial="PageLink" arguments="{url: result.url, label: result.path}"/></td>
                         <td>{result.environment}</td>
                         <td>
                             <f:if condition="{result.http_status} == 200">
@@ -150,7 +154,7 @@
                         </td>
                         <td>
                             <f:if condition="{result.suggestedUrl}">
-                                <ws:webLink url="{result.suggestedUrl}" target="_blank" rel="noreferrer" title="{result.suggestedUrl}">{result.suggestedUrl}</ws:webLink>
+                                <f:render partial="PageLink" arguments="{url: result.suggestedUrl, label: result.suggestedUrl}"/>
                             </f:if>
                         </td>
                         <td class="text-nowrap"><f:format.date format="d.m.Y H:i">@{result.checked_at}</f:format.date></td>

@@ -1,0 +1,16 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment><!--
+    Link from a result to the page or record in this backend. Nothing is
+    rendered without a URL — the page does not exist here.
+    Arguments: url, title.
+--></f:comment>
+<f:if condition="{url}">
+    <a href="{url}" class="ot-websitecheck-help-link" title="{title}"><core:icon identifier="actions-open" size="small"/><span class="visually-hidden">{title}</span></a>
+</f:if>
+
+</html>

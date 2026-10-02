@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
+use OliverThiele\OtWebsitecheck\Service\BackendPageLinks;
 use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
@@ -28,6 +29,7 @@ class WebsiteCheckModuleController extends AbstractModuleController
         private readonly CheckResultRepository $checkResultRepository,
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
         private readonly FindingGuide $findingGuide,
+        private readonly BackendPageLinks $backendPageLinks,
     ) {
     }
 
@@ -121,6 +123,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
         return $result + [
             'suggestedUrl' => $suggestedUrl,
+            'backendUrl' => $this->backendPageLinks->forPage(RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid')),
+            'languageTitle' => $this->backendPageLinks->findLanguageTitle(RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid')),
             'guide' => $this->findingGuide->forStatusResult($marker, RowValue::int($result, 'http_status')),
             // Exception class names are markers as well and share one explanation.
             'markerHelp' => $markerHelp !== $markerKey . '.help' ? $markerHelp : $this->translate('errorMarker.exception.help'),

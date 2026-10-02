@@ -388,6 +388,17 @@ snapshot, so the snapshots come first:
   reference results can be reused, warns about label clashes before anything
   runs, and prints the command for `vendor/bin/typo3`, `typo3` or
   `ddev typo3`, with quoting, ready to copy.
+- **Page links** — a click on a checked URL previews the page in a modal
+  inside the module; the icon beside it, or a click with a modifier key, opens
+  it in a new window, where the browser console is at hand. The modules allow
+  frames from the hosts of the configured sites, the stored snapshots and the
+  migration check runs — the rest of the backend keeps its policy. A page that
+  forbids being framed (`X-Frame-Options`, `frame-ancestors`) stays empty in
+  the modal; open it in a new window then. The edit icon beside a page uid or
+  path opens the page in the page module, in the language of the result; a
+  record block links to the form of its record. Both only where the page or
+  record exists in this database — the checks name pages by their uid on the
+  checked environment
 - **Help** — every verdict, warning and marker explained for editors: what it
   means, who acts on it and what to do. Every finding in the other modules
   links to its entry, and the explanation of a finding opens on hover or

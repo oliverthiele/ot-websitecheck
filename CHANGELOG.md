@@ -43,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `Documentation/Recipes.md` for integrators: pages that require a
   parameter, pages that show the content of another page, redirects that do
   not lead to the final URL
+- Preview a checked page in a modal in the status check and migration check
+  modules, with a link to open it in a new window; the modules allow frames
+  from the hosts of the configured sites, snapshots and runs
+- Link a result to its page in the page module, in its language, and a record
+  block to the form of its record, where they exist in this database
+- Store the site language of a status check result. Requires a database
+  schema update
 
 ### Changed
 

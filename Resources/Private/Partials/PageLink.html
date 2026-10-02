@@ -1,0 +1,20 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:ws="http://typo3.org/ns/OliverThiele/OtWebsitecheck/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment><!--
+    A checked page: a click previews it in a modal (page-preview.js), the icon
+    beside it opens it in a new window — where the browser console is at hand.
+    A click with a modifier key opens the link in a new tab as before.
+    Arguments: url, label (the visible text).
+--></f:comment>
+<f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+<f:variable name="labelNewWindow" value="{f:translate(key: '{languageFile}preview.newWindow')}"/>
+<f:variable name="labelClose" value="{f:translate(key: '{languageFile}preview.close')}"/>
+<ws:webLink url="{url}" target="_blank" rel="noreferrer" title="{url}" data="{'js': 'pagePreview', 'preview-title': url, 'label-new-window': labelNewWindow, 'label-close': labelClose}">{label}</ws:webLink>
+<ws:webLink url="{url}" target="_blank" rel="noreferrer" class="ot-websitecheck-help-link" title="{labelNewWindow}"><core:icon identifier="actions-window-open" size="small"/><span class="visually-hidden">{labelNewWindow}</span></ws:webLink>
+
+</html>

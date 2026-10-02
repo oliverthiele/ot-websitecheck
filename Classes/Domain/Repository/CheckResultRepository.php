@@ -40,6 +40,7 @@ class CheckResultRepository extends AbstractRepository
      * @param int $runStartedAt start of the checksitemap run storing the result, 0 for other commands
      * @param string $finalUrl the URL that answered after redirects; empty without redirects
      * @param string $canonicalUrl the canonical URL the page declares; empty when it declares none or was not read
+     * @param int $languageUid the site language the local routing reads from the URL
      */
     public function storeResult(
         string $url,
@@ -52,11 +53,13 @@ class CheckResultRepository extends AbstractRepository
         int $runStartedAt = 0,
         string $finalUrl = '',
         string $canonicalUrl = '',
+        int $languageUid = 0,
     ): void {
         $values = [
             'path' => UrlUtility::pathWithQuery($url),
             'source' => $source,
             'page_uid' => $pageUid ?? 0,
+            'language_uid' => $languageUid,
             'http_status' => $httpStatus,
             'error_marker' => $errorMarker,
             'final_url' => $finalUrl,

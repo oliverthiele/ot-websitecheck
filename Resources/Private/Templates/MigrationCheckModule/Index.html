@@ -13,6 +13,7 @@
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/reviewed-toggle.js"/>
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/migration-command.js"/>
     <f:asset.module identifier="@typo3/backend/popover.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/page-preview.js"/>
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/module-guide.js"/>
     <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
     <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
@@ -268,6 +269,7 @@
         </f:if>
     </strong>
     <f:if condition="{identity.title}"> — {identity.title}</f:if>
+    <f:render partial="BackendLink" arguments="{url: identity.recordUrl, title: '{f:translate(key: \'{languageFile}backend.editRecord\')}'}"/>
 </f:section>
 
 <f:section name="StatusBadge">
@@ -316,7 +318,10 @@
                 <br/><small class="text-danger">{f:translate(key: '{languageFile}abortReason.{row.abortReason}')}</small>
             </f:if>
         </td>
-        <td><ws:webLink url="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</ws:webLink></td>
+        <td>
+            <f:render partial="PageLink" arguments="{url: row.finalUrl, label: row.finalPath}"/>
+            <f:render partial="BackendLink" arguments="{url: row.backendUrl, title: '{f:translate(key: \'{languageFile}backend.openPage\', arguments: {0: row.pageUid, 1: row.language})}'}"/>
+        </td>
         <td>
             <f:for each="{row.chain}" as="step" iteration="stepIteration">
                 <f:if condition="{stepIteration.isFirst}">

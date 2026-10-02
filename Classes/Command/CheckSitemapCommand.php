@@ -160,7 +160,8 @@ class CheckSitemapCommand extends Command
                 $finalUrl = $page->finalUrl !== '' ? $page->finalUrl : $url;
                 $canonicalUrl = $page->isOk() ? $this->canonicalExtractor->extract($page->body, $finalUrl) : '';
                 $errorMarker = $this->errorMarkerDetector->detectFor($page, $this->canonicalExtractor->isElsewhere($canonicalUrl, $finalUrl));
-                $pageArguments = $this->pageUidResolver->resolveArguments($url);
+                $route = $this->pageUidResolver->resolveRoute($url);
+                $pageArguments = $route?->pageArguments;
                 // A detail page without a record answers with a fallback or an
                 // error by design; what is wrong is that the sitemap lists it.
                 if (!$page->isConnectionError() && $this->requiredParameterPages->isCalledWithoutParameter($pageArguments, new PageIdentity())) {
@@ -180,7 +181,7 @@ class CheckSitemapCommand extends Command
                     $errorMarkerCount++;
                 }
 
-                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $pageArguments?->getPageId(), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl);
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $pageArguments?->getPageId(), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl, $route->languageId ?? 0);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {

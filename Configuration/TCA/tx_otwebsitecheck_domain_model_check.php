@@ -15,11 +15,18 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'page_uid, url, path, environment, source, http_status, error_marker, final_url, canonical_url, checked_at, run_started_at, reviewed, note'],
+        '1' => ['showitem' => 'page_uid, language_uid, url, path, environment, source, http_status, error_marker, final_url, canonical_url, checked_at, run_started_at, reviewed, note'],
     ],
     'columns' => [
         'page_uid' => [
             'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.page_uid',
+            'config' => [
+                'type' => 'number',
+                'readOnly' => true,
+            ],
+        ],
+        'language_uid' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.language_uid',
             'config' => [
                 'type' => 'number',
                 'readOnly' => true,

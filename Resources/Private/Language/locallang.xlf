@@ -632,6 +632,26 @@
         <source>What it means and what to do</source>
       </segment>
     </unit>
+    <unit id="preview.newWindow">
+      <segment>
+        <source>Open in a new window</source>
+      </segment>
+    </unit>
+    <unit id="preview.close">
+      <segment>
+        <source>Close</source>
+      </segment>
+    </unit>
+    <unit id="backend.openPage">
+      <segment>
+        <source>Open page %1$s in the page module (language: %2$s)</source>
+      </segment>
+    </unit>
+    <unit id="backend.editRecord">
+      <segment>
+        <source>Edit the record</source>
+      </segment>
+    </unit>
     <unit id="actor.editor">
       <segment>
         <source>Editor</source>

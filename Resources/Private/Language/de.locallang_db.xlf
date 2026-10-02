@@ -15,6 +15,12 @@
         <target>Seiten-UID</target>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.language_uid">
+      <segment>
+        <source>Site language uid</source>
+        <target>Uid der Website-Sprache</target>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.url">
       <segment>
         <source>URL</source>
