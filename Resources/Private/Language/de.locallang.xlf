@@ -2249,8 +2249,8 @@
     </unit>
     <unit id="faq.canonical.meaning">
       <segment>
-        <source>Every page tells search engines under which URL it should be indexed — its canonical URL. A page with "Show content from page" names the page whose content it shows, and a page can name another one in its SEO properties. That is correct; the same content is indexed once. But such a page does not belong in the sitemap, and a redirect should not end on it.</source>
-        <target>Jede Seite teilt Suchmaschinen mit, unter welcher URL sie indexiert werden soll — ihre Canonical-URL. Eine Seite mit „Inhalt anzeigen von“ nennt die Seite, deren Inhalt sie zeigt, und eine Seite kann in ihren SEO-Eigenschaften eine andere nennen. Das ist richtig; derselbe Inhalt wird einmal indexiert. Eine solche Seite gehört aber nicht in die Sitemap, und eine Weiterleitung sollte nicht auf ihr enden.</target>
+        <source>Every page tells search engines under which URL it should be indexed — its canonical URL. A page with "Show Content from this page" names the page whose content it shows, and a page can name another one in its SEO properties. That is correct; the same content is indexed once. But such a page does not belong in the sitemap, and a redirect should not end on it.</source>
+        <target>Jede Seite teilt Suchmaschinen mit, unter welcher URL sie indexiert werden soll — ihre Canonical-URL. Eine Seite mit „Inhalt dieser Seite anzeigen“ nennt die Seite, deren Inhalt sie zeigt, und eine Seite kann in ihren SEO-Eigenschaften eine andere nennen. Das ist richtig; derselbe Inhalt wird einmal indexiert. Eine solche Seite gehört aber nicht in die Sitemap, und eine Weiterleitung sollte nicht auf ihr enden.</target>
       </segment>
     </unit>
     <unit id="faq.canonical.action">
@@ -2449,6 +2449,198 @@
       <segment>
         <source>Nothing to do for the migration. If the URL matters, e.g. because it is linked from outside, give it a redirect to a fitting page.</source>
         <target>Für die Migration ist nichts zu tun. Ist die URL wichtig, etwa weil sie von außen verlinkt ist, eine Weiterleitung auf eine passende Seite anlegen.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.title">
+      <segment>
+        <source>Glossary</source>
+        <target>Glossar</target>
+      </segment>
+    </unit>
+    <unit id="glossary.intro">
+      <segment>
+        <source>Terms the checks use, and where to find the matching settings in TYPO3. Field names are those of the page properties.</source>
+        <target>Begriffe, die die Checks verwenden, und wo Sie die passenden Einstellungen in TYPO3 finden. Feldnamen sind die der Seiteneigenschaften.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.sitemap.term">
+      <segment>
+        <source>XML sitemap</source>
+        <target>XML-Sitemap</target>
+      </segment>
+    </unit>
+    <unit id="glossary.sitemap">
+      <segment>
+        <source>A list of the URLs of a website that search engines are meant to index, e.g. under /sitemap.xml. TYPO3 creates it from the pages and — per plugin — from records such as news. A page is left out when its "Index this page" switch is off or it has its own canonical link.</source>
+        <target>Eine Liste der URLs einer Website, die Suchmaschinen indexieren sollen, z. B. unter /sitemap.xml. TYPO3 erzeugt sie aus den Seiten und — je Plugin — aus Datensätzen wie News. Eine Seite fehlt darin, wenn „Diese Seite indizieren“ ausgeschaltet ist oder sie einen eigenen kanonischen Link hat.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.snapshot.term">
+      <segment>
+        <source>Sitemap snapshot</source>
+        <target>Sitemap-Snapshot</target>
+      </segment>
+    </unit>
+    <unit id="glossary.snapshot">
+      <segment>
+        <source>A copy of all sitemaps of a website at one point in time, stored in the Sitemaps module. Every check takes its URLs from a snapshot. A locked snapshot cannot be deleted — before a relaunch, lock the one of the live site.</source>
+        <target>Eine Kopie aller Sitemaps einer Website zu einem Zeitpunkt, gespeichert im Modul „Sitemaps“. Jeder Check nimmt seine URLs aus einem Snapshot. Ein gesperrter Snapshot lässt sich nicht löschen — vor einem Relaunch den der Live-Website sperren.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.environment.term">
+      <segment>
+        <source>Environment</source>
+        <target>Umgebung</target>
+      </segment>
+    </unit>
+    <unit id="glossary.environment">
+      <segment>
+        <source>One installation of the same website: live is the public one, staging the copy for testing and approval, development and local the ones developers work on. They often differ in content and configuration.</source>
+        <target>Eine Installation derselben Website: Live ist die öffentliche, Staging die Kopie zum Testen und Abnehmen, Development und Lokal die, an denen Entwickler arbeiten. Sie unterscheiden sich oft in Inhalt und Konfiguration.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.statusCode.term">
+      <segment>
+        <source>HTTP status code</source>
+        <target>HTTP-Statuscode</target>
+      </segment>
+    </unit>
+    <unit id="glossary.statusCode">
+      <segment>
+        <source>The number a server answers a request with. 200: the page works. 301 and 308: moved permanently. 302 and 307: moved temporarily. 404 and 410: not found. 403: access denied. 500 and above: an error on the server, often in TYPO3 itself.</source>
+        <target>Die Zahl, mit der ein Server auf eine Anfrage antwortet. 200: Die Seite funktioniert. 301 und 308: dauerhaft umgezogen. 302 und 307: vorübergehend umgezogen. 404 und 410: nicht gefunden. 403: Zugriff verweigert. 500 und höher: ein Fehler auf dem Server, oft in TYPO3 selbst.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.redirect.term">
+      <segment>
+        <source>Redirect</source>
+        <target>Weiterleitung</target>
+      </segment>
+    </unit>
+    <unit id="glossary.redirect">
+      <segment>
+        <source>The answer "this page is elsewhere now", with the new URL. Editors maintain redirects in the Redirects module, where the extension redirects is installed; the webserver can redirect as well, by rules only the integrator changes. A move should be permanent (301), so search engines carry the old URL's ranking over.</source>
+        <target>Die Antwort „diese Seite ist jetzt woanders“, mit der neuen URL. Redakteure pflegen Weiterleitungen im Modul „Weiterleitungen“, wo die Erweiterung redirects installiert ist; auch der Webserver kann weiterleiten, über Regeln, die nur die Integration ändert. Ein Umzug sollte dauerhaft sein (301), damit Suchmaschinen das Ranking der alten URL übertragen.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.redirectChain.term">
+      <segment>
+        <source>Redirect chain</source>
+        <target>Weiterleitungskette</target>
+      </segment>
+    </unit>
+    <unit id="glossary.redirectChain">
+      <segment>
+        <source>Several redirects in a row before a page answers. Each costs time and some of what search engines carry over. The first redirect should point at the final URL directly.</source>
+        <target>Mehrere Weiterleitungen hintereinander, bis eine Seite antwortet. Jede kostet Zeit und einen Teil dessen, was Suchmaschinen übertragen. Die erste Weiterleitung sollte direkt auf die End-URL zeigen.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.canonical.term">
+      <segment>
+        <source>Canonical URL</source>
+        <target>Canonical-URL (kanonischer Link)</target>
+      </segment>
+    </unit>
+    <unit id="glossary.canonical">
+      <segment>
+        <source>The URL under which a page wants to be indexed, named in its HTML. Where the same content is reachable under several URLs, search engines index it only under this one. TYPO3 sets it to the page itself, unless the page names another one: page properties, tab SEO, field "Canonical link". A page with its own canonical link is left out of the sitemap.</source>
+        <target>Die URL, unter der eine Seite indexiert werden möchte, angegeben in ihrem HTML. Ist derselbe Inhalt unter mehreren URLs erreichbar, indexieren Suchmaschinen ihn nur unter dieser. TYPO3 setzt sie auf die Seite selbst, außer die Seite nennt eine andere: Seiteneigenschaften, Reiter SEO, Feld „Kanonischer Link“. Eine Seite mit eigenem kanonischen Link fehlt in der Sitemap.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.contentFromPage.term">
+      <segment>
+        <source>Show content from another page</source>
+        <target>Inhalt einer anderen Seite anzeigen</target>
+      </segment>
+    </unit>
+    <unit id="glossary.contentFromPage">
+      <segment>
+        <source>A page can show the content elements of another page: page properties, tab Appearance, section "Replace Content", field "Show Content from this page". It answers under its own URL, but names the other page as canonical. TYPO3 still lists it in the sitemap — the integrator can leave such pages out.</source>
+        <target>Eine Seite kann die Inhaltselemente einer anderen Seite zeigen: Seiteneigenschaften, Reiter Erscheinungsbild, Bereich „Inhalt ersetzen“, Feld „Inhalt dieser Seite anzeigen“. Sie antwortet unter ihrer eigenen URL, nennt aber die andere Seite als Canonical. TYPO3 führt sie trotzdem in der Sitemap — die Integration kann solche Seiten auslassen.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.shortcut.term">
+      <segment>
+        <source>Shortcut page</source>
+        <target>Verweisseite</target>
+      </segment>
+    </unit>
+    <unit id="glossary.shortcut">
+      <segment>
+        <source>A page of the type "Shortcut" shows no content of its own and redirects to another page — always with 307, a temporary redirect. A redirect should point past it, at its target.</source>
+        <target>Eine Seite vom Typ „Verweis“ zeigt keinen eigenen Inhalt und leitet auf eine andere Seite weiter — immer mit 307, also vorübergehend. Eine Weiterleitung sollte an ihr vorbei direkt auf ihr Ziel zeigen.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.slug.term">
+      <segment>
+        <source>URL segment</source>
+        <target>URL-Segment</target>
+      </segment>
+    </unit>
+    <unit id="glossary.slug">
+      <segment>
+        <source>The part of the URL that belongs to a page, e.g. /about-us. It is set in the page properties, tab General, field "URL Segment". Changing it changes the URL — without a redirect, the old one is lost.</source>
+        <target>Der Teil der URL, der zu einer Seite gehört, z. B. /ueber-uns. Er steht in den Seiteneigenschaften, Reiter Allgemein, Feld „URL Segment“. Wer ihn ändert, ändert die URL — ohne Weiterleitung geht die alte verloren.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.pageId.term">
+      <segment>
+        <source>Page ID</source>
+        <target>Seiten-ID</target>
+      </segment>
+    </unit>
+    <unit id="glossary.pageId">
+      <segment>
+        <source>The number TYPO3 identifies a page by, shown in square brackets after the title, e.g. [48]. Copy it into the search of the page tree to find the page.</source>
+        <target>Die Nummer, an der TYPO3 eine Seite erkennt, in eckigen Klammern hinter dem Titel, z. B. [48]. In die Suche des Seitenbaums kopieren, um die Seite zu finden.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.detailPage.term">
+      <segment>
+        <source>Record and detail page</source>
+        <target>Datensatz und Detailseite</target>
+      </segment>
+    </unit>
+    <unit id="glossary.detailPage">
+      <segment>
+        <source>Content that is not a page — a news item, a product, a job — is a record. A plugin shows it on a detail page, whose URL carries the record, e.g. /news/my-article. The same page without a record shows a list, an empty page or an error.</source>
+        <target>Inhalt, der keine Seite ist — eine News, ein Produkt, eine Stelle —, ist ein Datensatz. Ein Plugin zeigt ihn auf einer Detailseite, deren URL den Datensatz enthält, z. B. /news/mein-artikel. Dieselbe Seite ohne Datensatz zeigt eine Liste, eine leere Seite oder einen Fehler.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.noIndex.term">
+      <segment>
+        <source>Not in the search index</source>
+        <target>Nicht im Suchindex</target>
+      </segment>
+    </unit>
+    <unit id="glossary.noIndex">
+      <segment>
+        <source>Page properties, tab SEO, switch "Index this page": switched off, search engines are asked not to index the page, and it is left out of the sitemap.</source>
+        <target>Seiteneigenschaften, Reiter SEO, Schalter „Diese Seite indizieren“: Ausgeschaltet werden Suchmaschinen gebeten, die Seite nicht zu indexieren, und sie fehlt in der Sitemap.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.languageFallback.term">
+      <segment>
+        <source>Language fallback</source>
+        <target>Sprach-Fallback</target>
+      </segment>
+    </unit>
+    <unit id="glossary.languageFallback">
+      <segment>
+        <source>When a page or record has no translation, TYPO3 can show the default language instead — depending on the site configuration. The URL works, but in the wrong language.</source>
+        <target>Fehlt einer Seite oder einem Datensatz die Übersetzung, kann TYPO3 stattdessen die Standardsprache zeigen — je nach Site-Konfiguration. Die URL funktioniert, aber in der falschen Sprache.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.markers.term">
+      <segment>
+        <source>Page and record markers</source>
+        <target>Seiten- und Datensatz-Marker</target>
+      </segment>
+    </unit>
+    <unit id="glossary.markers">
+      <segment>
+        <source>Hidden details in the HTML of a page that name the page ID and, on a detail page, the record. The migration check compares pages by them. The integrator adds them to the templates; editors see nothing of them.</source>
+        <target>Unsichtbare Angaben im HTML einer Seite, die die Seiten-ID und auf einer Detailseite den Datensatz nennen. Der Migrations-Check vergleicht Seiten an ihnen. Die Integration ergänzt sie in den Templates; Redakteure sehen davon nichts.</target>
       </segment>
     </unit>
   </file>

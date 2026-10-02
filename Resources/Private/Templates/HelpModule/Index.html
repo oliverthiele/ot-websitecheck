@@ -45,6 +45,7 @@
         <f:for each="{entries}" as="entry">
             <li><a href="#faq-{entry.name}">{f:translate(key: '{languageFile}faq.{entry.name}.title')}</a></li>
         </f:for>
+        <li><a href="#glossary">{f:translate(key: '{languageFile}glossary.title')}</a></li>
     </ul>
 
     <f:for each="{entries}" as="entry">
@@ -71,6 +72,15 @@
             </div>
         </div>
     </f:for>
+
+    <h2 id="glossary">{f:translate(key: '{languageFile}glossary.title')}</h2>
+    <p>{f:translate(key: '{languageFile}glossary.intro')}</p>
+    <dl class="ot-websitecheck-glossary">
+        <f:for each="{glossary}" as="term">
+            <dt id="glossary-{term}">{f:translate(key: '{languageFile}glossary.{term}.term')}</dt>
+            <dd>{f:translate(key: '{languageFile}glossary.{term}')}</dd>
+        </f:for>
+    </dl>
 
 </f:section>
 

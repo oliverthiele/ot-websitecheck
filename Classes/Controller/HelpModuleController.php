@@ -42,6 +42,28 @@ class HelpModuleController extends AbstractModuleController
         'referenceNotOk' => ['actors' => [FindingGuide::ACTOR_NONE], 'readOn' => ''],
     ];
 
+    /**
+     * Terms of the checks and of TYPO3 an editor meets in the results, in the
+     * order of the glossary.
+     */
+    private const array GLOSSARY = [
+        'sitemap',
+        'snapshot',
+        'environment',
+        'statusCode',
+        'redirect',
+        'redirectChain',
+        'canonical',
+        'contentFromPage',
+        'shortcut',
+        'slug',
+        'pageId',
+        'detailPage',
+        'noIndex',
+        'languageFallback',
+        'markers',
+    ];
+
     public function indexAction(): ResponseInterface
     {
         $entries = [];
@@ -52,6 +74,7 @@ class HelpModuleController extends AbstractModuleController
         $moduleTemplate = $this->createModuleTemplate();
         $moduleTemplate->assignMultiple([
             'entries' => $entries,
+            'glossary' => self::GLOSSARY,
             'actors' => FindingGuide::ACTORS,
         ]);
 

@@ -753,7 +753,7 @@ often renders the live domain into its canonical.
 
 #### Pages that show the content of another page
 
-A page with "Show content from page" (`content_from_pid`) answers under its own
+A page with "Show Content from this page" (`content_from_pid`, tab Appearance) answers under its own
 path and names the other page as canonical — EXT:seo does that by itself. That
 is correct for search engines, but the page should not be in the sitemap. The
 page sitemap of EXT:seo leaves out pages with `no_index` or their own

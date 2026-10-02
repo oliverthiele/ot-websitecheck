@@ -215,7 +215,7 @@ class MigrationAnalyzer
     /**
      * The reference row of the page a reference declares as canonical, when
      * that is another page of the run — e.g. the page whose content a page
-     * shows with "show content from page".
+     * shows with "Show Content from this page".
      *
      * @param array<string, Observation> $workingReferenceByFinalPath comparable final path => reference row answering 200
      */

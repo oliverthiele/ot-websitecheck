@@ -101,7 +101,7 @@ the checks again.
 **Finding:** the status check marks a URL with `canonicalElsewhere`, the
 migration check warns `listedUrlNotCanonical` or `canonicalDiffers`.
 
-**Why:** a page with "Show content from page" (`content_from_pid`) answers
+**Why:** a page with "Show Content from this page" (`content_from_pid`, tab Appearance) answers
 under its own path, but EXT:seo names the other page as its canonical URL. For
 search engines that is correct: the content is indexed once, under the
 canonical URL. The page sitemap of EXT:seo still lists the page, and search
