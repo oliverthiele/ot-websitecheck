@@ -99,22 +99,22 @@
     </unit>
     <unit id="command.reference">
       <segment>
-        <source>Reference snapshot (before)</source>
+        <source>Sitemap snapshot before (reference)</source>
       </segment>
     </unit>
     <unit id="command.reference.help">
       <segment>
-        <source>The state to keep, usually the locked snapshot of the live site. Every URL in it is checked.</source>
+        <source>The state to keep, usually the locked snapshot of the live site from the Sitemaps module. Every URL in it is checked.</source>
       </segment>
     </unit>
     <unit id="command.target">
       <segment>
-        <source>Target snapshot (after)</source>
+        <source>Sitemap snapshot after (target)</source>
       </segment>
     </unit>
     <unit id="command.target.help">
       <segment>
-        <source>The new state, e.g. staging. The URLs of the reference are requested on its host.</source>
+        <source>The new state from the Sitemaps module, e.g. staging. The URLs of the reference are requested on its host.</source>
       </segment>
     </unit>
     <unit id="command.referenceRun">
@@ -259,12 +259,12 @@
     </unit>
     <unit id="statusCommand.snapshot">
       <segment>
-        <source>Snapshot</source>
+        <source>Sitemap snapshot</source>
       </segment>
     </unit>
     <unit id="statusCommand.snapshot.help">
       <segment>
-        <source>Its URLs are requested — on its own host, unless another host is given.</source>
+        <source>The list of URLs to check, stored in the Sitemaps module. Its URLs are requested on its own host, unless another host is given.</source>
       </segment>
     </unit>
     <unit id="statusCommand.environment">
@@ -1514,7 +1514,7 @@
     </unit>
     <unit id="help.migrationReference.title">
       <segment>
-        <source>Reference snapshot</source>
+        <source>Sitemap snapshot before</source>
       </segment>
     </unit>
     <unit id="help.migrationReference">

@@ -119,26 +119,26 @@
     </unit>
     <unit id="command.reference">
       <segment>
-        <source>Reference snapshot (before)</source>
-        <target>Referenz-Snapshot (vorher)</target>
+        <source>Sitemap snapshot before (reference)</source>
+        <target>Sitemap-Snapshot vorher (Referenz)</target>
       </segment>
     </unit>
     <unit id="command.reference.help">
       <segment>
-        <source>The state to keep, usually the locked snapshot of the live site. Every URL in it is checked.</source>
-        <target>Der Stand, der erhalten bleiben soll, meist der gesperrte Snapshot der Live-Website. Jede URL daraus wird geprüft.</target>
+        <source>The state to keep, usually the locked snapshot of the live site from the Sitemaps module. Every URL in it is checked.</source>
+        <target>Der Stand, der erhalten bleiben soll, meist der gesperrte Snapshot der Live-Website aus dem Modul „Sitemaps“. Jede URL daraus wird geprüft.</target>
       </segment>
     </unit>
     <unit id="command.target">
       <segment>
-        <source>Target snapshot (after)</source>
-        <target>Ziel-Snapshot (nachher)</target>
+        <source>Sitemap snapshot after (target)</source>
+        <target>Sitemap-Snapshot nachher (Ziel)</target>
       </segment>
     </unit>
     <unit id="command.target.help">
       <segment>
-        <source>The new state, e.g. staging. The URLs of the reference are requested on its host.</source>
-        <target>Der neue Stand, z. B. Staging. Die URLs der Referenz werden auf dessen Host abgefragt.</target>
+        <source>The new state from the Sitemaps module, e.g. staging. The URLs of the reference are requested on its host.</source>
+        <target>Der neue Stand aus dem Modul „Sitemaps“, z. B. Staging. Die URLs der Referenz werden auf dessen Host abgefragt.</target>
       </segment>
     </unit>
     <unit id="command.referenceRun">
@@ -311,14 +311,14 @@
     </unit>
     <unit id="statusCommand.snapshot">
       <segment>
-        <source>Snapshot</source>
-        <target>Snapshot</target>
+        <source>Sitemap snapshot</source>
+        <target>Sitemap-Snapshot</target>
       </segment>
     </unit>
     <unit id="statusCommand.snapshot.help">
       <segment>
-        <source>Its URLs are requested — on its own host, unless another host is given.</source>
-        <target>Seine URLs werden abgefragt — auf dem eigenen Host, sofern kein anderer angegeben ist.</target>
+        <source>The list of URLs to check, stored in the Sitemaps module. Its URLs are requested on its own host, unless another host is given.</source>
+        <target>Die URL-Liste, die geprüft wird, gespeichert im Modul „Sitemaps“. Ihre URLs werden auf dem eigenen Host abgefragt, sofern kein anderer angegeben ist.</target>
       </segment>
     </unit>
     <unit id="statusCommand.environment">
@@ -1817,8 +1817,8 @@
     </unit>
     <unit id="help.migrationReference.title">
       <segment>
-        <source>Reference snapshot</source>
-        <target>Referenz-Snapshot</target>
+        <source>Sitemap snapshot before</source>
+        <target>Sitemap-Snapshot vorher</target>
       </segment>
     </unit>
     <unit id="help.migrationReference">

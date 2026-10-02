@@ -62,6 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that runs a check
 - Show under the composed command how to run it as a Scheduler task, with its
   options
+- Name the selects of the command panels "Sitemap snapshot" and say that the
+  list comes from the Sitemaps module
 - Show the page in the results as title with its uid in brackets, an
   exception by its short class name, the sitemap group "pages" as pages and
   other groups as records; filter all exceptions at once and count the
