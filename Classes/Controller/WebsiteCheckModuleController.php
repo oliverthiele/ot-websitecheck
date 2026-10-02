@@ -11,6 +11,7 @@ use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
@@ -25,6 +26,12 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
     private const int RESULTS_PER_PAGE = 500;
 
+    /**
+     * Filter value for every exception class at once: one finding for an
+     * editor, however many classes there are.
+     */
+    private const string RENDERING_ERROR = 'renderingError';
+
     public function __construct(
         private readonly CheckResultRepository $checkResultRepository,
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
@@ -37,21 +44,19 @@ class WebsiteCheckModuleController extends AbstractModuleController
     {
         $environments = $this->checkResultRepository->findDistinctEnvironments();
         $markers = $this->checkResultRepository->findDistinctMarkers($environment);
-        if (!in_array($marker, $markers, true)) {
+        $exceptionMarkers = array_values(array_filter($markers, $this->findingGuide->isExceptionMarker(...)));
+        $markerFilter = match (true) {
+            $marker === self::RENDERING_ERROR && $exceptionMarkers !== [] => $exceptionMarkers,
+            in_array($marker, $markers, true) && !$this->findingGuide->isExceptionMarker($marker) => [$marker],
+            default => [],
+        };
+        if ($markerFilter === []) {
             $marker = '';
         }
-        $markerFilter = $marker === '' ? [] : [$marker];
         if (!in_array($actor, FindingGuide::ACTORS, true)) {
             $actor = '';
         }
-        $actorFilter = $actor === '' ? null : [
-            'markers' => $this->findingGuide->filterMarkers($markers, $actor),
-            'plain' => match ($actor) {
-                FindingGuide::ACTOR_EDITOR => CheckResultRepository::PLAIN_NOT_FOUND,
-                FindingGuide::ACTOR_INTEGRATOR => CheckResultRepository::PLAIN_OTHER_ERROR,
-                default => CheckResultRepository::PLAIN_OK,
-            },
-        ];
+        $actorFilter = $actor === '' ? null : $this->buildActorFilter($actor, $markers);
         // "Nothing to do" lists what "only problems" hides; a chosen actor wins.
         $onlyProblems = $onlyProblems && $actor === '';
         // A crawl of a large site stores tens of thousands of rows; the table
@@ -78,7 +83,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
                 'nextPage' => $page < $pageCount ? $page + 1 : 0,
             ],
             'environmentOptions' => $environmentOptions,
-            'markerOptions' => ['' => $this->translate('statusResults.allMarkers')] + $this->buildMarkerOptions($markers),
+            'markerOptions' => ['' => $this->translate('statusResults.allMarkers')] + $this->buildMarkerOptions($markers, $exceptionMarkers !== []),
+            'actorCounts' => $this->countByActor($environment, $markers),
             'currentMarker' => $marker,
             'actorOptions' => $this->buildActorOptions(),
             'currentActor' => $actor,
@@ -118,16 +124,24 @@ class WebsiteCheckModuleController extends AbstractModuleController
         };
 
         $marker = RowValue::string($result, 'error_marker');
-        $markerKey = 'errorMarker.' . $marker;
-        $markerHelp = $marker === '' ? '' : $this->translate($markerKey . '.help');
+        $isException = $this->findingGuide->isExceptionMarker($marker);
+        $pageUid = RowValue::int($result, 'page_uid');
+        $page = $pageUid > 0 ? BackendUtility::getRecord('pages', $pageUid, 'title') : null;
+        $pageTitle = $page['title'] ?? '';
 
         return $result + [
+            'pageTitle' => is_string($pageTitle) ? $pageTitle : '',
+            // An exception class is shown by its short name; the popover names it in full.
+            'markerLabel' => match (true) {
+                $marker === '' => '',
+                $isException => substr((string)strrchr('\\' . $marker, '\\'), 1),
+                default => $this->translate('errorMarker.' . $marker),
+            },
+            'markerHelp' => $this->translate($isException ? 'errorMarker.exception.help' : 'errorMarker.' . $marker . '.help'),
             'suggestedUrl' => $suggestedUrl,
             'backendLink' => $this->backendPageLinks->forPageOfUrl($url, RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid'), $this->request),
             'languageTitle' => $this->backendPageLinks->findLanguageTitle(RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid')),
             'guide' => $this->findingGuide->forStatusResult($marker, RowValue::int($result, 'http_status')),
-            // Exception class names are markers as well and share one explanation.
-            'markerHelp' => $markerHelp !== $markerKey . '.help' ? $markerHelp : $this->translate('errorMarker.exception.help'),
         ];
     }
 
@@ -135,17 +149,51 @@ class WebsiteCheckModuleController extends AbstractModuleController
      * @param list<string> $markers
      * @return array<string, string>
      */
-    private function buildMarkerOptions(array $markers): array
+    private function buildMarkerOptions(array $markers, bool $hasExceptions): array
     {
         $options = [];
         foreach ($markers as $marker) {
-            $key = 'errorMarker.' . $marker;
-            $label = $this->translate($key);
-            // Exception class names are markers as well and have no label.
-            $options[$marker] = $label !== $key ? $label : $marker;
+            if (!$this->findingGuide->isExceptionMarker($marker)) {
+                $options[$marker] = $this->translate('errorMarker.' . $marker);
+            }
+        }
+        if ($hasExceptions) {
+            $options[self::RENDERING_ERROR] = $this->translate('statusResults.renderingError');
         }
 
         return $options;
+    }
+
+    /**
+     * @param list<string> $markers the markers stored for the environment
+     * @return array{markers: list<string>, plain: string}
+     */
+    private function buildActorFilter(string $actor, array $markers): array
+    {
+        return [
+            'markers' => $this->findingGuide->filterMarkers($markers, $actor),
+            'plain' => match ($actor) {
+                FindingGuide::ACTOR_EDITOR => CheckResultRepository::PLAIN_NOT_FOUND,
+                FindingGuide::ACTOR_INTEGRATOR => CheckResultRepository::PLAIN_OTHER_ERROR,
+                default => CheckResultRepository::PLAIN_OK,
+            },
+        ];
+    }
+
+    /**
+     * How many results each actor has to look at; nothing to do is not counted.
+     *
+     * @param list<string> $markers
+     * @return array<string, int>
+     */
+    private function countByActor(string $environment, array $markers): array
+    {
+        $counts = [];
+        foreach ([FindingGuide::ACTOR_EDITOR, FindingGuide::ACTOR_INTEGRATOR] as $actor) {
+            $counts[$actor] = $this->checkResultRepository->countAll($environment, false, false, [], $this->buildActorFilter($actor, $markers));
+        }
+
+        return $counts;
     }
 
     public function initializeDeleteAction(): void

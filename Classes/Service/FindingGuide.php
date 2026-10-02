@@ -124,6 +124,15 @@ class FindingGuide
     }
 
     /**
+     * A marker this extension does not define is the class name of an
+     * uncaught exception, see ErrorMarkerDetector.
+     */
+    public function isExceptionMarker(string $marker): bool
+    {
+        return $marker !== '' && !isset(self::MARKERS[$marker]);
+    }
+
+    /**
      * Of the given markers, those an actor acts on.
      *
      * @param list<string> $markers

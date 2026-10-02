@@ -17,8 +17,8 @@
     </unit>
     <unit id="mlang_labels_tabdescr">
       <segment>
-        <source>Tools that crawl XML sitemaps and record what every URL answers. Start with Sitemaps: every check reads its URLs from a stored snapshot. The status check then looks at one environment, the migration check compares two. The help explains every finding and says who acts on it.</source>
-        <target>Werkzeuge, die XML-Sitemaps crawlen und festhalten, was jede URL antwortet. Beginnen Sie mit Sitemaps: Jeder Check liest seine URLs aus einem gespeicherten Snapshot. Der Status-Check prüft dann eine Umgebung, der Migrations-Check vergleicht zwei. Die Hilfe erklärt jeden Befund und sagt, wer handeln muss.</target>
+        <source>Finds broken pages and lost URLs before visitors and search engines do — on any environment, and across a relaunch. Pages and records are recognised by what they are, not by their URL, so a redirect to the wrong content is found as well. Start with Sitemaps; the help says for every finding what it means and who acts on it.</source>
+        <target>Findet kaputte Seiten und verlorene URLs, bevor Besucher und Suchmaschinen sie finden — auf jeder Umgebung und über einen Relaunch hinweg. Seiten und Datensätze werden daran erkannt, was sie sind, nicht an ihrer URL; so fällt auch eine Weiterleitung auf den falschen Inhalt auf. Beginnen Sie mit Sitemaps; die Hilfe sagt zu jedem Befund, was er bedeutet und wer handeln muss.</target>
       </segment>
     </unit>
     <unit id="module.status.title">
@@ -29,14 +29,14 @@
     </unit>
     <unit id="module.status.shortDescription">
       <segment>
-        <source>Step 2 — HTTP status and error markers per URL</source>
-        <target>Schritt 2 — HTTP-Status und Fehlermarker pro URL</target>
+        <source>Step 2 — does every page work?</source>
+        <target>Schritt 2 — funktioniert jede Seite?</target>
       </segment>
     </unit>
     <unit id="module.status.description">
       <segment>
-        <source>Review the results of the websitecheck:checksitemap and websitecheck:crawllinks commands: URLs without HTTP 200, TYPO3 error pages and links whose arguments have no effect.</source>
-        <target>Ergebnisse der Commands websitecheck:checksitemap und websitecheck:crawllinks: URLs ohne HTTP 200, TYPO3-Fehlerseiten und Links, deren Argumente nichts bewirken.</target>
+        <source>Requests every URL of a snapshot and finds error pages, needless redirects and plugin links that lead nowhere. The URL list may come from another environment: check the larger sitemap of a development system — with news the live site does not have yet — against the live site.</source>
+        <target>Ruft jede URL eines Snapshots ab und findet Fehlerseiten, unnötige Weiterleitungen und Plugin-Links, die ins Leere führen. Die URL-Liste darf von einer anderen Umgebung stammen: etwa die umfangreichere Sitemap des Dev-Systems — mit News, die live noch fehlen — gegen das Live-System prüfen.</target>
       </segment>
     </unit>
     <unit id="module.migration.title">
@@ -47,14 +47,14 @@
     </unit>
     <unit id="module.migration.shortDescription">
       <segment>
-        <source>Step 3 — moved URLs without a working redirect</source>
-        <target>Schritt 3 — verschobene URLs ohne funktionierende Weiterleitung</target>
+        <source>Step 3 — a relaunch without lost URLs</source>
+        <target>Schritt 3 — Relaunch ohne verlorene URLs</target>
       </segment>
     </unit>
     <unit id="module.migration.description">
       <segment>
-        <source>Review the results of the websitecheck:migrationcheck command: does every URL of the reference environment still lead to the same page or record on the target environment — directly or through a redirect?</source>
-        <target>Ergebnisse des Commands websitecheck:migrationcheck: Führt jede URL der Referenzumgebung auf der Zielumgebung noch zur selben Seite bzw. zum selben Datensatz — direkt oder über eine Weiterleitung?</target>
+        <source>Compares the old and the new website page by page: does every old URL still lead to the same content? A missing redirect is shown with the page it should point at — independent of whether redirects come from the webserver or from TYPO3.</source>
+        <target>Vergleicht alte und neue Website Seite für Seite: Führt jede alte URL noch zum selben Inhalt? Fehlende Weiterleitungen zeigt er mit der Seite, auf die sie zeigen sollten — unabhängig davon, ob Weiterleitungen vom Webserver oder von TYPO3 kommen.</target>
       </segment>
     </unit>
     <unit id="module.sitemaps.title">
@@ -65,14 +65,14 @@
     </unit>
     <unit id="module.sitemaps.shortDescription">
       <segment>
-        <source>Step 1 — store the sitemaps every check reads</source>
-        <target>Schritt 1 — die Sitemaps sichern, die jeder Check liest</target>
+        <source>Step 1 — keep the state of a website</source>
+        <target>Schritt 1 — den Stand einer Website festhalten</target>
       </segment>
     </unit>
     <unit id="module.sitemaps.description">
       <segment>
-        <source>Review the snapshots of the websitecheck:importsitemaps command: how many URLs every language lists per sitemap group, which sitemap files failed, and a note per snapshot.</source>
-        <target>Snapshots des Commands websitecheck:importsitemaps: wie viele URLs jede Sprache pro Sitemap-Gruppe enthält, welche Sitemap-Dateien fehlschlugen, und eine Notiz pro Snapshot.</target>
+        <source>Stores the sitemaps of every language as a snapshot. The list of URLs stays, also when the website changes — before a relaunch, it is the only copy of what search engines know. Snapshots can be saved as files and survive a database that is replaced.</source>
+        <target>Speichert die Sitemaps aller Sprachen als Snapshot. Die URL-Liste bleibt erhalten, auch wenn sich die Website ändert — vor einem Relaunch die einzige Kopie dessen, was Suchmaschinen kennen. Snapshots lassen sich als Datei sichern und überstehen eine ersetzte Datenbank.</target>
       </segment>
     </unit>
     <unit id="module.help.title">
@@ -83,14 +83,14 @@
     </unit>
     <unit id="module.help.shortDescription">
       <segment>
-        <source>What a finding means, and who acts on it</source>
-        <target>Was ein Befund bedeutet und wer handeln muss</target>
+        <source>What a finding means</source>
+        <target>Was ein Befund bedeutet</target>
       </segment>
     </unit>
     <unit id="module.help.description">
       <segment>
-        <source>Every verdict, warning and marker of the checks explained: what it means, whether an editor can fix it in the backend or the integrator has to change the configuration, and what to do.</source>
-        <target>Alle Bewertungen, Warnungen und Marker der Checks erklärt: was sie bedeuten, ob Redakteure sie im Backend beheben können oder die Integration die Konfiguration ändern muss, und was zu tun ist.</target>
+        <source>For every finding: what it means, whether editors can fix it themselves or the integrator has to, and what to do.</source>
+        <target>Zu jedem Befund: was er heißt, ob die Redaktion ihn selbst beheben kann oder die Integration ran muss, und was zu tun ist.</target>
       </segment>
     </unit>
   </file>

@@ -57,6 +57,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show the tools of the module overview in the order of the workflow:
   Sitemaps, status check, migration check, help; the short descriptions name
   the step
+- Describe in the module overview and the module guides what each tool is
+  for, instead of which command it runs; the commands moved into the panel
+  that runs a check
+- Show under the composed command how to run it as a Scheduler task, with its
+  options
+- Show the page in the results as title with its uid in brackets, an
+  exception by its short class name, the sitemap group "pages" as pages and
+  other groups as records; filter all exceptions at once and count the
+  results per actor above the results
 - Count a redirect in the migration check to the page whose content the
   reference page shows (`content_from_pid`, declared through its canonical)
   as the same content instead of `otherContent`, and suggest that page as

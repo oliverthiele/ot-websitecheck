@@ -66,6 +66,17 @@ final class FindingGuideTest extends UnitTestCase
     }
 
     #[Test]
+    public function everyMarkerTheExtensionDoesNotDefineIsAnException(): void
+    {
+        $subject = new FindingGuide();
+
+        self::assertTrue($subject->isExceptionMarker('My\\Extension\\SomeException'));
+        self::assertFalse($subject->isExceptionMarker(ErrorMarkerDetector::MARKER_TIMEOUT));
+        self::assertFalse($subject->isExceptionMarker('pageNotFound'));
+        self::assertFalse($subject->isExceptionMarker(''));
+    }
+
+    #[Test]
     public function markersAreFilteredByActor(): void
     {
         $markers = ['pageNotFound', ErrorMarkerDetector::MARKER_TIMEOUT, 'My\\Extension\\SomeException'];

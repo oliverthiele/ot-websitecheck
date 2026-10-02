@@ -35,8 +35,8 @@
     </unit>
     <unit id="filter.onlyProblems">
       <segment>
-        <source>only problems and warnings</source>
-        <target>nur Probleme und Warnungen</target>
+        <source>only findings</source>
+        <target>nur Auffälligkeiten</target>
       </segment>
     </unit>
     <unit id="filter.onlyUnreviewed">
@@ -107,8 +107,8 @@
     </unit>
     <unit id="command.title">
       <segment>
-        <source>Compose a migration check</source>
-        <target>Migrations-Check zusammenstellen</target>
+        <source>Run the migration check — on the command line or in the Scheduler</source>
+        <target>Migrations-Check ausführen — auf der Kommandozeile oder im Planer</target>
       </segment>
     </unit>
     <unit id="command.intro">
@@ -231,6 +231,12 @@
         <target>Im Projektverzeichnis ausführen und danach diese Seite neu laden. Geschützte Umgebungen: --reference-basic-auth oder --target-basic-auth ergänzen oder die in der README beschriebenen Umgebungsvariablen nutzen.</target>
       </segment>
     </unit>
+    <unit id="command.scheduler">
+      <segment>
+        <source>Run it regularly: in the Scheduler module, add a task "Execute console commands", choose %1$s and set these options:</source>
+        <target>Regelmäßig ausführen: im Modul Planer eine Aufgabe „Konsolenbefehle ausführen“ anlegen, %1$s wählen und diese Optionen setzen:</target>
+      </segment>
+    </unit>
     <unit id="command.locked">
       <segment>
         <source>locked</source>
@@ -275,8 +281,8 @@
     </unit>
     <unit id="statusCommand.title">
       <segment>
-        <source>Compose a status or link check</source>
-        <target>Status- oder Link-Check zusammenstellen</target>
+        <source>Run a status or link check — on the command line or in the Scheduler</source>
+        <target>Status- oder Link-Check ausführen — auf der Kommandozeile oder im Planer</target>
       </segment>
     </unit>
     <unit id="statusCommand.intro">
@@ -407,8 +413,8 @@
     </unit>
     <unit id="statusResults.summary">
       <segment>
-        <source>%1$s results — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
-        <target>%1$s Ergebnisse — %2$s ohne HTTP 200 oder mit Fehlermarker, davon %3$s noch nicht geprüft.</target>
+        <source>%1$s results — %2$s with a finding, %3$s of them not yet reviewed.</source>
+        <target>%1$s Ergebnisse — %2$s mit Befund, davon %3$s noch nicht geprüft.</target>
       </segment>
     </unit>
     <unit id="statusResults.pagination">
@@ -419,8 +425,8 @@
     </unit>
     <unit id="statusResults.summaryForEnvironment">
       <segment>
-        <source>%1$s results for "%4$s" — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
-        <target>%1$s Ergebnisse für „%4$s“ — %2$s ohne HTTP 200 oder mit Fehlermarker, davon %3$s noch nicht geprüft.</target>
+        <source>%1$s results for "%4$s" — %2$s with a finding, %3$s of them not yet reviewed.</source>
+        <target>%1$s Ergebnisse für „%4$s“ — %2$s mit Befund, davon %3$s noch nicht geprüft.</target>
       </segment>
     </unit>
     <unit id="statusResults.sources">
@@ -435,16 +441,28 @@
         <target>— alle Umgebungen —</target>
       </segment>
     </unit>
+    <unit id="statusResults.renderingError">
+      <segment>
+        <source>Error while rendering (exception)</source>
+        <target>Fehler beim Rendern (Exception)</target>
+      </segment>
+    </unit>
+    <unit id="statusResults.byActor">
+      <segment>
+        <source>By who acts</source>
+        <target>Nach Zuständigkeit</target>
+      </segment>
+    </unit>
     <unit id="statusResults.allMarkers">
       <segment>
-        <source>— all markers —</source>
-        <target>— alle Marker —</target>
+        <source>— all findings —</source>
+        <target>— alle Befunde —</target>
       </segment>
     </unit>
     <unit id="statusResults.onlyProblems">
       <segment>
-        <source>only problems (no HTTP 200, or an error marker)</source>
-        <target>nur Probleme (kein HTTP 200 oder ein Fehlermarker)</target>
+        <source>only findings</source>
+        <target>nur Auffälligkeiten</target>
       </segment>
     </unit>
     <unit id="statusResults.deleteAll">
@@ -461,8 +479,8 @@
     </unit>
     <unit id="statusResults.column.pageUid">
       <segment>
-        <source>Page uid</source>
-        <target>Seiten-uid</target>
+        <source>Page</source>
+        <target>Seite</target>
       </segment>
     </unit>
     <unit id="statusResults.column.path">
@@ -473,8 +491,8 @@
     </unit>
     <unit id="statusResults.column.errorMarker">
       <segment>
-        <source>Error marker</source>
-        <target>Fehlermarker</target>
+        <source>Finding</source>
+        <target>Befund</target>
       </segment>
     </unit>
     <unit id="statusResults.column.finalUrl">
@@ -681,6 +699,24 @@
         <target>Seite %1$s</target>
       </segment>
     </unit>
+    <unit id="section.pages">
+      <segment>
+        <source>Pages</source>
+        <target>Seiten</target>
+      </segment>
+    </unit>
+    <unit id="section.records">
+      <segment>
+        <source>Records: %1$s</source>
+        <target>Datensätze: %1$s</target>
+      </segment>
+    </unit>
+    <unit id="summary.byActor">
+      <segment>
+        <source>Who acts</source>
+        <target>Wer handelt</target>
+      </segment>
+    </unit>
     <unit id="identity.record">
       <segment>
         <source>%1$s %2$s on page %3$s</source>
@@ -689,8 +725,8 @@
     </unit>
     <unit id="identity.unknown">
       <segment>
-        <source>Unknown page</source>
-        <target>Unbekannte Seite</target>
+        <source>No page id — the URL answered with an error, or the page renders no page marker</source>
+        <target>Ohne Seiten-ID — die URL antwortete mit einem Fehler, oder die Seite gibt keinen Seiten-Marker aus</target>
       </segment>
     </unit>
     <unit id="column.language">
@@ -1631,14 +1667,14 @@
     </unit>
     <unit id="guide.sitemaps.title">
       <segment>
-        <source>How sitemap snapshots work</source>
-        <target>So funktionieren Sitemap-Snapshots</target>
+        <source>What sitemap snapshots are for</source>
+        <target>Wofür Sitemap-Snapshots da sind</target>
       </segment>
     </unit>
     <unit id="guide.sitemaps.purpose">
       <segment>
-        <source>A snapshot stores the sitemaps of every language of a site at one point in time, raw XML included. It is the URL list every check works with, and it stays available after the site itself has changed.</source>
-        <target>Ein Snapshot speichert die Sitemaps aller Sprachen einer Website zu einem Zeitpunkt, samt rohem XML. Er ist die URL-Liste, mit der jeder Check arbeitet, und bleibt erhalten, auch wenn sich die Website inzwischen geändert hat.</target>
+        <source>A snapshot keeps the sitemaps of every language of a website at one point in time. It is the list of URLs every check works with, and it stays when the website changes: after a relaunch, the snapshot of the old site is the only record of the URLs search engines still send visitors to.</source>
+        <target>Ein Snapshot hält die Sitemaps aller Sprachen einer Website zu einem Zeitpunkt fest. Er ist die URL-Liste, mit der jeder Check arbeitet, und bleibt erhalten, wenn sich die Website ändert: Nach einem Relaunch ist der Snapshot der alten Website die einzige Aufzeichnung der URLs, auf die Suchmaschinen noch Besucher schicken.</target>
       </segment>
     </unit>
     <unit id="guide.sitemaps.step1">
@@ -1667,14 +1703,14 @@
     </unit>
     <unit id="guide.status.title">
       <segment>
-        <source>How the status check works</source>
-        <target>So funktioniert der Status-Check</target>
+        <source>What the status check is for</source>
+        <target>Wofür der Status-Check da ist</target>
       </segment>
     </unit>
     <unit id="guide.status.purpose">
       <segment>
-        <source>Checks whether every URL of a sitemap snapshot works: the HTTP status and TYPO3 error pages per URL. The link check also follows the plugin links on those pages, which no sitemap lists, and reports links whose arguments have no effect.</source>
-        <target>Prüft, ob jede URL eines Sitemap-Snapshots funktioniert: HTTP-Status und TYPO3-Fehlerseiten je URL. Der Link-Check folgt außerdem den Plugin-Links auf diesen Seiten, die in keiner Sitemap stehen, und meldet Links, deren Argumente nichts bewirken.</target>
+        <source>Finds every page of a website that does not work as it should: error pages, URLs that only answer through a redirect or name another URL as canonical, and — in the link check — plugin links whose arguments have no effect. The URL list comes from a snapshot and may be requested on another host: e.g. the sitemap of the development system, with news the live site does not have yet, checked against the live site.</source>
+        <target>Findet jede Seite einer Website, die nicht funktioniert, wie sie soll: Fehlerseiten, URLs, die nur über eine Weiterleitung antworten oder eine andere URL als Canonical nennen, und — im Link-Check — Plugin-Links, deren Argumente nichts bewirken. Die URL-Liste kommt aus einem Snapshot und kann auf einem anderen Host abgefragt werden: etwa die Sitemap des Dev-Systems, mit News, die live noch fehlen, gegen das Live-System geprüft.</target>
       </segment>
     </unit>
     <unit id="guide.status.step1">
@@ -1703,14 +1739,14 @@
     </unit>
     <unit id="guide.migration.title">
       <segment>
-        <source>How the migration check works</source>
-        <target>So funktioniert der Migrations-Check</target>
+        <source>What the migration check is for</source>
+        <target>Wofür der Migrations-Check da ist</target>
       </segment>
     </unit>
     <unit id="guide.migration.purpose">
       <segment>
-        <source>Checks whether the URLs search engines know from the old site still lead to the same page or record on the new one — directly or through a redirect.</source>
-        <target>Prüft, ob die URLs, die Suchmaschinen von der alten Website kennen, auf der neuen noch zur selben Seite bzw. zum selben Datensatz führen — direkt oder über eine Weiterleitung.</target>
+        <source>Makes sure a relaunch loses no URL: every URL search engines know from the old website has to lead to the same page or record on the new one — directly or through a redirect. Pages and records are recognised by what they are, not by their URL, so a redirect to the wrong content is found as well. Where a redirect is missing, the module suggests where it should point.</source>
+        <target>Sorgt dafür, dass ein Relaunch keine URL verliert: Jede URL, die Suchmaschinen von der alten Website kennen, muss auf der neuen zur selben Seite bzw. zum selben Datensatz führen — direkt oder über eine Weiterleitung. Seiten und Datensätze werden daran erkannt, was sie sind, nicht an ihrer URL; so fällt auch eine Weiterleitung auf den falschen Inhalt auf. Fehlt eine Weiterleitung, schlägt das Modul vor, wohin sie zeigen sollte.</target>
       </segment>
     </unit>
     <unit id="guide.migration.step1">

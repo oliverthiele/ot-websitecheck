@@ -45,6 +45,11 @@
                 <f:then>{f:translate(key: '{languageFile}statusResults.summaryForEnvironment', arguments: {0: summary.total, 1: summary.notOk, 2: summary.unreviewedNotOk, 3: currentEnvironment})}</f:then>
                 <f:else>{f:translate(key: '{languageFile}statusResults.summary', arguments: {0: summary.total, 1: summary.notOk, 2: summary.unreviewedNotOk})}</f:else>
             </f:if>
+            <br/>
+            {f:translate(key: '{languageFile}statusResults.byActor')}:
+            <f:for each="{actorCounts}" as="count" key="actorName">
+                <f:link.action action="index" arguments="{environment: currentEnvironment, actor: actorName}" class="text-decoration-none" title="{f:translate(key: '{languageFile}summary.filterBy')}"><f:render partial="ActorBadge" arguments="{actor: actorName}"/> {count}</f:link.action>
+            </f:for>
             <f:if condition="{sources}">
                 <br/>
                 {f:translate(key: '{languageFile}statusResults.sources')}
@@ -123,7 +128,7 @@
                         <td>
                             <f:if condition="{result.page_uid}">
                                 <f:then>
-                                    {result.page_uid}
+                                    <f:if condition="{result.pageTitle}">{result.pageTitle} </f:if>[{result.page_uid}]
                                     <f:render partial="BackendLink" arguments="{link: result.backendLink, pageUid: result.page_uid, language: result.languageTitle}"/>
                                 </f:then>
                                 <f:else><span class="text-muted">—</span></f:else>
@@ -145,7 +150,7 @@
                                     data-bs-placement="auto"
                                     data-bs-title="{result.error_marker}"
                                     data-bs-content="{result.markerHelp}"
-                                >{f:translate(key: '{languageFile}errorMarker.{result.error_marker}', default: result.error_marker)}</a>
+                                >{result.markerLabel}</a>
                             </f:if>
                             <f:render partial="HelpLink" arguments="{entry: result.guide.entry}"/>
                             <f:if condition="{result.guide.actor} != 'none'">

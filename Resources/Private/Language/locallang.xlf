@@ -29,7 +29,7 @@
     </unit>
     <unit id="filter.onlyProblems">
       <segment>
-        <source>only problems and warnings</source>
+        <source>only findings</source>
       </segment>
     </unit>
     <unit id="filter.onlyUnreviewed">
@@ -89,7 +89,7 @@
     </unit>
     <unit id="command.title">
       <segment>
-        <source>Compose a migration check</source>
+        <source>Run the migration check — on the command line or in the Scheduler</source>
       </segment>
     </unit>
     <unit id="command.intro">
@@ -192,6 +192,11 @@
         <source>Run it in the project root, then reload this page. Protected environments: add --reference-basic-auth or --target-basic-auth, or use the environment variables described in the README.</source>
       </segment>
     </unit>
+    <unit id="command.scheduler">
+      <segment>
+        <source>Run it regularly: in the Scheduler module, add a task "Execute console commands", choose %1$s and set these options:</source>
+      </segment>
+    </unit>
     <unit id="command.locked">
       <segment>
         <source>locked</source>
@@ -229,7 +234,7 @@
     </unit>
     <unit id="statusCommand.title">
       <segment>
-        <source>Compose a status or link check</source>
+        <source>Run a status or link check — on the command line or in the Scheduler</source>
       </segment>
     </unit>
     <unit id="statusCommand.intro">
@@ -339,7 +344,7 @@
     </unit>
     <unit id="statusResults.summary">
       <segment>
-        <source>%1$s results — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
+        <source>%1$s results — %2$s with a finding, %3$s of them not yet reviewed.</source>
       </segment>
     </unit>
     <unit id="statusResults.pagination">
@@ -349,7 +354,7 @@
     </unit>
     <unit id="statusResults.summaryForEnvironment">
       <segment>
-        <source>%1$s results for "%4$s" — %2$s without HTTP 200 or with an error marker, %3$s of them not yet reviewed.</source>
+        <source>%1$s results for "%4$s" — %2$s with a finding, %3$s of them not yet reviewed.</source>
       </segment>
     </unit>
     <unit id="statusResults.sources">
@@ -362,14 +367,24 @@
         <source>— all environments —</source>
       </segment>
     </unit>
+    <unit id="statusResults.renderingError">
+      <segment>
+        <source>Error while rendering (exception)</source>
+      </segment>
+    </unit>
+    <unit id="statusResults.byActor">
+      <segment>
+        <source>By who acts</source>
+      </segment>
+    </unit>
     <unit id="statusResults.allMarkers">
       <segment>
-        <source>— all markers —</source>
+        <source>— all findings —</source>
       </segment>
     </unit>
     <unit id="statusResults.onlyProblems">
       <segment>
-        <source>only problems (no HTTP 200, or an error marker)</source>
+        <source>only findings</source>
       </segment>
     </unit>
     <unit id="statusResults.deleteAll">
@@ -384,7 +399,7 @@
     </unit>
     <unit id="statusResults.column.pageUid">
       <segment>
-        <source>Page uid</source>
+        <source>Page</source>
       </segment>
     </unit>
     <unit id="statusResults.column.path">
@@ -394,7 +409,7 @@
     </unit>
     <unit id="statusResults.column.errorMarker">
       <segment>
-        <source>Error marker</source>
+        <source>Finding</source>
       </segment>
     </unit>
     <unit id="statusResults.column.finalUrl">
@@ -567,6 +582,21 @@
         <source>Page %1$s</source>
       </segment>
     </unit>
+    <unit id="section.pages">
+      <segment>
+        <source>Pages</source>
+      </segment>
+    </unit>
+    <unit id="section.records">
+      <segment>
+        <source>Records: %1$s</source>
+      </segment>
+    </unit>
+    <unit id="summary.byActor">
+      <segment>
+        <source>Who acts</source>
+      </segment>
+    </unit>
     <unit id="identity.record">
       <segment>
         <source>%1$s %2$s on page %3$s</source>
@@ -574,7 +604,7 @@
     </unit>
     <unit id="identity.unknown">
       <segment>
-        <source>Unknown page</source>
+        <source>No page id — the URL answered with an error, or the page renders no page marker</source>
       </segment>
     </unit>
     <unit id="column.language">
@@ -1359,12 +1389,12 @@
     </unit>
     <unit id="guide.sitemaps.title">
       <segment>
-        <source>How sitemap snapshots work</source>
+        <source>What sitemap snapshots are for</source>
       </segment>
     </unit>
     <unit id="guide.sitemaps.purpose">
       <segment>
-        <source>A snapshot stores the sitemaps of every language of a site at one point in time, raw XML included. It is the URL list every check works with, and it stays available after the site itself has changed.</source>
+        <source>A snapshot keeps the sitemaps of every language of a website at one point in time. It is the list of URLs every check works with, and it stays when the website changes: after a relaunch, the snapshot of the old site is the only record of the URLs search engines still send visitors to.</source>
       </segment>
     </unit>
     <unit id="guide.sitemaps.step1">
@@ -1389,12 +1419,12 @@
     </unit>
     <unit id="guide.status.title">
       <segment>
-        <source>How the status check works</source>
+        <source>What the status check is for</source>
       </segment>
     </unit>
     <unit id="guide.status.purpose">
       <segment>
-        <source>Checks whether every URL of a sitemap snapshot works: the HTTP status and TYPO3 error pages per URL. The link check also follows the plugin links on those pages, which no sitemap lists, and reports links whose arguments have no effect.</source>
+        <source>Finds every page of a website that does not work as it should: error pages, URLs that only answer through a redirect or name another URL as canonical, and — in the link check — plugin links whose arguments have no effect. The URL list comes from a snapshot and may be requested on another host: e.g. the sitemap of the development system, with news the live site does not have yet, checked against the live site.</source>
       </segment>
     </unit>
     <unit id="guide.status.step1">
@@ -1419,12 +1449,12 @@
     </unit>
     <unit id="guide.migration.title">
       <segment>
-        <source>How the migration check works</source>
+        <source>What the migration check is for</source>
       </segment>
     </unit>
     <unit id="guide.migration.purpose">
       <segment>
-        <source>Checks whether the URLs search engines know from the old site still lead to the same page or record on the new one — directly or through a redirect.</source>
+        <source>Makes sure a relaunch loses no URL: every URL search engines know from the old website has to lead to the same page or record on the new one — directly or through a redirect. Pages and records are recognised by what they are, not by their URL, so a redirect to the wrong content is found as well. Where a redirect is missing, the module suggests where it should point.</source>
       </segment>
     </unit>
     <unit id="guide.migration.step1">

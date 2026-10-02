@@ -86,6 +86,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         $groupOptions = [];
         $languageOptions = [];
         $verdictCounts = [];
+        $actorCounts = [FindingGuide::ACTOR_EDITOR => 0, FindingGuide::ACTOR_INTEGRATOR => 0];
         /** @var array<string, array<string, list<Observation>>> $observationsBySection sitemap group => identity key => observations */
         $observationsBySection = [];
         foreach ($referenceByPath as $path => $reference) {
@@ -96,15 +97,19 @@ class MigrationCheckModuleController extends AbstractModuleController
             if ($rowLanguage !== '') {
                 $languageOptions[$rowLanguage] = $rowLanguage;
             }
+            $actors = $this->collectActors($reference, $target);
             if ($target !== null) {
                 $verdictKey = $this->verdictKey($target);
                 $verdictCounts[$verdictKey] = ($verdictCounts[$verdictKey] ?? 0) + 1;
+                foreach (array_intersect($actors, array_keys($actorCounts)) as $countedActor) {
+                    $actorCounts[$countedActor]++;
+                }
             }
 
             if (($group !== '' && $reference->sitemapGroup !== $group)
                 || ($language !== '' && $rowLanguage !== $language)
                 || ($verdict !== '' && ($target === null || $this->verdictKey($target) !== $verdict))
-                || ($actor !== '' && !in_array($actor, $this->collectActors($reference, $target), true))
+                || ($actor !== '' && !in_array($actor, $actors, true))
                 // An explicitly chosen verdict or actor is shown whether it counts as a problem or not.
                 || ($onlyProblems && $verdict === '' && $actor === '' && !$this->isProblem($reference, $target))
                 || ($onlyUnreviewed && ($target === null || $target->reviewed))
@@ -159,6 +164,7 @@ class MigrationCheckModuleController extends AbstractModuleController
             'languageOptions' => ['' => $this->translate('filter.allLanguages')] + $languageOptions,
             'verdictOptions' => ['' => $this->translate('filter.allVerdicts')] + $this->buildVerdictOptions(array_keys($verdictCounts)),
             'verdictCounts' => $verdictCounts,
+            'actorCounts' => $actorCounts,
             'currentRun' => $run,
             'runSnapshots' => $this->buildRunSnapshots($run),
             'currentGroup' => $group,
@@ -463,10 +469,23 @@ class MigrationCheckModuleController extends AbstractModuleController
                     'rows' => array_map($this->buildRow(...), $observations),
                 ];
             }
-            $sections[] = ['name' => (string)$sectionName, 'identities' => $identities];
+            $sections[] = ['name' => (string)$sectionName, 'label' => $this->buildSectionLabel((string)$sectionName), 'identities' => $identities];
         }
 
         return $sections;
+    }
+
+    /**
+     * A sitemap group in words: the page sitemap is "pages" in TYPO3, every
+     * other group lists records.
+     */
+    private function buildSectionLabel(string $group): string
+    {
+        return match ($group) {
+            '' => $this->translate('section.noGroup'),
+            'pages' => $this->translate('section.pages'),
+            default => sprintf($this->translate('section.records'), $group),
+        };
     }
 
     /**
