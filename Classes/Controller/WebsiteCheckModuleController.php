@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
@@ -26,10 +27,11 @@ class WebsiteCheckModuleController extends AbstractModuleController
     public function __construct(
         private readonly CheckResultRepository $checkResultRepository,
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
+        private readonly FindingGuide $findingGuide,
     ) {
     }
 
-    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, string $marker = '', int $page = 1): ResponseInterface
+    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, string $marker = '', string $actor = '', int $page = 1): ResponseInterface
     {
         $environments = $this->checkResultRepository->findDistinctEnvironments();
         $markers = $this->checkResultRepository->findDistinctMarkers($environment);
@@ -37,9 +39,22 @@ class WebsiteCheckModuleController extends AbstractModuleController
             $marker = '';
         }
         $markerFilter = $marker === '' ? [] : [$marker];
+        if (!in_array($actor, FindingGuide::ACTORS, true)) {
+            $actor = '';
+        }
+        $actorFilter = $actor === '' ? null : [
+            'markers' => $this->findingGuide->filterMarkers($markers, $actor),
+            'plain' => match ($actor) {
+                FindingGuide::ACTOR_EDITOR => CheckResultRepository::PLAIN_NOT_FOUND,
+                FindingGuide::ACTOR_INTEGRATOR => CheckResultRepository::PLAIN_OTHER_ERROR,
+                default => CheckResultRepository::PLAIN_OK,
+            },
+        ];
+        // "Nothing to do" lists what "only problems" hides; a chosen actor wins.
+        $onlyProblems = $onlyProblems && $actor === '';
         // A crawl of a large site stores tens of thousands of rows; the table
         // shows one page of them.
-        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed, $markerFilter);
+        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed, $markerFilter, $actorFilter);
         $pageCount = max(1, (int)ceil($total / self::RESULTS_PER_PAGE));
         $page = min(max(1, $page), $pageCount);
         $offset = ($page - 1) * self::RESULTS_PER_PAGE;
@@ -48,8 +63,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
         $moduleTemplate = $this->createModuleTemplate();
         $moduleTemplate->assignMultiple([
             'results' => array_map(
-                $this->addFinalUrl(...),
-                $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset, $markerFilter),
+                $this->addGuidance(...),
+                $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset, $markerFilter, $actorFilter),
             ),
             'pagination' => [
                 'page' => $page,
@@ -63,6 +78,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
             'environmentOptions' => $environmentOptions,
             'markerOptions' => ['' => $this->translate('statusResults.allMarkers')] + $this->buildMarkerOptions($markers),
             'currentMarker' => $marker,
+            'actorOptions' => $this->buildActorOptions(),
+            'currentActor' => $actor,
             // Results of any environment — the filter must stay even when the chosen one has none.
             'hasResults' => $environments !== [],
             'sources' => $this->checkResultRepository->findDistinctSources($environment),
@@ -79,13 +96,14 @@ class WebsiteCheckModuleController extends AbstractModuleController
     }
 
     /**
-     * Where a URL should lead in the end: the page its canonical names, or
-     * else the URL its redirects ended on. Empty when that is the URL itself.
+     * Who acts on a result, the help entry that explains it, and where the URL
+     * should lead in the end: the page its canonical names, or else the URL
+     * its redirects ended on — empty when that is the URL itself.
      *
      * @param array<string, mixed> $result
      * @return array<string, mixed>
      */
-    private function addFinalUrl(array $result): array
+    private function addGuidance(array $result): array
     {
         $url = RowValue::string($result, 'url');
         $finalUrl = RowValue::string($result, 'final_url');
@@ -97,7 +115,16 @@ class WebsiteCheckModuleController extends AbstractModuleController
             default => '',
         };
 
-        return $result + ['suggestedUrl' => $suggestedUrl];
+        $marker = RowValue::string($result, 'error_marker');
+        $markerKey = 'errorMarker.' . $marker;
+        $markerHelp = $marker === '' ? '' : $this->translate($markerKey . '.help');
+
+        return $result + [
+            'suggestedUrl' => $suggestedUrl,
+            'guide' => $this->findingGuide->forStatusResult($marker, RowValue::int($result, 'http_status')),
+            // Exception class names are markers as well and share one explanation.
+            'markerHelp' => $markerHelp !== $markerKey . '.help' ? $markerHelp : $this->translate('errorMarker.exception.help'),
+        ];
     }
 
     /**

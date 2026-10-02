@@ -1,5 +1,6 @@
 <?php
 
+use OliverThiele\OtWebsitecheck\Controller\HelpModuleController;
 use OliverThiele\OtWebsitecheck\Controller\MigrationCheckModuleController;
 use OliverThiele\OtWebsitecheck\Controller\SitemapSnapshotModuleController;
 use OliverThiele\OtWebsitecheck\Controller\WebsiteCheckModuleController;
@@ -17,6 +18,31 @@ return [
         'aliases' => ['system_websitecheck'],
         'labels' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf',
         'showSubmoduleOverview' => true,
+    ],
+    // The overview shows the tools in the order they are registered — the
+    // order of the workflow, since every check reads a sitemap snapshot.
+    'site_websitecheck_sitemaps' => [
+        'parent' => 'site_websitecheck',
+        'access' => 'admin',
+        'workspaces' => 'live',
+        'iconIdentifier' => 'ot-websitecheck',
+        'path' => '/module/site/websitecheck/sitemaps',
+        'aliases' => ['system_websitecheck_sitemaps'],
+        'labels' => [
+            'title' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.title',
+            'shortDescription' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.shortDescription',
+            'description' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.description',
+        ],
+        'extensionName' => 'OtWebsitecheck',
+        'controllerActions' => [
+            SitemapSnapshotModuleController::class => [
+                'index',
+                'delete',
+                'saveSnapshot',
+                'importArchive',
+                'deleteArchive',
+            ],
+        ],
     ],
     'site_websitecheck_status' => [
         'parent' => 'site_websitecheck',
@@ -60,26 +86,21 @@ return [
             ],
         ],
     ],
-    'site_websitecheck_sitemaps' => [
+    'site_websitecheck_help' => [
         'parent' => 'site_websitecheck',
         'access' => 'admin',
         'workspaces' => 'live',
         'iconIdentifier' => 'ot-websitecheck',
-        'path' => '/module/site/websitecheck/sitemaps',
-        'aliases' => ['system_websitecheck_sitemaps'],
+        'path' => '/module/site/websitecheck/help',
         'labels' => [
-            'title' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.title',
-            'shortDescription' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.shortDescription',
-            'description' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.description',
+            'title' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.help.title',
+            'shortDescription' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.help.shortDescription',
+            'description' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.help.description',
         ],
         'extensionName' => 'OtWebsitecheck',
         'controllerActions' => [
-            SitemapSnapshotModuleController::class => [
+            HelpModuleController::class => [
                 'index',
-                'delete',
-                'saveSnapshot',
-                'importArchive',
-                'deleteArchive',
             ],
         ],
     ],

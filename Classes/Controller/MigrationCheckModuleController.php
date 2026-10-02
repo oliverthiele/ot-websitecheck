@@ -11,6 +11,7 @@ use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
 use OliverThiele\OtWebsitecheck\Service\ArchiveDirectory;
 use OliverThiele\OtWebsitecheck\Service\ArchiveFileService;
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\MigrationCheckSuggestion;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
@@ -43,6 +44,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
         private readonly ArchiveDirectory $archiveDirectory,
         private readonly ArchiveFileService $archiveFileService,
+        private readonly FindingGuide $findingGuide,
     ) {
     }
 
@@ -51,11 +53,15 @@ class MigrationCheckModuleController extends AbstractModuleController
         string $group = '',
         string $language = '',
         string $verdict = '',
+        string $actor = '',
         bool $onlyProblems = true,
         bool $onlyUnreviewed = false,
         bool $showTargetSitemap = false,
         int $page = 1,
     ): ResponseInterface {
+        if (!in_array($actor, FindingGuide::ACTORS, true)) {
+            $actor = '';
+        }
         $runs = $this->observationRepository->findDistinctRuns();
         if ($run === '' || !in_array($run, $runs, true)) {
             $run = $runs[0] ?? '';
@@ -95,8 +101,9 @@ class MigrationCheckModuleController extends AbstractModuleController
             if (($group !== '' && $reference->sitemapGroup !== $group)
                 || ($language !== '' && $rowLanguage !== $language)
                 || ($verdict !== '' && ($target === null || $this->verdictKey($target) !== $verdict))
-                // An explicitly chosen verdict is shown whether it counts as a problem or not.
-                || ($onlyProblems && $verdict === '' && !$this->isProblem($reference, $target))
+                || ($actor !== '' && !in_array($actor, $this->collectActors($reference, $target), true))
+                // An explicitly chosen verdict or actor is shown whether it counts as a problem or not.
+                || ($onlyProblems && $verdict === '' && $actor === '' && !$this->isProblem($reference, $target))
                 || ($onlyUnreviewed && ($target === null || $target->reviewed))
             ) {
                 continue;
@@ -154,6 +161,8 @@ class MigrationCheckModuleController extends AbstractModuleController
             'currentGroup' => $group,
             'currentLanguage' => $language,
             'currentVerdict' => $verdict,
+            'actorOptions' => $this->buildActorOptions(),
+            'currentActor' => $actor,
             'onlyProblems' => $onlyProblems,
             'onlyUnreviewed' => $onlyUnreviewed,
             'showTargetSitemap' => $showTargetSitemap,
@@ -276,6 +285,41 @@ class MigrationCheckModuleController extends AbstractModuleController
         }
     }
 
+    /**
+     * Everyone who acts on a reference row and its target row. Nothing to do
+     * only when no finding asks anyone.
+     *
+     * @return list<string>
+     */
+    private function collectActors(Observation $reference, ?Observation $target): array
+    {
+        $actors = [];
+        foreach (array_filter([$reference, $target]) as $observation) {
+            foreach ($this->buildFindings($observation) as $finding) {
+                $actors[$finding['actor']] = true;
+            }
+        }
+        unset($actors[FindingGuide::ACTOR_NONE]);
+
+        return $actors === [] ? [FindingGuide::ACTOR_NONE] : array_keys($actors);
+    }
+
+    /**
+     * The verdict and the warnings of a row with who acts on them and the
+     * help entry that explains them.
+     *
+     * @return list<array{type: string, name: string, actor: string, entry: string}>
+     */
+    private function buildFindings(Observation $observation): array
+    {
+        $findings = [['type' => 'verdict', 'name' => $this->verdictKey($observation)] + $this->findingGuide->forVerdict($observation->verdict)];
+        foreach ($observation->warnings as $warning) {
+            $findings[] = ['type' => 'warning', 'name' => $warning] + $this->findingGuide->forWarning($warning);
+        }
+
+        return $findings;
+    }
+
     private function isProblem(Observation $reference, ?Observation $target): bool
     {
         if ($target === null) {
@@ -371,7 +415,15 @@ class MigrationCheckModuleController extends AbstractModuleController
             'abortReason' => $observation->abortReason,
             'verdict' => $this->verdictKey($observation),
             'verdictSeverity' => $this->verdictSeverity($observation->verdict),
-            'warnings' => $observation->warnings,
+            'verdictGuide' => $this->findingGuide->forVerdict($observation->verdict),
+            'warnings' => array_map(
+                fn(string $warning): array => ['name' => $warning] + $this->findingGuide->forWarning($warning),
+                $observation->warnings,
+            ),
+            'actors' => array_values(array_diff(
+                array_unique(array_column($this->buildFindings($observation), 'actor')),
+                [FindingGuide::ACTOR_NONE],
+            )),
             'suggestedTarget' => $observation->suggestedTarget,
             'reviewed' => $observation->reviewed,
             'note' => $observation->note,

@@ -22,6 +22,11 @@
         <source>— all verdicts —</source>
       </segment>
     </unit>
+    <unit id="filter.allActors">
+      <segment>
+        <source>— everyone who acts —</source>
+      </segment>
+    </unit>
     <unit id="filter.onlyProblems">
       <segment>
         <source>only problems and warnings</source>
@@ -467,6 +472,76 @@
         <source>Detail page without record</source>
       </segment>
     </unit>
+    <unit id="errorMarker.productionException.help">
+      <segment>
+        <source>TYPO3 shows its error page "Oops, an error occurred!": something on the page failed while rendering, usually a plugin or a content element. The exception is in the TYPO3 log.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.developmentException.help">
+      <segment>
+        <source>The page shows an uncaught exception with stack trace — the development context shows it instead of the error page.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.exception.help">
+      <segment>
+        <source>The page shows an uncaught exception of this class. The page or one of its content elements fails while rendering.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.pageNotFound.help">
+      <segment>
+        <source>TYPO3 answers with its page-not-found message: the page does not exist under this URL, is hidden, or is not available in this language.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.accessDenied.help">
+      <segment>
+        <source>The page is protected: it is restricted to a frontend user group, or a page above it is.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.connectionError.help">
+      <segment>
+        <source>No connection to the server — a wrong host, DNS, a firewall or credentials the server rejected.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.timeout.help">
+      <segment>
+        <source>No complete answer within the timeout, also after the retries. Slow, not necessarily broken: check again before acting.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.argumentsIgnored.help">
+      <segment>
+        <source>The link answers exactly like the same URL without its arguments: the plugin they are meant for does not receive them, e.g. after it moved to another page or namespace.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.redirected.help">
+      <segment>
+        <source>The URL works only through a redirect. A sitemap should list the final URL, a link should point at it directly.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.redirectChain.help">
+      <segment>
+        <source>The URL works only through several redirects in a row. Each costs a request; the first one should point at the final URL.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.tooManyRedirects.help">
+      <segment>
+        <source>More than ten redirects — almost always a loop between two rules.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.responseTooLarge.help">
+      <segment>
+        <source>The answer is larger than 50 MB and was not read.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.canonicalElsewhere.help">
+      <segment>
+        <source>The page answers, but names another URL as canonical — typically a page that shows the content of another page. Search engines index the canonical URL; the sitemap should not list this one.</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.detailPageWithoutRecord.help">
+      <segment>
+        <source>The URL calls a page that shows content only with a parameter — the detail page of a plugin — without one. Its answer does not matter; the sitemap should not list it.</source>
+      </segment>
+    </unit>
     <unit id="errorMarker.tooManyRedirects">
       <segment>
         <source>Too many redirects</source>
@@ -545,6 +620,46 @@
     <unit id="label.note">
       <segment>
         <source>Note</source>
+      </segment>
+    </unit>
+    <unit id="label.actor">
+      <segment>
+        <source>Who acts</source>
+      </segment>
+    </unit>
+    <unit id="help.whatToDo">
+      <segment>
+        <source>What it means and what to do</source>
+      </segment>
+    </unit>
+    <unit id="actor.editor">
+      <segment>
+        <source>Editor</source>
+      </segment>
+    </unit>
+    <unit id="actor.editor.description">
+      <segment>
+        <source>Can be fixed in the backend: a redirect in the Redirects module, a page property, a translation, a link in the content.</source>
+      </segment>
+    </unit>
+    <unit id="actor.integrator">
+      <segment>
+        <source>Integrator</source>
+      </segment>
+    </unit>
+    <unit id="actor.integrator.description">
+      <segment>
+        <source>Comes from the configuration, the templates or the server and keeps coming back until that changes. Pass it on to whoever maintains the site.</source>
+      </segment>
+    </unit>
+    <unit id="actor.none">
+      <segment>
+        <source>Nothing to do</source>
+      </segment>
+    </unit>
+    <unit id="actor.none.description">
+      <segment>
+        <source>Works as it should, or is only shown for completeness.</source>
       </segment>
     </unit>
     <unit id="reviewed.yes">
@@ -1212,6 +1327,11 @@
         <source>Documentation</source>
       </segment>
     </unit>
+    <unit id="guide.help">
+      <segment>
+        <source>What the findings mean</source>
+      </segment>
+    </unit>
     <unit id="guide.sitemaps.title">
       <segment>
         <source>How sitemap snapshots work</source>
@@ -1515,6 +1635,356 @@
     <unit id="flash.archive.failed">
       <segment>
         <source>That did not work</source>
+      </segment>
+    </unit>
+    <unit id="faq.intro">
+      <segment>
+        <source>What the checks report, whether you can fix it in the backend or have to pass it on, and what to do. Every finding in the other modules links to its entry here.</source>
+      </segment>
+    </unit>
+    <unit id="faq.workflow.title">
+      <segment>
+        <source>How the tools work together</source>
+      </segment>
+    </unit>
+    <unit id="faq.workflow.sitemaps">
+      <segment>
+        <source>store the sitemaps of a site as a snapshot. Every check reads its URLs from a snapshot, and a snapshot stays when the site changes — before a relaunch, lock the one of the live site.</source>
+      </segment>
+    </unit>
+    <unit id="faq.workflow.status">
+      <segment>
+        <source>request every URL of a snapshot on one environment: which ones fail, show an error page or only work through a redirect.</source>
+      </segment>
+    </unit>
+    <unit id="faq.workflow.migration">
+      <segment>
+        <source>compare two environments, usually the live site and a relaunch: does every old URL still lead to the same page or record?</source>
+      </segment>
+    </unit>
+    <unit id="faq.actors.title">
+      <segment>
+        <source>Who acts</source>
+      </segment>
+    </unit>
+    <unit id="faq.entries.title">
+      <segment>
+        <source>Findings</source>
+      </segment>
+    </unit>
+    <unit id="faq.meaning">
+      <segment>
+        <source>What it means</source>
+      </segment>
+    </unit>
+    <unit id="faq.action">
+      <segment>
+        <source>What to do</source>
+      </segment>
+    </unit>
+    <unit id="faq.readOn">
+      <segment>
+        <source>For integrators: how to fix it</source>
+      </segment>
+    </unit>
+    <unit id="faq.missing.title">
+      <segment>
+        <source>An old URL leads nowhere</source>
+      </segment>
+    </unit>
+    <unit id="faq.missing.findings">
+      <segment>
+        <source>Migration check: Missing</source>
+      </segment>
+    </unit>
+    <unit id="faq.missing.meaning">
+      <segment>
+        <source>The URL works on the reference, usually the live site, but answers with an error on the target and does not redirect. Visitors and search engines that know the old URL end on an error page.</source>
+      </segment>
+    </unit>
+    <unit id="faq.missing.action">
+      <segment>
+        <source>Create a redirect from the old path to the page that replaces it, in the Redirects module. Where the module shows a suggested target, that is the same page or record on the target. If the page should exist under the old URL, check whether it is hidden, not translated, or has a changed URL segment.</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectBroken.title">
+      <segment>
+        <source>A redirect ends in an error</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectBroken.findings">
+      <segment>
+        <source>Migration check: Redirect broken</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectBroken.meaning">
+      <segment>
+        <source>There is a redirect, but where it leads fails: an error page, a loop between two redirects, or more redirects than are followed.</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectBroken.action">
+      <segment>
+        <source>Open the redirect chain shown in the row and correct the target of the redirect, in the Redirects module. A redirect that is not listed there comes from the webserver configuration — pass it on to the integrator.</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectNotFinal.title">
+      <segment>
+        <source>A redirect takes a detour</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectNotFinal.findings">
+      <segment>
+        <source>Migration check: Redirect not final, Redirect chain, Shortcut page in the chain · Status check: Through several redirects, Too many redirects</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectNotFinal.meaning">
+      <segment>
+        <source>The right page is reached, but not in one step: the redirect points at a URL that redirects again — often a page that was moved later, or a shortcut page, which redirects again by itself. Every step costs time, and search engines carry less over to the new URL.</source>
+      </segment>
+    </unit>
+    <unit id="faq.redirectNotFinal.action">
+      <segment>
+        <source>Change the first redirect so it points at the suggested final URL, in the Redirects module. A redirect that is not listed there comes from the webserver configuration — pass it on to the integrator.</source>
+      </segment>
+    </unit>
+    <unit id="faq.temporaryRedirect.title">
+      <segment>
+        <source>A redirect is only temporary</source>
+      </segment>
+    </unit>
+    <unit id="faq.temporaryRedirect.findings">
+      <segment>
+        <source>Migration check: Temporary redirect</source>
+      </segment>
+    </unit>
+    <unit id="faq.temporaryRedirect.meaning">
+      <segment>
+        <source>The redirect answers with 302, 303 or 307. Search engines keep the old URL in their index, because the move is announced as temporary.</source>
+      </segment>
+    </unit>
+    <unit id="faq.temporaryRedirect.action">
+      <segment>
+        <source>Set the status code of the redirect to 301 in the Redirects module. A shortcut page always redirects with 307 — point the redirect past it, at its target.</source>
+      </segment>
+    </unit>
+    <unit id="faq.otherContent.title">
+      <segment>
+        <source>A URL shows other content</source>
+      </segment>
+    </unit>
+    <unit id="faq.otherContent.findings">
+      <segment>
+        <source>Migration check: Other content, Redirect to start page</source>
+      </segment>
+    </unit>
+    <unit id="faq.otherContent.meaning">
+      <segment>
+        <source>The URL answers, but with a different page, record or language than before — for example after a redirect to a parent or start page, or because another page uses the URL now. A redirect to the start page is treated by search engines like a page that no longer exists.</source>
+      </segment>
+    </unit>
+    <unit id="faq.otherContent.action">
+      <segment>
+        <source>Point the redirect at the page that replaces the old one, in the Redirects module; a suggested target is shown where one is certain. If another page took over the URL on purpose, mark the row as reviewed.</source>
+      </segment>
+    </unit>
+    <unit id="faq.languageChanged.title">
+      <segment>
+        <source>The page is in another language</source>
+      </segment>
+    </unit>
+    <unit id="faq.languageChanged.findings">
+      <segment>
+        <source>Migration check: Language changed</source>
+      </segment>
+    </unit>
+    <unit id="faq.languageChanged.meaning">
+      <segment>
+        <source>The target page is in a different language than the reference — usually because a translation is missing and a fallback shows the default language.</source>
+      </segment>
+    </unit>
+    <unit id="faq.languageChanged.action">
+      <segment>
+        <source>Translate the page or record, or redirect the URL to a page in its language.</source>
+      </segment>
+    </unit>
+    <unit id="faq.canonical.title">
+      <segment>
+        <source>A page names another URL as canonical</source>
+      </segment>
+    </unit>
+    <unit id="faq.canonical.findings">
+      <segment>
+        <source>Migration check: Canonical URL differs, Sitemap URL not canonical · Status check: Canonical URL elsewhere</source>
+      </segment>
+    </unit>
+    <unit id="faq.canonical.meaning">
+      <segment>
+        <source>Every page tells search engines under which URL it should be indexed — its canonical URL. A page with "Show content from page" names the page whose content it shows, and a page can name another one in its SEO properties. That is correct; the same content is indexed once. But such a page does not belong in the sitemap, and a redirect should not end on it.</source>
+      </segment>
+    </unit>
+    <unit id="faq.canonical.action">
+      <segment>
+        <source>A redirect that ends on such a page: point it at the canonical URL, in the Redirects module. A sitemap that lists such pages: pass it on to the integrator — the sitemap configuration has to leave them out.</source>
+      </segment>
+    </unit>
+    <unit id="faq.detailPage.title">
+      <segment>
+        <source>A detail page is called without a record</source>
+      </segment>
+    </unit>
+    <unit id="faq.detailPage.findings">
+      <segment>
+        <source>Migration check: Detail page without record, Sitemap lists a detail page, Page also renders records · Status check: Detail page without record</source>
+      </segment>
+    </unit>
+    <unit id="faq.detailPage.meaning">
+      <segment>
+        <source>The detail page of a plugin — a product, a job, a news item — shows content only with a record in its URL. Called without one, it shows a list, an empty page or an error. Such a URL is no page of its own: nobody needs it, and nothing is lost when it fails. The detail views with their records are checked one by one.</source>
+      </segment>
+    </unit>
+    <unit id="faq.detailPage.action">
+      <segment>
+        <source>Nothing to do in the content. The sitemap should not list the page: pass it on to the integrator. Where the site has a page property for it ("Page requires a parameter" or similar), set it on every detail page.</source>
+      </segment>
+    </unit>
+    <unit id="faq.sitemapContent.title">
+      <segment>
+        <source>The sitemap lists a URL that redirects</source>
+      </segment>
+    </unit>
+    <unit id="faq.sitemapContent.findings">
+      <segment>
+        <source>Migration check: Sitemap URL redirects · Status check: Only through a redirect</source>
+      </segment>
+    </unit>
+    <unit id="faq.sitemapContent.meaning">
+      <segment>
+        <source>A sitemap should only contain the URLs search engines are meant to index. A URL that redirects makes them request two URLs for one page. In the link check, a link in the content points at a URL that redirects.</source>
+      </segment>
+    </unit>
+    <unit id="faq.sitemapContent.action">
+      <segment>
+        <source>A link in the content: change it to the final URL. A URL in the sitemap: TYPO3 builds the sitemap from the pages, so a redirect there usually comes from the server configuration, e.g. a rule for trailing slashes — pass it on to the integrator.</source>
+      </segment>
+    </unit>
+    <unit id="faq.errorPage.title">
+      <segment>
+        <source>A page shows an error</source>
+      </segment>
+    </unit>
+    <unit id="faq.errorPage.findings">
+      <segment>
+        <source>Status check: an HTTP status other than 200, a TYPO3 error page or exception, Response too large</source>
+      </segment>
+    </unit>
+    <unit id="faq.errorPage.meaning">
+      <segment>
+        <source>The URL answers with an error. 404 or "page not found": the page does not exist under this URL, is hidden or not translated. Access denied: the page is restricted to a user group. An exception or "Oops, an error occurred!": a plugin or content element fails while rendering.</source>
+      </segment>
+    </unit>
+    <unit id="faq.errorPage.action">
+      <segment>
+        <source>Not found or access denied: check the page in the page tree — visibility, translation, access. An exception: note the URL and pass it on to the integrator; the details are in the TYPO3 log.</source>
+      </segment>
+    </unit>
+    <unit id="faq.timeout.title">
+      <segment>
+        <source>No answer in time</source>
+      </segment>
+    </unit>
+    <unit id="faq.timeout.findings">
+      <segment>
+        <source>Migration check: Timeout · Status check: Timeout, No connection</source>
+      </segment>
+    </unit>
+    <unit id="faq.timeout.meaning">
+      <segment>
+        <source>The page did not answer within the time limit, also after the retries — or the server could not be reached at all. Slow is not missing: a page that renders for the first time after a cache flush can take long.</source>
+      </segment>
+    </unit>
+    <unit id="faq.timeout.action">
+      <segment>
+        <source>Run the check again. A page that keeps timing out, and every connection error, goes to the integrator.</source>
+      </segment>
+    </unit>
+    <unit id="faq.markers.title">
+      <segment>
+        <source>A page cannot be compared</source>
+      </segment>
+    </unit>
+    <unit id="faq.markers.findings">
+      <segment>
+        <source>Migration check: Identity unknown, Record unknown</source>
+      </segment>
+    </unit>
+    <unit id="faq.markers.meaning">
+      <segment>
+        <source>The migration check compares pages by what they are — page and record — not by their URL. For that, the site has to name them in its HTML. Without these markers, it cannot tell whether a URL still shows the same page.</source>
+      </segment>
+    </unit>
+    <unit id="faq.markers.action">
+      <segment>
+        <source>Pass it on to the integrator: the markers are added in the templates of the site — on every environment that is compared, the live site included.</source>
+      </segment>
+    </unit>
+    <unit id="faq.duplicateDetailPage.title">
+      <segment>
+        <source>A record is shown on several pages</source>
+      </segment>
+    </unit>
+    <unit id="faq.duplicateDetailPage.findings">
+      <segment>
+        <source>Migration check: Duplicate detail page</source>
+      </segment>
+    </unit>
+    <unit id="faq.duplicateDetailPage.meaning">
+      <segment>
+        <source>The same record is rendered by more than one detail page. Search engines find the same content under several URLs.</source>
+      </segment>
+    </unit>
+    <unit id="faq.duplicateDetailPage.action">
+      <segment>
+        <source>Pass it on to the integrator: one detail page per record type should render the records, and the others should link to it or name it as canonical.</source>
+      </segment>
+    </unit>
+    <unit id="faq.argumentsIgnored.title">
+      <segment>
+        <source>Link arguments have no effect</source>
+      </segment>
+    </unit>
+    <unit id="faq.argumentsIgnored.findings">
+      <segment>
+        <source>Status check of links: Link arguments have no effect</source>
+      </segment>
+    </unit>
+    <unit id="faq.argumentsIgnored.meaning">
+      <segment>
+        <source>A link carries arguments for a plugin — a record, a page of results — but the page answers exactly as without them. The plugin does not receive them, e.g. because it moved to another page. Visitors get a plausible looking wrong page.</source>
+      </segment>
+    </unit>
+    <unit id="faq.argumentsIgnored.action">
+      <segment>
+        <source>Pass it on to the integrator, with the page the link was found on: the template or plugin setting that builds the link has to point at the page with the plugin.</source>
+      </segment>
+    </unit>
+    <unit id="faq.referenceNotOk.title">
+      <segment>
+        <source>A URL was broken before already</source>
+      </segment>
+    </unit>
+    <unit id="faq.referenceNotOk.findings">
+      <segment>
+        <source>Migration check: Reference not OK</source>
+      </segment>
+    </unit>
+    <unit id="faq.referenceNotOk.meaning">
+      <segment>
+        <source>The URL fails on the reference already — the site the comparison starts from. Nothing was lost in the migration; the old sitemap listed a broken URL.</source>
+      </segment>
+    </unit>
+    <unit id="faq.referenceNotOk.action">
+      <segment>
+        <source>Nothing to do for the migration. If the URL matters, e.g. because it is linked from outside, give it a redirect to a fitting page.</source>
       </segment>
     </unit>
   </file>

@@ -34,9 +34,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   run. The sitemap row gets the warning `listedDetailPageWithoutRecord`
 - Add the warning `pageAlsoRendersRecords` to the migration check for a
   sitemap URL whose page renders records under other URLs
+- Add the backend module **Help**: what every verdict, warning and marker
+  means, who acts on it — an editor, the integrator or nobody — and what to
+  do. Every finding in the other modules links to its entry
+- Show who acts on a finding in the status check and migration check modules,
+  filter the results by it, and explain the markers of the status check in a
+  popover
+- Add `Documentation/Recipes.md` for integrators: pages that require a
+  parameter, pages that show the content of another page, redirects that do
+  not lead to the final URL
 
 ### Changed
 
+- Show the tools of the module overview in the order of the workflow:
+  Sitemaps, status check, migration check, help; the short descriptions name
+  the step
 - Count a redirect in the migration check to the page whose content the
   reference page shows (`content_from_pid`, declared through its canonical)
   as the same content instead of `otherContent`, and suggest that page as

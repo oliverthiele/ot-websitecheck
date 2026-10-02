@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -15,6 +16,13 @@ use TYPO3\CMS\Core\Registry;
 class CheckResultRepository extends AbstractRepository
 {
     public const string TABLE = 'tx_otwebsitecheck_domain_model_check';
+
+    /**
+     * What a result without a marker must answer to match an actor filter.
+     */
+    public const string PLAIN_NOT_FOUND = 'notFound';
+    public const string PLAIN_OTHER_ERROR = 'otherError';
+    public const string PLAIN_OK = 'ok';
     private const string REGISTRY_NAMESPACE = 'ot_websitecheck';
 
     public function __construct(
@@ -93,9 +101,10 @@ class CheckResultRepository extends AbstractRepository
     /**
      * @param int $limit rows per page, 0 for all
      * @param list<string> $markers only rows with one of these markers; all when empty
+     * @param array{markers: list<string>, plain: string}|null $actorFilter rows with one of these markers, or without a marker and a status as named by "plain" (a PLAIN_* constant or ''); all when null
      * @return array<int, array<string, mixed>>
      */
-    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0, array $markers = []): array
+    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0, array $markers = [], ?array $actorFilter = null): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         // Group by page uid first, then path: the same page uid/path can carry
@@ -108,7 +117,7 @@ class CheckResultRepository extends AbstractRepository
             ->addOrderBy('path', 'ASC')
             ->addOrderBy('environment', 'ASC');
 
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter);
         if ($limit > 0) {
             $queryBuilder->setMaxResults($limit)->setFirstResult(max(0, $offset));
         }
@@ -118,12 +127,13 @@ class CheckResultRepository extends AbstractRepository
 
     /**
      * @param list<string> $markers only rows with one of these markers; all when empty
+     * @param array{markers: list<string>, plain: string}|null $actorFilter see findAll()
      */
-    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, array $markers = []): int
+    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, array $markers = [], ?array $actorFilter = null): int
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         $queryBuilder->count('uid')->from(self::TABLE);
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter);
         $count = $queryBuilder->executeQuery()->fetchOne();
 
         return is_numeric($count) ? (int)$count : 0;
@@ -313,8 +323,9 @@ class CheckResultRepository extends AbstractRepository
 
     /**
      * @param list<string> $markers
+     * @param array{markers: list<string>, plain: string}|null $actorFilter
      */
-    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed, array $markers = []): void
+    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed, array $markers = [], ?array $actorFilter = null): void
     {
         if ($environment !== '') {
             $queryBuilder->andWhere(
@@ -339,5 +350,38 @@ class CheckResultRepository extends AbstractRepository
                 $queryBuilder->expr()->in('error_marker', $queryBuilder->createNamedParameter($markers, ArrayParameterType::STRING)),
             );
         }
+        if ($actorFilter !== null) {
+            $queryBuilder->andWhere($this->buildActorConstraint($queryBuilder, $actorFilter));
+        }
+    }
+
+    /**
+     * @param array{markers: list<string>, plain: string} $actorFilter
+     */
+    private function buildActorConstraint(QueryBuilder $queryBuilder, array $actorFilter): string
+    {
+        $expr = $queryBuilder->expr();
+        $alternatives = [];
+        if ($actorFilter['markers'] !== []) {
+            $alternatives[] = $expr->in('error_marker', $queryBuilder->createNamedParameter($actorFilter['markers'], ArrayParameterType::STRING));
+        }
+        $notFoundStatuses = $queryBuilder->createNamedParameter(FindingGuide::NOT_FOUND_STATUSES, ArrayParameterType::INTEGER);
+        $statusConstraint = match ($actorFilter['plain']) {
+            self::PLAIN_NOT_FOUND => $expr->in('http_status', $notFoundStatuses),
+            self::PLAIN_OTHER_ERROR => $expr->and(
+                $expr->neq('http_status', $queryBuilder->createNamedParameter(200, ParameterType::INTEGER)),
+                $expr->notIn('http_status', $notFoundStatuses),
+            ),
+            self::PLAIN_OK => $expr->eq('http_status', $queryBuilder->createNamedParameter(200, ParameterType::INTEGER)),
+            default => null,
+        };
+        if ($statusConstraint !== null) {
+            $alternatives[] = $expr->and(
+                $expr->eq('error_marker', $queryBuilder->createNamedParameter('')),
+                $statusConstraint,
+            );
+        }
+
+        return $alternatives === [] ? '1 = 0' : (string)$expr->or(...$alternatives);
     }
 }

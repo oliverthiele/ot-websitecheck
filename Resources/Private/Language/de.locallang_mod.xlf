@@ -17,8 +17,8 @@
     </unit>
     <unit id="mlang_labels_tabdescr">
       <segment>
-        <source>Tools that crawl XML sitemaps and record what every URL answers.</source>
-        <target>Werkzeuge, die XML-Sitemaps crawlen und festhalten, was jede URL antwortet.</target>
+        <source>Tools that crawl XML sitemaps and record what every URL answers. Start with Sitemaps: every check reads its URLs from a stored snapshot. The status check then looks at one environment, the migration check compares two. The help explains every finding and says who acts on it.</source>
+        <target>Werkzeuge, die XML-Sitemaps crawlen und festhalten, was jede URL antwortet. Beginnen Sie mit Sitemaps: Jeder Check liest seine URLs aus einem gespeicherten Snapshot. Der Status-Check prüft dann eine Umgebung, der Migrations-Check vergleicht zwei. Die Hilfe erklärt jeden Befund und sagt, wer handeln muss.</target>
       </segment>
     </unit>
     <unit id="module.status.title">
@@ -29,8 +29,8 @@
     </unit>
     <unit id="module.status.shortDescription">
       <segment>
-        <source>HTTP status and error markers per URL</source>
-        <target>HTTP-Status und Fehlermarker pro URL</target>
+        <source>Step 2 — HTTP status and error markers per URL</source>
+        <target>Schritt 2 — HTTP-Status und Fehlermarker pro URL</target>
       </segment>
     </unit>
     <unit id="module.status.description">
@@ -47,8 +47,8 @@
     </unit>
     <unit id="module.migration.shortDescription">
       <segment>
-        <source>Moved URLs without a working redirect</source>
-        <target>Verschobene URLs ohne funktionierende Weiterleitung</target>
+        <source>Step 3 — moved URLs without a working redirect</source>
+        <target>Schritt 3 — verschobene URLs ohne funktionierende Weiterleitung</target>
       </segment>
     </unit>
     <unit id="module.migration.description">
@@ -65,14 +65,32 @@
     </unit>
     <unit id="module.sitemaps.shortDescription">
       <segment>
-        <source>Stored sitemap snapshots per site and language</source>
-        <target>Gespeicherte Sitemap-Snapshots pro Website und Sprache</target>
+        <source>Step 1 — store the sitemaps every check reads</source>
+        <target>Schritt 1 — die Sitemaps sichern, die jeder Check liest</target>
       </segment>
     </unit>
     <unit id="module.sitemaps.description">
       <segment>
         <source>Review the snapshots of the websitecheck:importsitemaps command: how many URLs every language lists per sitemap group, which sitemap files failed, and a note per snapshot.</source>
         <target>Snapshots des Commands websitecheck:importsitemaps: wie viele URLs jede Sprache pro Sitemap-Gruppe enthält, welche Sitemap-Dateien fehlschlugen, und eine Notiz pro Snapshot.</target>
+      </segment>
+    </unit>
+    <unit id="module.help.title">
+      <segment>
+        <source>Help</source>
+        <target>Hilfe</target>
+      </segment>
+    </unit>
+    <unit id="module.help.shortDescription">
+      <segment>
+        <source>What a finding means, and who acts on it</source>
+        <target>Was ein Befund bedeutet und wer handeln muss</target>
+      </segment>
+    </unit>
+    <unit id="module.help.description">
+      <segment>
+        <source>Every verdict, warning and marker of the checks explained: what it means, whether an editor can fix it in the backend or the integrator has to change the configuration, and what to do.</source>
+        <target>Alle Bewertungen, Warnungen und Marker der Checks erklärt: was sie bedeuten, ob Redakteure sie im Backend beheben können oder die Integration die Konfiguration ändern muss, und was zu tun ist.</target>
       </segment>
     </unit>
   </file>

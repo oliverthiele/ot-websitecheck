@@ -68,6 +68,10 @@
                     <label class="visually-hidden" for="statusFilterMarker">{f:translate(key: '{languageFile}statusResults.column.errorMarker')}</label>
                     <f:form.select name="marker" id="statusFilterMarker" options="{markerOptions}" value="{currentMarker}" class="form-select" data="{js: 'statusFilterAutoSubmit'}"/>
                 </div>
+                <div class="col-auto">
+                    <label class="visually-hidden" for="statusFilterActor">{f:translate(key: '{languageFile}label.actor')}</label>
+                    <f:form.select name="actor" id="statusFilterActor" options="{actorOptions}" value="{currentActor}" class="form-select" data="{js: 'statusFilterAutoSubmit'}"/>
+                </div>
                 <div class="col-auto form-check">
                     <f:form.checkbox name="onlyProblems" id="statusFilterOnlyProblems" value="1" checked="{onlyProblems}" class="form-check-input" data="{js: 'statusFilterAutoSubmit'}"/>
                     <label class="form-check-label" for="statusFilterOnlyProblems">{f:translate(key: '{languageFile}statusResults.onlyProblems')}</label>
@@ -131,7 +135,17 @@
                         </td>
                         <td>
                             <f:if condition="{result.error_marker}">
-                                <span title="{result.error_marker}">{f:translate(key: '{languageFile}errorMarker.{result.error_marker}', default: result.error_marker)}</span>
+                                <a tabindex="0" role="button" class="ot-websitecheck-help-badge"
+                                    data-bs-toggle="popover"
+                                    data-bs-trigger="hover focus"
+                                    data-bs-placement="auto"
+                                    data-bs-title="{result.error_marker}"
+                                    data-bs-content="{result.markerHelp}"
+                                >{f:translate(key: '{languageFile}errorMarker.{result.error_marker}', default: result.error_marker)}</a>
+                            </f:if>
+                            <f:render partial="HelpLink" arguments="{entry: result.guide.entry}"/>
+                            <f:if condition="{result.guide.actor} != 'none'">
+                                <br/><f:render partial="ActorBadge" arguments="{actor: result.guide.actor}"/>
                             </f:if>
                         </td>
                         <td>
@@ -167,10 +181,10 @@
         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
             <span>{f:translate(key: '{languageFile}statusResults.pagination', arguments: {0: pagination.from, 1: pagination.to, 2: pagination.total})}</span>
             <f:if condition="{pagination.previousPage}">
-                <f:link.action action="index" arguments="{environment: currentEnvironment, marker: currentMarker, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', page: pagination.previousPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.previousPage')}</f:link.action>
+                <f:link.action action="index" arguments="{environment: currentEnvironment, marker: currentMarker, actor: currentActor, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', page: pagination.previousPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.previousPage')}</f:link.action>
             </f:if>
             <f:if condition="{pagination.nextPage}">
-                <f:link.action action="index" arguments="{environment: currentEnvironment, marker: currentMarker, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', page: pagination.nextPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.nextPage')}</f:link.action>
+                <f:link.action action="index" arguments="{environment: currentEnvironment, marker: currentMarker, actor: currentActor, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', page: pagination.nextPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.nextPage')}</f:link.action>
             </f:if>
         </div>
     </f:if>

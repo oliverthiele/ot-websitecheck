@@ -339,24 +339,9 @@ no credentials. The checks take these URLs from the snapshot they read; with
 ## Usage
 
 The backend module **Sites > Website Check** (admin-only) shows one card per
-tool:
+tool, in the order of the workflow — every check reads its URLs from a sitemap
+snapshot, so the snapshots come first:
 
-- **Status check** — a form that composes the `checksitemap` or `crawllinks`
-  command for a snapshot, and the results, filterable by environment, only
-  problems and only not yet reviewed, 500 rows per page. The form suggests the
-  newest snapshot and an environment label from it — with `-links` for a link
-  check, so its results do not replace those of a status check.
-- **Migration check** — a form that composes the `migrationcheck` command, and
-  the results, see [Migration check results](#migration-check-results), 200
-  pages and records per page. A run can be saved as a file together with the
-  snapshots it compared. The
-  form offers every complete snapshot and suggests the pair to compare: a
-  locked live snapshot, otherwise the newest live one, as reference; the
-  newest staging snapshot, otherwise development, then local, as target. It
-  suggests labels from the environments, offers the earlier runs whose
-  reference results can be reused, warns about label clashes before anything
-  runs, and prints the command for `vendor/bin/typo3`, `typo3` or
-  `ddev typo3`, with quoting, ready to copy.
 - **Sitemaps** — import form and the stored snapshots, newest first:
   - **Import** — choose one of the base URLs of the configured sites (`base`
     and every `baseVariants` entry), "Find sitemaps" lists the sitemap of
@@ -386,6 +371,33 @@ tool:
     hovered or focused. The lock icon protects a snapshot from deletion. The
     language filter applies to all snapshots. A snapshot whose import was
     interrupted is marked as incomplete.
+- **Status check** — a form that composes the `checksitemap` or `crawllinks`
+  command for a snapshot, and the results, filterable by environment, marker,
+  who acts, only problems and only not yet reviewed, 500 rows per page. The form suggests the
+  newest snapshot and an environment label from it — with `-links` for a link
+  check, so its results do not replace those of a status check.
+- **Migration check** — a form that composes the `migrationcheck` command, and
+  the results, see [Migration check results](#migration-check-results), 200
+  pages and records per page, filterable by sitemap group, language, verdict
+  and who acts. A run can be saved as a file together with the
+  snapshots it compared. The
+  form offers every complete snapshot and suggests the pair to compare: a
+  locked live snapshot, otherwise the newest live one, as reference; the
+  newest staging snapshot, otherwise development, then local, as target. It
+  suggests labels from the environments, offers the earlier runs whose
+  reference results can be reused, warns about label clashes before anything
+  runs, and prints the command for `vendor/bin/typo3`, `typo3` or
+  `ddev typo3`, with quoting, ready to copy.
+- **Help** — every verdict, warning and marker explained for editors: what it
+  means, who acts on it and what to do. Every finding in the other modules
+  links to its entry, and the explanation of a finding opens on hover or
+  keyboard focus. Who acts is one of three:
+  - **Editor** — fixed in the backend: a redirect in the Redirects module, a
+    page property, a translation
+  - **Integrator** — comes from the configuration, the templates or the server,
+    e.g. a sitemap that lists pages it should not; the entries link on to
+    [Documentation/Recipes.md](Documentation/Recipes.md)
+  - **Nothing to do** — works, or is shown for completeness
 
 ### Relaunch workflow
 

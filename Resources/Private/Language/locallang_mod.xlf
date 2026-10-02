@@ -14,7 +14,7 @@
     </unit>
     <unit id="mlang_labels_tabdescr">
       <segment>
-        <source>Tools that crawl XML sitemaps and record what every URL answers.</source>
+        <source>Tools that crawl XML sitemaps and record what every URL answers. Start with Sitemaps: every check reads its URLs from a stored snapshot. The status check then looks at one environment, the migration check compares two. The help explains every finding and says who acts on it.</source>
       </segment>
     </unit>
     <unit id="module.status.title">
@@ -24,7 +24,7 @@
     </unit>
     <unit id="module.status.shortDescription">
       <segment>
-        <source>HTTP status and error markers per URL</source>
+        <source>Step 2 — HTTP status and error markers per URL</source>
       </segment>
     </unit>
     <unit id="module.status.description">
@@ -39,7 +39,7 @@
     </unit>
     <unit id="module.migration.shortDescription">
       <segment>
-        <source>Moved URLs without a working redirect</source>
+        <source>Step 3 — moved URLs without a working redirect</source>
       </segment>
     </unit>
     <unit id="module.migration.description">
@@ -54,12 +54,27 @@
     </unit>
     <unit id="module.sitemaps.shortDescription">
       <segment>
-        <source>Stored sitemap snapshots per site and language</source>
+        <source>Step 1 — store the sitemaps every check reads</source>
       </segment>
     </unit>
     <unit id="module.sitemaps.description">
       <segment>
         <source>Review the snapshots of the websitecheck:importsitemaps command: how many URLs every language lists per sitemap group, which sitemap files failed, and a note per snapshot.</source>
+      </segment>
+    </unit>
+    <unit id="module.help.title">
+      <segment>
+        <source>Help</source>
+      </segment>
+    </unit>
+    <unit id="module.help.shortDescription">
+      <segment>
+        <source>What a finding means, and who acts on it</source>
+      </segment>
+    </unit>
+    <unit id="module.help.description">
+      <segment>
+        <source>Every verdict, warning and marker of the checks explained: what it means, whether an editor can fix it in the backend or the integrator has to change the configuration, and what to do.</source>
       </segment>
     </unit>
   </file>

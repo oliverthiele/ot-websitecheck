@@ -1,0 +1,77 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:layout name="Module"/>
+
+<f:section name="Content">
+
+    <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
+    <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+
+    <h1><f:translate key="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.help.title"/></h1>
+
+    <p class="lead">{f:translate(key: '{languageFile}faq.intro')}</p>
+
+    <h2>{f:translate(key: '{languageFile}faq.workflow.title')}</h2>
+    <ol>
+        <li>
+            <a href="{be:moduleLink(route: 'site_websitecheck_sitemaps')}">{f:translate(key: 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.sitemaps.title')}</a>
+            — {f:translate(key: '{languageFile}faq.workflow.sitemaps')}
+        </li>
+        <li>
+            <a href="{be:moduleLink(route: 'site_websitecheck_status')}">{f:translate(key: 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.status.title')}</a>
+            — {f:translate(key: '{languageFile}faq.workflow.status')}
+        </li>
+        <li>
+            <a href="{be:moduleLink(route: 'site_websitecheck_migration')}">{f:translate(key: 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_mod.xlf:module.migration.title')}</a>
+            — {f:translate(key: '{languageFile}faq.workflow.migration')}
+        </li>
+    </ol>
+
+    <h2>{f:translate(key: '{languageFile}faq.actors.title')}</h2>
+    <dl>
+        <f:for each="{actors}" as="actor">
+            <dt><f:render partial="ActorBadge" arguments="{actor: actor}"/></dt>
+            <dd>{f:translate(key: '{languageFile}actor.{actor}.description')}</dd>
+        </f:for>
+    </dl>
+
+    <h2>{f:translate(key: '{languageFile}faq.entries.title')}</h2>
+    <ul>
+        <f:for each="{entries}" as="entry">
+            <li><a href="#faq-{entry.name}">{f:translate(key: '{languageFile}faq.{entry.name}.title')}</a></li>
+        </f:for>
+    </ul>
+
+    <f:for each="{entries}" as="entry">
+        <div class="panel panel-default mb-3" id="faq-{entry.name}">
+            <div class="panel-heading">
+                <h3 class="h4 mb-0">{f:translate(key: '{languageFile}faq.{entry.name}.title')}</h3>
+            </div>
+            <div class="panel-body">
+                <p class="mb-2">
+                    <f:for each="{entry.actors}" as="actor">
+                        <f:render partial="ActorBadge" arguments="{actor: actor}"/>
+                    </f:for>
+                    <small class="text-body-secondary">{f:translate(key: '{languageFile}faq.{entry.name}.findings')}</small>
+                </p>
+                <h4 class="h5">{f:translate(key: '{languageFile}faq.meaning')}</h4>
+                <p>{f:translate(key: '{languageFile}faq.{entry.name}.meaning')}</p>
+                <h4 class="h5">{f:translate(key: '{languageFile}faq.action')}</h4>
+                <p>{f:translate(key: '{languageFile}faq.{entry.name}.action')}</p>
+                <f:if condition="{entry.readOn}">
+                    <a href="{entry.readOn}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm">
+                        <core:icon identifier="actions-window-open" size="small"/> {f:translate(key: '{languageFile}faq.readOn')}
+                    </a>
+                </f:if>
+            </div>
+        </div>
+    </f:for>
+
+</f:section>
+
+</html>

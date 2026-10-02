@@ -1,0 +1,14 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment><!--
+    Who acts on a finding: an editor in the backend, the integrator in the
+    configuration, or nobody. Arguments: actor (editor, integrator or none).
+--></f:comment>
+<f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+<f:variable name="severities" value="{editor: 'info', integrator: 'notice', none: 'success'}"/>
+<span class="badge badge-{severities.{actor}}" title="{f:translate(key: '{languageFile}actor.{actor}.description')}">{f:translate(key: '{languageFile}actor.{actor}')}</span>
+
+</html>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Controller;
 
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Utility\LabelUtility;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
@@ -51,6 +52,21 @@ abstract class AbstractModuleController extends ActionController
         $token = $selfUriParams['token'] ?? '';
 
         return is_string($token) ? $token : '';
+    }
+
+    /**
+     * The options of the "who acts" filter.
+     *
+     * @return array<string, string>
+     */
+    protected function buildActorOptions(): array
+    {
+        $options = ['' => $this->translate('filter.allActors')];
+        foreach (FindingGuide::ACTORS as $actor) {
+            $options[$actor] = $this->translate('actor.' . $actor);
+        }
+
+        return $options;
     }
 
     protected function translate(string $key): string

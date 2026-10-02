@@ -24,6 +24,18 @@ final class CheckResultRepositoryTest extends FunctionalTestCase
         $this->subject = new CheckResultRepository($this->get(ConnectionPool::class), GeneralUtility::makeInstance(Registry::class));
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return list<int>
+     */
+    private function uidsOf(array $rows): array
+    {
+        $uids = array_map(static fn(array $row): int => is_numeric($row['uid'] ?? null) ? (int)$row['uid'] : 0, $rows);
+        sort($uids);
+
+        return $uids;
+    }
+
     #[Test]
     public function reviewIsKeptWhileTheStatusStaysTheSame(): void
     {
@@ -67,6 +79,20 @@ final class CheckResultRepositoryTest extends FunctionalTestCase
         self::assertSame(1, $this->subject->countAll('staging', false, false, ['redirected']));
         self::assertSame(2, $this->subject->countAll('', true, false, ['redirected', 'timeout']));
         self::assertSame([4], array_map(static fn(array $row): int => (int)$row['uid'], $this->subject->findAll('staging', false, false, 0, 0, ['redirected'])));
+    }
+
+    #[Test]
+    public function resultsAreFilteredByWhoActs(): void
+    {
+        // Fixture: 200 (1, 5), 500 (2), timeout (3), redirected (4), 404 (6).
+        $integrator = ['markers' => ['timeout', 'redirected'], 'plain' => CheckResultRepository::PLAIN_OTHER_ERROR];
+        $editor = ['markers' => [], 'plain' => CheckResultRepository::PLAIN_NOT_FOUND];
+        $nobody = ['markers' => [], 'plain' => CheckResultRepository::PLAIN_OK];
+
+        self::assertSame([2, 3, 4], $this->uidsOf($this->subject->findAll('staging', false, false, 0, 0, [], $integrator)));
+        self::assertSame([6], $this->uidsOf($this->subject->findAll('staging', false, false, 0, 0, [], $editor)));
+        self::assertSame([1], $this->uidsOf($this->subject->findAll('staging', false, false, 0, 0, [], $nobody)));
+        self::assertSame(0, $this->subject->countAll('', false, false, [], ['markers' => [], 'plain' => '']));
     }
 
     #[Test]
