@@ -124,7 +124,7 @@
                             <f:if condition="{result.page_uid}">
                                 <f:then>
                                     {result.page_uid}
-                                    <f:render partial="BackendLink" arguments="{url: result.backendUrl, title: '{f:translate(key: \'{languageFile}backend.openPage\', arguments: {0: result.page_uid, 1: result.languageTitle})}'}"/>
+                                    <f:render partial="BackendLink" arguments="{link: result.backendLink, pageUid: result.page_uid, language: result.languageTitle}"/>
                                 </f:then>
                                 <f:else><span class="text-muted">—</span></f:else>
                             </f:if>

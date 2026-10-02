@@ -402,9 +402,11 @@ class MigrationCheckModuleController extends AbstractModuleController
             'role' => $observation->role,
             'language' => $observation->identity->language,
             'pageUid' => $observation->identity->pageUid,
-            'backendUrl' => $this->backendPageLinks->forPage(
+            'backendLink' => $this->backendPageLinks->forPageOfUrl(
+                $observation->finalUrl !== '' ? $observation->finalUrl : $observation->requestedUrl,
                 $observation->identity->pageUid,
-                $this->backendPageLinks->findLanguageId($observation->identity->pageUid, $observation->identity->language),
+                $this->backendPageLinks->findLanguageId($observation->identity->pageUid, $observation->identity->language, $observation->finalUrl),
+                $this->request,
             ),
             'firstStatus' => $observation->firstStatus,
             'finalStatus' => $observation->finalStatus,

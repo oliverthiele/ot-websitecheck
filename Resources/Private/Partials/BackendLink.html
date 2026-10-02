@@ -5,12 +5,25 @@
 >
 
 <f:comment><!--
-    Link from a result to the page or record in this backend. Nothing is
-    rendered without a URL — the page does not exist here.
-    Arguments: url, title.
+    Link from a result to its page or record in a backend: this one, or — for
+    a page on another host — the backend of that host, in a new window, where
+    TYPO3 asks for a login if needed. Nothing is rendered without a URL.
+    Arguments: link ({url, host}), and either title or pageUid and language.
 --></f:comment>
-<f:if condition="{url}">
-    <a href="{url}" class="ot-websitecheck-help-link" title="{title}"><core:icon identifier="actions-open" size="small"/><span class="visually-hidden">{title}</span></a>
+<f:if condition="{link.url}">
+    <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+    <f:if condition="{title}">
+        <f:else if="{link.host}">
+            <f:variable name="title" value="{f:translate(key: '{languageFile}backend.openPageOnHost', arguments: {0: pageUid, 1: link.host, 2: language})}"/>
+        </f:else>
+        <f:else>
+            <f:variable name="title" value="{f:translate(key: '{languageFile}backend.openPage', arguments: {0: pageUid, 1: language})}"/>
+        </f:else>
+    </f:if>
+    <f:if condition="{link.host}">
+        <f:then><a href="{link.url}" target="_blank" rel="noreferrer" class="ot-websitecheck-help-link" title="{title}"><core:icon identifier="actions-open" size="small"/><span class="visually-hidden">{title}</span></a></f:then>
+        <f:else><a href="{link.url}" class="ot-websitecheck-help-link" title="{title}"><core:icon identifier="actions-open" size="small"/><span class="visually-hidden">{title}</span></a></f:else>
+    </f:if>
 </f:if>
 
 </html>

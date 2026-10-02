@@ -777,6 +777,12 @@
         <target>Seite %1$s im Seitenmodul öffnen (Sprache: %2$s)</target>
       </segment>
     </unit>
+    <unit id="backend.openPageOnHost">
+      <segment>
+        <source>Open page %1$s in the backend of %2$s (language: %3$s) — asks for a login if needed</source>
+        <target>Seite %1$s im Backend von %2$s öffnen (Sprache: %3$s) — ggf. mit Login</target>
+      </segment>
+    </unit>
     <unit id="backend.editRecord">
       <segment>
         <source>Edit the record</source>

@@ -46,8 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Preview a checked page in a modal in the status check and migration check
   modules, with a link to open it in a new window; the modules allow frames
   from the hosts of the configured sites, snapshots and runs
-- Link a result to its page in the page module, in its language, and a record
-  block to the form of its record, where they exist in this database
+- Link a result to its page in the page module, in its language — in the
+  backend of the host it was checked on, which asks for a login if needed —
+  and a record block to the form of its record
 - Store the site language of a status check result. Requires a database
   schema update
 

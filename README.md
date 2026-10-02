@@ -395,10 +395,13 @@ snapshot, so the snapshots come first:
   migration check runs — the rest of the backend keeps its policy. A page that
   forbids being framed (`X-Frame-Options`, `frame-ancestors`) stays empty in
   the modal; open it in a new window then. The edit icon beside a page uid or
-  path opens the page in the page module, in the language of the result; a
-  record block links to the form of its record. Both only where the page or
-  record exists in this database — the checks name pages by their uid on the
-  checked environment
+  path opens the page in the page module, in the language of the result — in
+  the backend of the host the result was checked on, since the uid belongs to
+  that environment. Another host opens in a new window; TYPO3 asks for a login
+  there if needed and opens the page afterwards. The path of that backend is
+  taken from this installation (usually `/typo3`). On this host the link needs
+  the page in this database, and a record block links to the form of its
+  record
 - **Help** — every verdict, warning and marker explained for editors: what it
   means, who acts on it and what to do. Every finding in the other modules
   links to its entry, and the explanation of a finding opens on hover or

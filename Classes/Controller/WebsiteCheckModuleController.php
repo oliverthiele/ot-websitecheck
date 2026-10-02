@@ -123,7 +123,7 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
         return $result + [
             'suggestedUrl' => $suggestedUrl,
-            'backendUrl' => $this->backendPageLinks->forPage(RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid')),
+            'backendLink' => $this->backendPageLinks->forPageOfUrl($url, RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid'), $this->request),
             'languageTitle' => $this->backendPageLinks->findLanguageTitle(RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid')),
             'guide' => $this->findingGuide->forStatusResult($marker, RowValue::int($result, 'http_status')),
             // Exception class names are markers as well and share one explanation.
