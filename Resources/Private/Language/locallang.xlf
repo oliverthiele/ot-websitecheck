@@ -694,7 +694,7 @@
     </unit>
     <unit id="actor.editor.description">
       <segment>
-        <source>Can be fixed in the backend: a redirect in the Redirects module, a page property, a translation, a link in the content.</source>
+        <source>Can be fixed in the backend: a redirect in Link Management › Redirects, a page property, a translation, a link in the content.</source>
       </segment>
     </unit>
     <unit id="actor.integrator">
@@ -1759,7 +1759,7 @@
     </unit>
     <unit id="faq.missing.action">
       <segment>
-        <source>Create a redirect from the old path to the page that replaces it, in the Redirects module. Where the module shows a suggested target, that is the same page or record on the target. If the page should exist under the old URL, check whether it is hidden, not translated, or has a changed URL segment.</source>
+        <source>Create a redirect from the old path to the page that replaces it, in Link Management › Redirects. Where the module shows a suggested target, that is the same page or record on the target. If the page should exist under the old URL, check whether it is hidden, not translated, or has a changed URL segment.</source>
       </segment>
     </unit>
     <unit id="faq.redirectBroken.title">
@@ -1779,7 +1779,7 @@
     </unit>
     <unit id="faq.redirectBroken.action">
       <segment>
-        <source>Open the redirect chain shown in the row and correct the target of the redirect, in the Redirects module. A redirect that is not listed there comes from the webserver configuration — pass it on to the integrator.</source>
+        <source>Open the redirect chain shown in the row and correct the target of the redirect, in Link Management › Redirects. A redirect that is not listed there comes from the webserver configuration — pass it on to the integrator.</source>
       </segment>
     </unit>
     <unit id="faq.redirectNotFinal.title">
@@ -1799,7 +1799,7 @@
     </unit>
     <unit id="faq.redirectNotFinal.action">
       <segment>
-        <source>Change the first redirect so it points at the suggested final URL, in the Redirects module. A redirect that is not listed there comes from the webserver configuration — pass it on to the integrator.</source>
+        <source>Change the first redirect so it points at the suggested final URL, in Link Management › Redirects. A redirect that is not listed there comes from the webserver configuration — pass it on to the integrator.</source>
       </segment>
     </unit>
     <unit id="faq.temporaryRedirect.title">
@@ -1819,7 +1819,7 @@
     </unit>
     <unit id="faq.temporaryRedirect.action">
       <segment>
-        <source>Set the status code of the redirect to 301 in the Redirects module. A shortcut page always redirects with 307 — point the redirect past it, at its target.</source>
+        <source>Set the status code of the redirect to 301 in Link Management › Redirects. A shortcut page always redirects with 307 — point the redirect past it, at its target.</source>
       </segment>
     </unit>
     <unit id="faq.otherContent.title">
@@ -1839,7 +1839,7 @@
     </unit>
     <unit id="faq.otherContent.action">
       <segment>
-        <source>Point the redirect at the page that replaces the old one, in the Redirects module; a suggested target is shown where one is certain. If another page took over the URL on purpose, mark the row as reviewed.</source>
+        <source>Point the redirect at the page that replaces the old one, in Link Management › Redirects; a suggested target is shown where one is certain. If another page took over the URL on purpose, mark the row as reviewed.</source>
       </segment>
     </unit>
     <unit id="faq.languageChanged.title">
@@ -1879,7 +1879,7 @@
     </unit>
     <unit id="faq.canonical.action">
       <segment>
-        <source>A redirect that ends on such a page: point it at the canonical URL, in the Redirects module. A sitemap that lists such pages: pass it on to the integrator — the sitemap configuration has to leave them out.</source>
+        <source>A redirect that ends on such a page: point it at the canonical URL, in Link Management › Redirects. A sitemap that lists such pages: pass it on to the integrator — the sitemap configuration has to leave them out.</source>
       </segment>
     </unit>
     <unit id="faq.detailPage.title">
@@ -2099,7 +2099,7 @@
     </unit>
     <unit id="glossary.redirect">
       <segment>
-        <source>The answer "this page is elsewhere now", with the new URL. Editors maintain redirects in the Redirects module, where the extension redirects is installed; the webserver can redirect as well, by rules only the integrator changes. A move should be permanent (301), so search engines carry the old URL's ranking over.</source>
+        <source>The answer "this page is elsewhere now", with the new URL. Editors maintain redirects in the module Link Management › Redirects — Source Path, Target and Status Code HTTP Header —, where the extension redirects is installed. The webserver can redirect as well, by rules only the integrator changes. A move should be permanent (301), so search engines carry the old URL's ranking over.</source>
       </segment>
     </unit>
     <unit id="glossary.redirectChain.term">

@@ -406,7 +406,7 @@ snapshot, so the snapshots come first:
   means, who acts on it and what to do. Every finding in the other modules
   links to its entry, and the explanation of a finding opens on hover or
   keyboard focus. Who acts is one of three:
-  - **Editor** — fixed in the backend: a redirect in the Redirects module, a
+  - **Editor** — fixed in the backend: a redirect in Link Management › Redirects, a
     page property, a translation
   - **Integrator** — comes from the configuration, the templates or the server,
     e.g. a sitemap that lists pages it should not; the entries link on to

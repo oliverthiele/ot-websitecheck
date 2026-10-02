@@ -42,7 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   popover
 - Add a glossary to the help module: the terms of the checks, and where the
   matching settings are in the page properties of TYPO3 — canonical link,
-  "Show Content from this page", shortcut pages, URL segment, page ID
+  "Show Content from this page", shortcut pages, URL segment, page ID, and
+  Link Management › Redirects with its fields
 - Add `Documentation/Recipes.md` for integrators: pages that require a
   parameter, pages that show the content of another page, redirects that do
   not lead to the final URL

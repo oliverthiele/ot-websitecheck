@@ -128,8 +128,9 @@ at a URL that was moved later — or at a TYPO3 shortcut page, which redirects
 again with 307.
 
 **Fix:** change the first redirect so it points at the suggested final URL.
-Where the redirect is a record of EXT:redirects, an editor can do that in the
-Redirects module; a rule in the webserver configuration needs the integrator.
+Where the redirect is a record of EXT:redirects, an editor can do that in
+Link Management › Redirects; a rule in the webserver configuration needs the
+integrator.
 The check cannot tell the two apart — only HTTP answers are evaluated.
 
 ---
