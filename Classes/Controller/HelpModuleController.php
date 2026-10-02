@@ -38,6 +38,7 @@ class HelpModuleController extends AbstractModuleController
         'timeout' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::README_URL . 'retries'],
         'markers' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::README_URL . 'requirements-on-the-checked-site'],
         'duplicateDetailPage' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => ''],
+        'metadata' => ['actors' => [FindingGuide::ACTOR_EDITOR, FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::RECIPES_URL . '#metadata-of-detail-pages'],
         'argumentsIgnored' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::README_URL . 'websitecheckcrawllinks'],
         'referenceNotOk' => ['actors' => [FindingGuide::ACTOR_NONE], 'readOn' => ''],
     ];
@@ -59,6 +60,8 @@ class HelpModuleController extends AbstractModuleController
         'slug',
         'pageId',
         'detailPage',
+        'metaDescription',
+        'openGraph',
         'noIndex',
         'languageFallback',
         'markers',

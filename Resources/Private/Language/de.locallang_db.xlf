@@ -69,6 +69,18 @@
         <target>Von der Seite angegebene Canonical-URL</target>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.metadata">
+      <segment>
+        <source>Metadata of the page</source>
+        <target>Metadaten der Seite</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.meta_findings">
+      <segment>
+        <source>Metadata findings</source>
+        <target>Befunde zu Metadaten</target>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.checked_at">
       <segment>
         <source>Checked at</source>
@@ -193,6 +205,12 @@
       <segment>
         <source>Canonical URL declared by the final page</source>
         <target>Von der Endseite angegebene Canonical-URL</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.metadata">
+      <segment>
+        <source>Metadata of the final page</source>
+        <target>Metadaten der Endseite</target>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_observation.page_uid">

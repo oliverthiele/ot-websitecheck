@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Service\BackendPageLinks;
 use OliverThiele\OtWebsitecheck\Service\FindingGuide;
+use OliverThiele\OtWebsitecheck\Service\MetadataAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
@@ -40,8 +42,11 @@ class WebsiteCheckModuleController extends AbstractModuleController
     ) {
     }
 
-    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, string $marker = '', string $actor = '', int $page = 1): ResponseInterface
+    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, string $marker = '', string $actor = '', string $metaFinding = '', int $page = 1): ResponseInterface
     {
+        if (!in_array($metaFinding, MetadataAnalyzer::FINDINGS, true)) {
+            $metaFinding = '';
+        }
         $environments = $this->checkResultRepository->findDistinctEnvironments();
         $markers = $this->checkResultRepository->findDistinctMarkers($environment);
         $exceptionMarkers = array_values(array_filter($markers, $this->findingGuide->isExceptionMarker(...)));
@@ -57,11 +62,12 @@ class WebsiteCheckModuleController extends AbstractModuleController
             $actor = '';
         }
         $actorFilter = $actor === '' ? null : $this->buildActorFilter($actor, $markers);
-        // "Nothing to do" lists what "only problems" hides; a chosen actor wins.
-        $onlyProblems = $onlyProblems && $actor === '';
+        // "Nothing to do" lists what "only problems" hides; a chosen actor or
+        // metadata finding wins — metadata findings are no problem of the URL.
+        $onlyProblems = $onlyProblems && $actor === '' && $metaFinding === '';
         // A crawl of a large site stores tens of thousands of rows; the table
         // shows one page of them.
-        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed, $markerFilter, $actorFilter);
+        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed, $markerFilter, $actorFilter, $metaFinding);
         $pageCount = max(1, (int)ceil($total / self::RESULTS_PER_PAGE));
         $page = min(max(1, $page), $pageCount);
         $offset = ($page - 1) * self::RESULTS_PER_PAGE;
@@ -71,7 +77,7 @@ class WebsiteCheckModuleController extends AbstractModuleController
         $moduleTemplate->assignMultiple([
             'results' => array_map(
                 $this->addGuidance(...),
-                $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset, $markerFilter, $actorFilter),
+                $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset, $markerFilter, $actorFilter, $metaFinding),
             ),
             'pagination' => [
                 'page' => $page,
@@ -88,6 +94,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
             'currentMarker' => $marker,
             'actorOptions' => $this->buildActorOptions(),
             'currentActor' => $actor,
+            'metaFindingOptions' => $this->buildMetaFindingOptions(),
+            'currentMetaFinding' => $metaFinding,
             // Results of any environment — the filter must stay even when the chosen one has none.
             'hasResults' => $environments !== [],
             'sources' => $this->checkResultRepository->findDistinctSources($environment),
@@ -131,6 +139,11 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
         return $result + [
             'pageTitle' => is_string($pageTitle) ? $pageTitle : '',
+            'metaFindings' => array_map(
+                fn(string $finding): array => ['name' => $finding] + $this->findingGuide->forMetaFinding($finding),
+                array_values(array_filter(explode(',', RowValue::string($result, 'meta_findings')))),
+            ),
+            'metadataSummary' => $this->summarizeMetadata(PageMetadata::fromJson(RowValue::string($result, 'metadata'))),
             // An exception class is shown by its short name; the popover names it in full.
             'markerLabel' => match (true) {
                 $marker === '' => '',
@@ -159,6 +172,33 @@ class WebsiteCheckModuleController extends AbstractModuleController
         }
         if ($hasExceptions) {
             $options[self::RENDERING_ERROR] = $this->translate('statusResults.renderingError');
+        }
+
+        return $options;
+    }
+
+    /**
+     * The metadata of a page in one line, for a popover: the values come from
+     * a checked page and are shown as text, never as HTML.
+     */
+    private function summarizeMetadata(PageMetadata $metadata): string
+    {
+        $parts = [];
+        foreach ($metadata->toArray() as $key => $value) {
+            $parts[] = $this->translate('metadata.' . $key) . ': ' . $value;
+        }
+
+        return implode(' · ', $parts);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildMetaFindingOptions(): array
+    {
+        $options = ['' => $this->translate('metaFinding.all')];
+        foreach (MetadataAnalyzer::FINDINGS as $finding) {
+            $options[$finding] = $this->translate('metaFinding.' . $finding);
         }
 
         return $options;

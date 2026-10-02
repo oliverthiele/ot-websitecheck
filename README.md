@@ -37,6 +37,12 @@ URL of the live site still leads to the same page or record on the new one.
   EXT:seo is read: a sitemap entry whose page names another URL as canonical is
   reported, and a redirect to the page another one shows the content of counts
   as the same content
+- **Metadata as delivered** — the status check reads title, meta description,
+  robots and OpenGraph tags of every page as it is delivered, so metadata a
+  plugin sets — or does not set — on a detail view shows up, which the backend
+  cannot show: URLs of one page sharing a title or description, a missing
+  description or preview image, a sitemap URL marked noindex. The migration
+  check warns when the same content loses its description or preview image
 - **Identity per page and record** — pages and detail records are matched by
   uid, not by URL, so a moved detail page is compared with the same record;
   the same record on several pages is reported as duplicate content
@@ -522,6 +528,8 @@ problems and warnings" is set.
 | `listedUrlNotCanonical` | A sitemap lists a URL whose page names another URL as canonical |
 | `listedDetailPageWithoutRecord` | A sitemap lists a page marked as requiring a parameter, without one |
 | `pageAlsoRendersRecords` | The page renders records under other URLs — maybe a detail page called without a record |
+| `metaDescriptionLost` | The reference page had a meta description, the same content on the target has none |
+| `openGraphImageLost` | The reference page had an `og:image`, the same content on the target has none |
 | `languageChanged` | The target page is in a different language |
 | `recordIdentityUnknown` | Several URLs render the same page without a record marker |
 | `duplicateDetailPage` | The same record is rendered by more than one page |
@@ -750,6 +758,22 @@ URL. The migration check follows redirects itself, one hop at a time, see above.
 
 Canonical URLs are compared by path and query, not by host: a staging system
 often renders the live domain into its canonical.
+
+`checksitemap` also reads the metadata of every page that answers with 200 —
+`<title>`, meta description and robots, `og:title`, `og:description` and
+`og:image` — and judges it once the run is complete, across all results of the
+environment. The module shows the values and these findings in a column of
+their own; none of them fails a run:
+
+| Finding | Meaning |
+|---------|---------|
+| `metaShared` | Other URLs of the same page have the same title or description — the detail views of a plugin that sets no metadata of its own |
+| `metaDescriptionMissing` | No meta description |
+| `openGraphImageMissing` | No `og:image`; TYPO3 renders OpenGraph tags only when they are filled in |
+| `listedButNoindex` | The sitemap lists a page whose robots tag says noindex |
+
+How to set the metadata of a detail view is in
+[Documentation/Recipes.md](Documentation/Recipes.md#metadata-of-detail-pages).
 
 #### Pages that show the content of another page
 

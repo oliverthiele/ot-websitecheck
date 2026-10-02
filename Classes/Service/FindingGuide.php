@@ -55,6 +55,8 @@ class FindingGuide
         MigrationAnalyzer::WARNING_PAGE_ALSO_RENDERS_RECORDS => [self::ACTOR_INTEGRATOR, 'detailPage'],
         MigrationAnalyzer::WARNING_RECORD_IDENTITY_UNKNOWN => [self::ACTOR_INTEGRATOR, 'markers'],
         MigrationAnalyzer::WARNING_DUPLICATE_DETAIL_PAGE => [self::ACTOR_INTEGRATOR, 'duplicateDetailPage'],
+        MigrationAnalyzer::WARNING_META_DESCRIPTION_LOST => [self::ACTOR_EDITOR, 'metadata'],
+        MigrationAnalyzer::WARNING_OPEN_GRAPH_IMAGE_LOST => [self::ACTOR_EDITOR, 'metadata'],
     ];
 
     /**
@@ -74,6 +76,16 @@ class FindingGuide
         ErrorMarkerDetector::MARKER_CANONICAL_ELSEWHERE => [self::ACTOR_INTEGRATOR, 'canonical'],
         ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD => [self::ACTOR_INTEGRATOR, 'detailPage'],
         'argumentsIgnored' => [self::ACTOR_INTEGRATOR, 'argumentsIgnored'],
+    ];
+
+    /**
+     * @var array<string, array{0: string, 1: string}> metadata finding => [actor, help entry]
+     */
+    private const array META_FINDINGS = [
+        MetadataAnalyzer::FINDING_SHARED => [self::ACTOR_INTEGRATOR, 'metadata'],
+        MetadataAnalyzer::FINDING_DESCRIPTION_MISSING => [self::ACTOR_EDITOR, 'metadata'],
+        MetadataAnalyzer::FINDING_OPEN_GRAPH_IMAGE_MISSING => [self::ACTOR_EDITOR, 'metadata'],
+        MetadataAnalyzer::FINDING_LISTED_BUT_NOINDEX => [self::ACTOR_INTEGRATOR, 'metadata'],
     ];
 
     /**
@@ -98,6 +110,18 @@ class FindingGuide
     public function forWarning(string $warning): array
     {
         [$actor, $entry] = self::WARNINGS[$warning] ?? [self::ACTOR_INTEGRATOR, ''];
+
+        return ['actor' => $actor, 'entry' => $entry];
+    }
+
+    /**
+     * A finding on the metadata of a page, see MetadataAnalyzer.
+     *
+     * @return array{actor: string, entry: string}
+     */
+    public function forMetaFinding(string $finding): array
+    {
+        [$actor, $entry] = self::META_FINDINGS[$finding] ?? [self::ACTOR_INTEGRATOR, 'metadata'];
 
         return ['actor' => $actor, 'entry' => $entry];
     }

@@ -15,7 +15,7 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'page_uid, language_uid, url, path, environment, source, http_status, error_marker, final_url, canonical_url, checked_at, run_started_at, reviewed, note'],
+        '1' => ['showitem' => 'page_uid, language_uid, url, path, environment, source, http_status, error_marker, final_url, canonical_url, metadata, meta_findings, checked_at, run_started_at, reviewed, note'],
     ],
     'columns' => [
         'page_uid' => [
@@ -101,6 +101,26 @@ return [
                 'type' => 'input',
                 'size' => 50,
                 'max' => 2048,
+                'readOnly' => true,
+                'searchable' => false,
+            ],
+        ],
+        'metadata' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.metadata',
+            'config' => [
+                'type' => 'text',
+                'cols' => 60,
+                'rows' => 5,
+                'readOnly' => true,
+                'searchable' => false,
+            ],
+        ],
+        'meta_findings' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_check.meta_findings',
+            'config' => [
+                'type' => 'input',
+                'size' => 50,
+                'max' => 255,
                 'readOnly' => true,
                 'searchable' => false,
             ],

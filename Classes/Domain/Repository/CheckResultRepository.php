@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
@@ -41,6 +42,7 @@ class CheckResultRepository extends AbstractRepository
      * @param string $finalUrl the URL that answered after redirects; empty without redirects
      * @param string $canonicalUrl the canonical URL the page declares; empty when it declares none or was not read
      * @param int $languageUid the site language the local routing reads from the URL
+     * @param string $metadata the page's metadata as PageMetadata::toJson() writes it
      */
     public function storeResult(
         string $url,
@@ -54,12 +56,14 @@ class CheckResultRepository extends AbstractRepository
         string $finalUrl = '',
         string $canonicalUrl = '',
         int $languageUid = 0,
+        string $metadata = '',
     ): void {
         $values = [
             'path' => UrlUtility::pathWithQuery($url),
             'source' => $source,
             'page_uid' => $pageUid ?? 0,
             'language_uid' => $languageUid,
+            'metadata' => $metadata,
             'http_status' => $httpStatus,
             'error_marker' => $errorMarker,
             'final_url' => $finalUrl,
@@ -105,9 +109,10 @@ class CheckResultRepository extends AbstractRepository
      * @param int $limit rows per page, 0 for all
      * @param list<string> $markers only rows with one of these markers; all when empty
      * @param array{markers: list<string>, plain: string}|null $actorFilter rows with one of these markers, or without a marker and a status as named by "plain" (a PLAIN_* constant or ''); all when null
+     * @param string $metaFinding only rows with this metadata finding; all when empty
      * @return array<int, array<string, mixed>>
      */
-    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0, array $markers = [], ?array $actorFilter = null): array
+    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0, array $markers = [], ?array $actorFilter = null, string $metaFinding = ''): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         // Group by page uid first, then path: the same page uid/path can carry
@@ -120,7 +125,7 @@ class CheckResultRepository extends AbstractRepository
             ->addOrderBy('path', 'ASC')
             ->addOrderBy('environment', 'ASC');
 
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter, $metaFinding);
         if ($limit > 0) {
             $queryBuilder->setMaxResults($limit)->setFirstResult(max(0, $offset));
         }
@@ -132,11 +137,11 @@ class CheckResultRepository extends AbstractRepository
      * @param list<string> $markers only rows with one of these markers; all when empty
      * @param array{markers: list<string>, plain: string}|null $actorFilter see findAll()
      */
-    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, array $markers = [], ?array $actorFilter = null): int
+    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, array $markers = [], ?array $actorFilter = null, string $metaFinding = ''): int
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         $queryBuilder->count('uid')->from(self::TABLE);
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter, $metaFinding);
         $count = $queryBuilder->executeQuery()->fetchOne();
 
         return is_numeric($count) ? (int)$count : 0;
@@ -220,6 +225,46 @@ class CheckResultRepository extends AbstractRepository
             ->fetchFirstColumn();
 
         return array_map(static fn(mixed $environment): string => is_scalar($environment) ? (string)$environment : '', $rows);
+    }
+
+    /**
+     * The working pages of an environment with their metadata, as the
+     * metadata analysis needs them.
+     *
+     * @return list<array{uid: int, url: string, pageUid: int, metadata: PageMetadata, metaFindings: string}>
+     */
+    public function findPagesWithMetadata(string $environment): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('uid', 'url', 'page_uid', 'metadata', 'meta_findings')
+            ->from(self::TABLE)
+            ->where(
+                $queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)),
+                $queryBuilder->expr()->eq('http_status', $queryBuilder->createNamedParameter(200, ParameterType::INTEGER)),
+                $queryBuilder->expr()->neq('metadata', $queryBuilder->createNamedParameter('')),
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(static fn(array $row): array => [
+            'uid' => RowValue::int($row, 'uid'),
+            'url' => RowValue::string($row, 'url'),
+            'pageUid' => RowValue::int($row, 'page_uid'),
+            'metadata' => PageMetadata::fromJson(RowValue::string($row, 'metadata')),
+            'metaFindings' => RowValue::string($row, 'meta_findings'),
+        ], $rows);
+    }
+
+    /**
+     * @param list<string> $findings
+     */
+    public function updateMetaFindings(int $uid, array $findings): void
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->update(self::TABLE)
+            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, ParameterType::INTEGER)))
+            ->set('meta_findings', implode(',', $findings))
+            ->executeStatement();
     }
 
     /**
@@ -328,7 +373,7 @@ class CheckResultRepository extends AbstractRepository
      * @param list<string> $markers
      * @param array{markers: list<string>, plain: string}|null $actorFilter
      */
-    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed, array $markers = [], ?array $actorFilter = null): void
+    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed, array $markers = [], ?array $actorFilter = null, string $metaFinding = ''): void
     {
         if ($environment !== '') {
             $queryBuilder->andWhere(
@@ -355,6 +400,9 @@ class CheckResultRepository extends AbstractRepository
         }
         if ($actorFilter !== null) {
             $queryBuilder->andWhere($this->buildActorConstraint($queryBuilder, $actorFilter));
+        }
+        if ($metaFinding !== '') {
+            $queryBuilder->andWhere($queryBuilder->expr()->inSet('meta_findings', $queryBuilder->quote($metaFinding)));
         }
     }
 

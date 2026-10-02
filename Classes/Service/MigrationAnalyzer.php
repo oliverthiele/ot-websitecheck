@@ -56,6 +56,18 @@ class MigrationAnalyzer
     public const string WARNING_LISTED_URL_NOT_CANONICAL = 'listedUrlNotCanonical';
     public const string WARNING_LISTED_DETAIL_PAGE_WITHOUT_RECORD = 'listedDetailPageWithoutRecord';
     public const string WARNING_PAGE_ALSO_RENDERS_RECORDS = 'pageAlsoRendersRecords';
+    public const string WARNING_META_DESCRIPTION_LOST = 'metaDescriptionLost';
+    public const string WARNING_OPEN_GRAPH_IMAGE_LOST = 'openGraphImageLost';
+
+    /**
+     * Target verdicts that reach the same content: only there, metadata the
+     * reference had and the target lacks is lost in the migration.
+     */
+    private const array SAME_CONTENT_VERDICTS = [
+        self::VERDICT_OK,
+        self::VERDICT_MOVED_WITH_REDIRECT,
+        self::VERDICT_REDIRECT_NOT_FINAL,
+    ];
 
     private const array TEMPORARY_REDIRECT_STATUS_CODES = [302, 303, 307];
 
@@ -137,6 +149,9 @@ class MigrationAnalyzer
                 ) {
                     $verdict = self::VERDICT_DETAIL_PAGE_WITHOUT_RECORD;
                     $suggestedTarget = '';
+                }
+                if ($reference !== null && in_array($verdict, self::SAME_CONTENT_VERDICTS, true)) {
+                    $warnings = [...$warnings, ...$this->collectLostMetadata($reference, $observation)];
                 }
                 if ($verdict === self::VERDICT_REDIRECT_NOT_FINAL) {
                     if ($this->declaresCanonicalElsewhere($observation)) {
@@ -226,6 +241,29 @@ class MigrationAnalyzer
         }
 
         return $workingReferenceByFinalPath[UrlUtility::comparablePath($reference->canonicalUrl)] ?? null;
+    }
+
+    /**
+     * What the reference page told search engines and social networks that the
+     * same content on the target no longer does. Rows stored before metadata
+     * was read have none on either side and get no warning.
+     *
+     * @return list<string>
+     */
+    private function collectLostMetadata(Observation $reference, Observation $target): array
+    {
+        if ($reference->metadata->isEmpty() || $target->metadata->isEmpty()) {
+            return [];
+        }
+        $warnings = [];
+        if ($reference->metadata->description !== '' && $target->metadata->description === '') {
+            $warnings[] = self::WARNING_META_DESCRIPTION_LOST;
+        }
+        if ($reference->metadata->openGraphImage !== '' && $target->metadata->openGraphImage === '') {
+            $warnings[] = self::WARNING_OPEN_GRAPH_IMAGE_LOST;
+        }
+
+        return $warnings;
     }
 
     /**

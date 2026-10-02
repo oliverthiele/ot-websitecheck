@@ -135,6 +135,41 @@ The check cannot tell the two apart — only HTTP answers are evaluated.
 
 ---
 
+## Metadata of detail pages
+
+**Finding:** the status check marks detail views with "Shared with other URLs"
+or "No description"; the migration check warns "Description lost".
+
+**Why:** a normal page takes its title, description and OpenGraph data from
+its page properties. The detail view of a plugin renders a record on one page,
+so unless the plugin or its template sets the metadata of the record, every
+detail view carries the title and description of the detail page. The backend
+cannot show this — only the delivered page does, which is what the checks
+read.
+
+**Fix:** set the metadata in the template of the detail view. Since TYPO3 14,
+Fluid has ViewHelpers for it:
+
+```html
+<f:page.title>{item.title}</f:page.title>
+<f:page.meta property="description" replace="{true}">{item.teaser}</f:page.meta>
+<f:page.meta property="og:title" replace="{true}">{item.title}</f:page.meta>
+<f:page.meta property="og:description" replace="{true}">{item.teaser}</f:page.meta>
+<f:if condition="{item.image}">
+    <f:page.meta property="og:image" replace="{true}">{f:uri.image(image: item.image, width: 1200, absolute: true)}</f:page.meta>
+</f:if>
+```
+
+`replace` matters: without it, the description of the page properties stays.
+An extension that cannot be changed can do the same in its controller with
+the `MetaTagManagerRegistry` and a page title provider (`RecordTitleProvider`
+since TYPO3 14).
+
+Run the status check again afterwards: "Shared with other URLs" disappears
+once every detail view has its own title and description.
+
+---
+
 ## Markers the checked site has to render
 
 The migration check compares pages by uid and records by table and uid, not by

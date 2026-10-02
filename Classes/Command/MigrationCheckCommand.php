@@ -13,6 +13,7 @@ use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\IdentityExtractor;
+use OliverThiele\OtWebsitecheck\Service\MetadataExtractor;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
@@ -56,6 +57,7 @@ class MigrationCheckCommand extends Command
         private readonly CanonicalExtractor $canonicalExtractor,
         private readonly RequiredParameterPages $requiredParameterPages,
         private readonly PageUidResolver $pageUidResolver,
+        private readonly MetadataExtractor $metadataExtractor,
     ) {
         parent::__construct();
     }
@@ -416,8 +418,11 @@ class MigrationCheckCommand extends Command
                 $canonicalUrl = $isWorkingPage
                     ? $this->canonicalExtractor->extract($redirectChain->finalBody, $redirectChain->getFinalUrl())
                     : '';
+                $metadata = $isWorkingPage
+                    ? $this->metadataExtractor->extract($redirectChain->finalBody, $redirectChain->getFinalUrl())->toJson()
+                    : '';
 
-                $this->observationRepository->storeObservation($runLabel, $observation['environment'], $observation['role'], $observation['group'], $redirectChain, $identity, time(), $canonicalUrl);
+                $this->observationRepository->storeObservation($runLabel, $observation['environment'], $observation['role'], $observation['group'], $redirectChain, $identity, time(), $canonicalUrl, $metadata);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {

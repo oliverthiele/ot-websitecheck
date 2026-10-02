@@ -10,6 +10,8 @@ use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
+use OliverThiele\OtWebsitecheck\Service\MetadataAnalyzer;
+use OliverThiele\OtWebsitecheck\Service\MetadataExtractor;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
 use OliverThiele\OtWebsitecheck\Service\RequiredParameterPages;
@@ -46,6 +48,8 @@ class CheckSitemapCommand extends Command
         private readonly RetryRounds $retryRounds,
         private readonly CanonicalExtractor $canonicalExtractor,
         private readonly RequiredParameterPages $requiredParameterPages,
+        private readonly MetadataExtractor $metadataExtractor,
+        private readonly MetadataAnalyzer $metadataAnalyzer,
     ) {
         parent::__construct();
     }
@@ -159,6 +163,7 @@ class CheckSitemapCommand extends Command
             function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$noticeCount, &$answeredCount): void {
                 $finalUrl = $page->finalUrl !== '' ? $page->finalUrl : $url;
                 $canonicalUrl = $page->isOk() ? $this->canonicalExtractor->extract($page->body, $finalUrl) : '';
+                $metadata = $page->isOk() ? $this->metadataExtractor->extract($page->body, $finalUrl)->toJson() : '';
                 $errorMarker = $this->errorMarkerDetector->detectFor($page, $this->canonicalExtractor->isElsewhere($canonicalUrl, $finalUrl));
                 $route = $this->pageUidResolver->resolveRoute($url);
                 $pageArguments = $route?->pageArguments;
@@ -181,7 +186,7 @@ class CheckSitemapCommand extends Command
                     $errorMarkerCount++;
                 }
 
-                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $pageArguments?->getPageId(), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl, $route->languageId ?? 0);
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $pageArguments?->getPageId(), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl, $route->languageId ?? 0, $metadata);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {
@@ -202,6 +207,8 @@ class CheckSitemapCommand extends Command
             $noticeCount,
         ));
 
+        $this->analyzeMetadata($environment);
+
         if ($answeredCount === 0) {
             $io->error('Not a single URL answered. Check the host, the network and the Basic Auth credentials.');
             return self::FAILURE;
@@ -211,5 +218,22 @@ class CheckSitemapCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Judges the metadata of every working page of the environment: whether
+     * URLs of one page share a title or description needs all of them, also
+     * those of earlier runs on the environment.
+     */
+    private function analyzeMetadata(string $environment): void
+    {
+        $pages = $this->checkResultRepository->findPagesWithMetadata($environment);
+        $findings = $this->metadataAnalyzer->analyze($pages);
+        foreach ($pages as $page) {
+            $pageFindings = $findings[$page['uid']] ?? [];
+            if (implode(',', $pageFindings) !== $page['metaFindings']) {
+                $this->checkResultRepository->updateMetaFindings($page['uid'], $pageFindings);
+            }
+        }
     }
 }

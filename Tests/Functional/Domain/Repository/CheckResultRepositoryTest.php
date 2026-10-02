@@ -72,6 +72,21 @@ final class CheckResultRepositoryTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function metadataFindingsAreStoredAndFiltered(): void
+    {
+        $this->subject->storeResult('https://www.example.com/news/a', 'staging', 'staging-current', 7, 200, '', 1790001000, 1790000900, '', '', 0, '{"title":"News"}');
+        $pages = $this->subject->findPagesWithMetadata('staging');
+        self::assertCount(1, $pages);
+        self::assertSame('News', $pages[0]['metadata']->title);
+
+        $this->subject->updateMetaFindings($pages[0]['uid'], ['metaShared', 'metaDescriptionMissing']);
+
+        self::assertSame(1, $this->subject->countAll('staging', false, false, [], null, 'metaDescriptionMissing'));
+        self::assertSame(1, $this->subject->countAll('staging', false, false, [], null, 'metaShared'));
+        self::assertSame(0, $this->subject->countAll('staging', false, false, [], null, 'listedButNoindex'));
+    }
+
+    #[Test]
     public function resultsAreFilteredByMarker(): void
     {
         self::assertSame(['redirected', 'timeout'], $this->subject->findDistinctMarkers('staging'));

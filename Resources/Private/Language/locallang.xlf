@@ -417,6 +417,86 @@
         <source>Final URL</source>
       </segment>
     </unit>
+    <unit id="statusResults.column.metadata">
+      <segment>
+        <source>Metadata</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.all">
+      <segment>
+        <source>— all metadata —</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaShared">
+      <segment>
+        <source>Shared with other URLs</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaShared.help">
+      <segment>
+        <source>Other URLs of the same page have the same title or description — usually the detail views of a plugin that sets no metadata of its own. In search results they all look alike.</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaDescriptionMissing">
+      <segment>
+        <source>No description</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaDescriptionMissing.help">
+      <segment>
+        <source>The page renders no meta description. Search engines then choose a snippet of the page themselves.</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.openGraphImageMissing">
+      <segment>
+        <source>No preview image</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.openGraphImageMissing.help">
+      <segment>
+        <source>The page renders no og:image. A link to it shared in a social network or messenger shows no image, or a random one.</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.listedButNoindex">
+      <segment>
+        <source>In the sitemap, but noindex</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.listedButNoindex.help">
+      <segment>
+        <source>The sitemap lists the page, but the page asks search engines not to index it. One of the two is wrong.</source>
+      </segment>
+    </unit>
+    <unit id="metadata.title">
+      <segment>
+        <source>Title</source>
+      </segment>
+    </unit>
+    <unit id="metadata.description">
+      <segment>
+        <source>Description</source>
+      </segment>
+    </unit>
+    <unit id="metadata.robots">
+      <segment>
+        <source>Robots</source>
+      </segment>
+    </unit>
+    <unit id="metadata.ogTitle">
+      <segment>
+        <source>og:title</source>
+      </segment>
+    </unit>
+    <unit id="metadata.ogDescription">
+      <segment>
+        <source>og:description</source>
+      </segment>
+    </unit>
+    <unit id="metadata.ogImage">
+      <segment>
+        <source>og:image</source>
+      </segment>
+    </unit>
     <unit id="statusResults.column.checkedAt">
       <segment>
         <source>Checked at</source>
@@ -1030,6 +1110,26 @@
     <unit id="warning.pageAlsoRendersRecords.description">
       <segment>
         <source>The same page renders records under other URLs. If it shows content only with a record, this URL is a detail page without one and does not belong in the sitemap; if it shows a list as well, nothing is wrong.</source>
+      </segment>
+    </unit>
+    <unit id="warning.metaDescriptionLost">
+      <segment>
+        <source>Description lost</source>
+      </segment>
+    </unit>
+    <unit id="warning.metaDescriptionLost.description">
+      <segment>
+        <source>The reference page had a meta description, the same content on the target has none.</source>
+      </segment>
+    </unit>
+    <unit id="warning.openGraphImageLost">
+      <segment>
+        <source>Preview image lost</source>
+      </segment>
+    </unit>
+    <unit id="warning.openGraphImageLost.description">
+      <segment>
+        <source>The reference page had an og:image for shared links, the same content on the target has none.</source>
       </segment>
     </unit>
     <unit id="abortReason.loop">
@@ -2002,6 +2102,26 @@
         <source>Pass it on to the integrator: one detail page per record type should render the records, and the others should link to it or name it as canonical.</source>
       </segment>
     </unit>
+    <unit id="faq.metadata.title">
+      <segment>
+        <source>Title, description or preview image are missing or the same everywhere</source>
+      </segment>
+    </unit>
+    <unit id="faq.metadata.findings">
+      <segment>
+        <source>Status check: Shared with other URLs, No description, No preview image, In the sitemap but noindex · Migration check: Description lost, Preview image lost</source>
+      </segment>
+    </unit>
+    <unit id="faq.metadata.meaning">
+      <segment>
+        <source>Search engines show the title and the description of a page in their results; social networks and messengers show the OpenGraph data — title, description, image — when a link is shared. The checks read what each page actually delivers. For a normal page that comes from its page properties; for the detail view of a plugin — a news item, a product — the plugin or its template has to set it, which the backend cannot show. When it does not, every detail view carries the title and description of the detail page.</source>
+      </segment>
+    </unit>
+    <unit id="faq.metadata.action">
+      <segment>
+        <source>A normal page: fill in its page properties — tab SEO, "Title for search engines" and "Description for search engines"; tab Social Media, section "Open Graph (Facebook)", "Open Graph Image". A detail view, or "Shared with other URLs": pass it on to the integrator, the template of the detail view has to set the metadata of its record. "In the sitemap, but noindex": check the switch "Index this page" on the tab SEO; if it is meant to be off, the integrator has to leave the page out of the sitemap.</source>
+      </segment>
+    </unit>
     <unit id="faq.argumentsIgnored.title">
       <segment>
         <source>Link arguments have no effect</source>
@@ -2170,6 +2290,26 @@
     <unit id="glossary.detailPage">
       <segment>
         <source>Content that is not a page — a news item, a product, a job — is a record. A plugin shows it on a detail page, whose URL carries the record, e.g. /news/my-article. The same page without a record shows a list, an empty page or an error.</source>
+      </segment>
+    </unit>
+    <unit id="glossary.metaDescription.term">
+      <segment>
+        <source>Meta description</source>
+      </segment>
+    </unit>
+    <unit id="glossary.metaDescription">
+      <segment>
+        <source>A short summary of a page that search engines may show below the title in their results. Page properties, tab SEO, field "Description for search engines"; next to it, "Title for search engines" replaces the page title there.</source>
+      </segment>
+    </unit>
+    <unit id="glossary.openGraph.term">
+      <segment>
+        <source>OpenGraph</source>
+      </segment>
+    </unit>
+    <unit id="glossary.openGraph">
+      <segment>
+        <source>Details for the preview of a shared link in social networks and messengers: title, description and image. Page properties, tab Social Media, section "Open Graph (Facebook)". TYPO3 only renders them when they are filled in; without an image, the preview has none.</source>
       </segment>
     </unit>
     <unit id="glossary.noIndex.term">

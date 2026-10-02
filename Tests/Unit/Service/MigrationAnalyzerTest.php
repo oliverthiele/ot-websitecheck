@@ -6,6 +6,7 @@ namespace OliverThiele\OtWebsitecheck\Tests\Unit\Service;
 
 use OliverThiele\OtWebsitecheck\Domain\Model\Observation;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use PHPUnit\Framework\Attributes\Test;
@@ -367,6 +368,30 @@ final class MigrationAnalyzerTest extends UnitTestCase
         self::assertSame(MigrationAnalyzer::VERDICT_MISSING, $results[$target->uid]['verdict']);
     }
 
+    #[Test]
+    public function metadataLostOnTheSameContentIsWarned(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'), metadata: new PageMetadata('Old', 'A summary', '', '', '', 'https://www.example.com/a.jpg'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 301],
+            ['url' => 'https://target.example.com/new/', 'status' => 200],
+        ], new PageIdentity(10, 'en'), metadata: new PageMetadata('New'));
+
+        $result = $this->subject->analyze([$reference, $target])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT, $result['verdict']);
+        self::assertSame([MigrationAnalyzer::WARNING_META_DESCRIPTION_LOST, MigrationAnalyzer::WARNING_OPEN_GRAPH_IMAGE_LOST], $result['warnings']);
+    }
+
+    #[Test]
+    public function rowsWithoutReadMetadataLoseNothing(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'), metadata: new PageMetadata('Old', 'A summary'));
+        $target = $this->target('/old/', [['url' => 'https://target.example.com/old/', 'status' => 200]], new PageIdentity(10, 'en'));
+
+        self::assertSame([], $this->subject->analyze([$reference, $target])[$target->uid]['warnings']);
+    }
+
     /**
      * @param list<Observation> $observations
      */
@@ -375,17 +400,17 @@ final class MigrationAnalyzerTest extends UnitTestCase
         return $this->subject->analyze($observations)[$observation->uid]['verdict'];
     }
 
-    private function reference(string $path, PageIdentity $identity, int $status = 200, string $canonicalUrl = ''): Observation
+    private function reference(string $path, PageIdentity $identity, int $status = 200, string $canonicalUrl = '', PageMetadata $metadata = new PageMetadata()): Observation
     {
-        return $this->observation(Observation::ROLE_REFERENCE, 'reference', $path, [['url' => 'https://www.example.com' . $path, 'status' => $status]], $identity, canonicalUrl: $canonicalUrl);
+        return $this->observation(Observation::ROLE_REFERENCE, 'reference', $path, [['url' => 'https://www.example.com' . $path, 'status' => $status]], $identity, canonicalUrl: $canonicalUrl, metadata: $metadata);
     }
 
     /**
      * @param list<array{url: string, status: int, redirectBy?: string}> $chain
      */
-    private function target(string $path, array $chain, PageIdentity $identity = new PageIdentity(), string $abortReason = RedirectChain::ABORT_NONE, string $canonicalUrl = ''): Observation
+    private function target(string $path, array $chain, PageIdentity $identity = new PageIdentity(), string $abortReason = RedirectChain::ABORT_NONE, string $canonicalUrl = '', PageMetadata $metadata = new PageMetadata()): Observation
     {
-        return $this->observation(Observation::ROLE_TARGET, 'target', $path, $chain, $identity, $abortReason, $canonicalUrl);
+        return $this->observation(Observation::ROLE_TARGET, 'target', $path, $chain, $identity, $abortReason, $canonicalUrl, $metadata);
     }
 
     /**
@@ -394,7 +419,7 @@ final class MigrationAnalyzerTest extends UnitTestCase
      *
      * @param list<array{url: string, status: int, redirectBy?: string}> $chain
      */
-    private function observation(string $role, string $environment, string $path, array $chain, PageIdentity $identity, string $abortReason = RedirectChain::ABORT_NONE, string $canonicalUrl = ''): Observation
+    private function observation(string $role, string $environment, string $path, array $chain, PageIdentity $identity, string $abortReason = RedirectChain::ABORT_NONE, string $canonicalUrl = '', PageMetadata $metadata = new PageMetadata()): Observation
     {
         $redirectChain = new RedirectChain($chain, '', $abortReason);
         $finalPath = parse_url($redirectChain->getFinalUrl(), PHP_URL_PATH);
@@ -416,6 +441,7 @@ final class MigrationAnalyzerTest extends UnitTestCase
             abortReason: $abortReason,
             identity: $identity,
             canonicalUrl: $canonicalUrl,
+            metadata: $metadata,
         );
     }
 }

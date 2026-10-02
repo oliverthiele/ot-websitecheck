@@ -15,7 +15,7 @@ return [
         ],
     ],
     'types' => [
-        '1' => ['showitem' => 'reviewed, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_observation.tab.observation, run_label, environment, role, sitemap_group, requested_url, requested_path, first_status, final_url, final_path, final_status, hop_count, redirect_chain, abort_reason, canonical_url, page_uid, language, record_table, record_uid, verdict, warnings, suggested_target, checked_at'],
+        '1' => ['showitem' => 'reviewed, note, --div--;LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_observation.tab.observation, run_label, environment, role, sitemap_group, requested_url, requested_path, first_status, final_url, final_path, final_status, hop_count, redirect_chain, abort_reason, canonical_url, metadata, page_uid, language, record_table, record_uid, verdict, warnings, suggested_target, checked_at'],
     ],
     'columns' => [
         'run_label' => [
@@ -138,6 +138,16 @@ return [
                 'type' => 'input',
                 'size' => 50,
                 'max' => 2048,
+                'readOnly' => true,
+                'searchable' => false,
+            ],
+        ],
+        'metadata' => [
+            'label' => 'LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang_db.xlf:tx_otwebsitecheck_domain_model_observation.metadata',
+            'config' => [
+                'type' => 'text',
+                'cols' => 60,
+                'rows' => 5,
                 'readOnly' => true,
                 'searchable' => false,
             ],

@@ -40,6 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show who acts on a finding in the status check and migration check modules,
   filter the results by it, and explain the markers of the status check in a
   popover
+- Read the metadata of every page in `websitecheck:checksitemap` — title,
+  meta description and robots, `og:title`, `og:description`, `og:image` —
+  and report URLs of one page sharing a title or description (`metaShared`),
+  a missing description or preview image and sitemap URLs marked noindex, in
+  a column and filter of the status check module. Requires a database schema
+  update
+- Warn in the migration check when the same content loses its meta
+  description (`metaDescriptionLost`) or `og:image` (`openGraphImageLost`)
 - Add a glossary to the help module: the terms of the checks, and where the
   matching settings are in the page properties of TYPO3 — canonical link,
   "Show Content from this page", shortcut pages, URL segment, page ID, and

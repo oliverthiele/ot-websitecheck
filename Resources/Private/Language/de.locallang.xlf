@@ -501,6 +501,102 @@
         <target>Endgültige URL</target>
       </segment>
     </unit>
+    <unit id="statusResults.column.metadata">
+      <segment>
+        <source>Metadata</source>
+        <target>Metadaten</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.all">
+      <segment>
+        <source>— all metadata —</source>
+        <target>— alle Metadaten —</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaShared">
+      <segment>
+        <source>Shared with other URLs</source>
+        <target>Mit anderen URLs geteilt</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaShared.help">
+      <segment>
+        <source>Other URLs of the same page have the same title or description — usually the detail views of a plugin that sets no metadata of its own. In search results they all look alike.</source>
+        <target>Andere URLs derselben Seite haben denselben Titel oder dieselbe Beschreibung — meist die Detailansichten eines Plugins, das keine eigenen Metadaten setzt. In den Suchergebnissen sehen sie alle gleich aus.</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaDescriptionMissing">
+      <segment>
+        <source>No description</source>
+        <target>Keine Beschreibung</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.metaDescriptionMissing.help">
+      <segment>
+        <source>The page renders no meta description. Search engines then choose a snippet of the page themselves.</source>
+        <target>Die Seite gibt keine Meta-Description aus. Suchmaschinen wählen dann selbst einen Ausschnitt der Seite.</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.openGraphImageMissing">
+      <segment>
+        <source>No preview image</source>
+        <target>Kein Vorschaubild</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.openGraphImageMissing.help">
+      <segment>
+        <source>The page renders no og:image. A link to it shared in a social network or messenger shows no image, or a random one.</source>
+        <target>Die Seite gibt kein og:image aus. Ein Link auf sie, geteilt in einem sozialen Netzwerk oder Messenger, zeigt kein Bild oder ein zufälliges.</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.listedButNoindex">
+      <segment>
+        <source>In the sitemap, but noindex</source>
+        <target>In der Sitemap, aber noindex</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.listedButNoindex.help">
+      <segment>
+        <source>The sitemap lists the page, but the page asks search engines not to index it. One of the two is wrong.</source>
+        <target>Die Sitemap führt die Seite, die Seite bittet Suchmaschinen aber, sie nicht zu indexieren. Eins von beidem ist falsch.</target>
+      </segment>
+    </unit>
+    <unit id="metadata.title">
+      <segment>
+        <source>Title</source>
+        <target>Titel</target>
+      </segment>
+    </unit>
+    <unit id="metadata.description">
+      <segment>
+        <source>Description</source>
+        <target>Beschreibung</target>
+      </segment>
+    </unit>
+    <unit id="metadata.robots">
+      <segment>
+        <source>Robots</source>
+        <target>Robots</target>
+      </segment>
+    </unit>
+    <unit id="metadata.ogTitle">
+      <segment>
+        <source>og:title</source>
+        <target>og:title</target>
+      </segment>
+    </unit>
+    <unit id="metadata.ogDescription">
+      <segment>
+        <source>og:description</source>
+        <target>og:description</target>
+      </segment>
+    </unit>
+    <unit id="metadata.ogImage">
+      <segment>
+        <source>og:image</source>
+        <target>og:image</target>
+      </segment>
+    </unit>
     <unit id="statusResults.column.checkedAt">
       <segment>
         <source>Checked at</source>
@@ -1237,6 +1333,30 @@
       <segment>
         <source>The same page renders records under other URLs. If it shows content only with a record, this URL is a detail page without one and does not belong in the sitemap; if it shows a list as well, nothing is wrong.</source>
         <target>Dieselbe Seite zeigt unter anderen URLs Datensätze. Zeigt sie nur mit einem Datensatz Inhalt, ist diese URL eine Detailseite ohne Datensatz und gehört nicht in die Sitemap; zeigt sie auch eine Liste, ist alles in Ordnung.</target>
+      </segment>
+    </unit>
+    <unit id="warning.metaDescriptionLost">
+      <segment>
+        <source>Description lost</source>
+        <target>Beschreibung verloren</target>
+      </segment>
+    </unit>
+    <unit id="warning.metaDescriptionLost.description">
+      <segment>
+        <source>The reference page had a meta description, the same content on the target has none.</source>
+        <target>Die Referenzseite hatte eine Meta-Description, derselbe Inhalt auf dem Ziel hat keine.</target>
+      </segment>
+    </unit>
+    <unit id="warning.openGraphImageLost">
+      <segment>
+        <source>Preview image lost</source>
+        <target>Vorschaubild verloren</target>
+      </segment>
+    </unit>
+    <unit id="warning.openGraphImageLost.description">
+      <segment>
+        <source>The reference page had an og:image for shared links, the same content on the target has none.</source>
+        <target>Die Referenzseite hatte ein og:image für geteilte Links, derselbe Inhalt auf dem Ziel hat keins.</target>
       </segment>
     </unit>
     <unit id="abortReason.loop">
@@ -2403,6 +2523,30 @@
         <target>An die Integration weitergeben: Eine Detailseite pro Datensatztyp sollte die Datensätze darstellen, die anderen sollten auf sie verlinken oder sie als Canonical nennen.</target>
       </segment>
     </unit>
+    <unit id="faq.metadata.title">
+      <segment>
+        <source>Title, description or preview image are missing or the same everywhere</source>
+        <target>Titel, Beschreibung oder Vorschaubild fehlen oder sind überall gleich</target>
+      </segment>
+    </unit>
+    <unit id="faq.metadata.findings">
+      <segment>
+        <source>Status check: Shared with other URLs, No description, No preview image, In the sitemap but noindex · Migration check: Description lost, Preview image lost</source>
+        <target>Status-Check: Mit anderen URLs geteilt, Keine Beschreibung, Kein Vorschaubild, In der Sitemap, aber noindex · Migrations-Check: Beschreibung verloren, Vorschaubild verloren</target>
+      </segment>
+    </unit>
+    <unit id="faq.metadata.meaning">
+      <segment>
+        <source>Search engines show the title and the description of a page in their results; social networks and messengers show the OpenGraph data — title, description, image — when a link is shared. The checks read what each page actually delivers. For a normal page that comes from its page properties; for the detail view of a plugin — a news item, a product — the plugin or its template has to set it, which the backend cannot show. When it does not, every detail view carries the title and description of the detail page.</source>
+        <target>Suchmaschinen zeigen Titel und Beschreibung einer Seite in ihren Ergebnissen; soziale Netzwerke und Messenger zeigen die OpenGraph-Angaben — Titel, Beschreibung, Bild —, wenn ein Link geteilt wird. Die Checks lesen, was jede Seite tatsächlich ausliefert. Bei einer normalen Seite kommt das aus ihren Seiteneigenschaften; bei der Detailansicht eines Plugins — einer News, einem Produkt — muss das Plugin oder sein Template es setzen, was das Backend nicht zeigen kann. Tut es das nicht, trägt jede Detailansicht Titel und Beschreibung der Detailseite.</target>
+      </segment>
+    </unit>
+    <unit id="faq.metadata.action">
+      <segment>
+        <source>A normal page: fill in its page properties — tab SEO, "Title for search engines" and "Description for search engines"; tab Social Media, section "Open Graph (Facebook)", "Open Graph Image". A detail view, or "Shared with other URLs": pass it on to the integrator, the template of the detail view has to set the metadata of its record. "In the sitemap, but noindex": check the switch "Index this page" on the tab SEO; if it is meant to be off, the integrator has to leave the page out of the sitemap.</source>
+        <target>Eine normale Seite: ihre Seiteneigenschaften ausfüllen — Reiter SEO, „Titel für Suchmaschinen“ und „Beschreibung für Suchmaschinen“; Reiter Social Media, Bereich „Open Graph (Facebook)“, „OpenGraph-Bild“. Eine Detailansicht oder „Mit anderen URLs geteilt“: an die Integration weitergeben, das Template der Detailansicht muss die Metadaten seines Datensatzes setzen. „In der Sitemap, aber noindex“: den Schalter „Diese Seite indizieren“ auf dem Reiter SEO prüfen; soll er aus sein, muss die Integration die Seite aus der Sitemap nehmen.</target>
+      </segment>
+    </unit>
     <unit id="faq.argumentsIgnored.title">
       <segment>
         <source>Link arguments have no effect</source>
@@ -2605,6 +2749,30 @@
       <segment>
         <source>Content that is not a page — a news item, a product, a job — is a record. A plugin shows it on a detail page, whose URL carries the record, e.g. /news/my-article. The same page without a record shows a list, an empty page or an error.</source>
         <target>Inhalt, der keine Seite ist — eine News, ein Produkt, eine Stelle —, ist ein Datensatz. Ein Plugin zeigt ihn auf einer Detailseite, deren URL den Datensatz enthält, z. B. /news/mein-artikel. Dieselbe Seite ohne Datensatz zeigt eine Liste, eine leere Seite oder einen Fehler.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.metaDescription.term">
+      <segment>
+        <source>Meta description</source>
+        <target>Meta-Description</target>
+      </segment>
+    </unit>
+    <unit id="glossary.metaDescription">
+      <segment>
+        <source>A short summary of a page that search engines may show below the title in their results. Page properties, tab SEO, field "Description for search engines"; next to it, "Title for search engines" replaces the page title there.</source>
+        <target>Eine kurze Zusammenfassung einer Seite, die Suchmaschinen unter dem Titel in ihren Ergebnissen zeigen können. Seiteneigenschaften, Reiter SEO, Feld „Beschreibung für Suchmaschinen“; daneben ersetzt „Titel für Suchmaschinen“ dort den Seitentitel.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.openGraph.term">
+      <segment>
+        <source>OpenGraph</source>
+        <target>OpenGraph</target>
+      </segment>
+    </unit>
+    <unit id="glossary.openGraph">
+      <segment>
+        <source>Details for the preview of a shared link in social networks and messengers: title, description and image. Page properties, tab Social Media, section "Open Graph (Facebook)". TYPO3 only renders them when they are filled in; without an image, the preview has none.</source>
+        <target>Angaben für die Vorschau eines geteilten Links in sozialen Netzwerken und Messengern: Titel, Beschreibung und Bild. Seiteneigenschaften, Reiter Social Media, Bereich „Open Graph (Facebook)“. TYPO3 gibt sie nur aus, wenn sie ausgefüllt sind; ohne Bild hat die Vorschau keins.</target>
       </segment>
     </unit>
     <unit id="glossary.noIndex.term">

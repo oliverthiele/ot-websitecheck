@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Domain\Model;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 
 /**
@@ -45,6 +46,7 @@ final readonly class Observation
         public string $note = '',
         public int $checkedAt = 0,
         public string $canonicalUrl = '',
+        public PageMetadata $metadata = new PageMetadata(),
     ) {
     }
 
@@ -81,6 +83,7 @@ final readonly class Observation
             note: RowValue::string($row, 'note'),
             checkedAt: RowValue::int($row, 'checked_at'),
             canonicalUrl: RowValue::string($row, 'canonical_url'),
+            metadata: PageMetadata::fromJson(RowValue::string($row, 'metadata')),
         );
     }
 
