@@ -44,11 +44,14 @@ class PageFetcher
             return new FetchedPage(0, '', TransferFailure::fromThrowable($throwable));
         }
 
+        $redirectHistory = $response->getHeader(RedirectMiddleware::HISTORY_HEADER);
+
         return new FetchedPage(
             $response->getStatusCode(),
             (string)$response->getBody(),
             null,
-            count($response->getHeader(RedirectMiddleware::HISTORY_HEADER)),
+            count($redirectHistory),
+            $redirectHistory === [] ? '' : (string)end($redirectHistory),
         );
     }
 }

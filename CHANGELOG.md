@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Read the canonical URL (`<link rel="canonical">`) of every page the
+  migration check and `websitecheck:checksitemap` request, and store it with
+  the result. Requires a database schema update
+- Add the verdict `redirectNotFinal` to the migration check: a redirect that
+  reaches the same page or record, but through another redirect or on a page
+  that names another URL as canonical. The suggested target is the final URL.
+  It counts as a problem for `--fail-on-problems`
+- Add the warnings `shortcutInChain` (a redirect leads to a TYPO3 shortcut
+  page, recognised by `X-Redirect-By`), `canonicalDiffers` and
+  `listedUrlNotCanonical` (a sitemap lists a URL whose page names another URL
+  as canonical) to the migration check
+- Add the markers `redirectChain` and `canonicalElsewhere` to the status
+  check; like `redirected`, they do not fail a run with `--fail-on-problems`
+- Show the final URL — the canonical URL, or where the redirects end — in the
+  status check module, and filter its results by marker
+- Record the `X-Redirect-By` header of every redirect in the redirect chain of
+  the migration check
+
+### Changed
+
+- Count a redirect in the migration check to the page whose content the
+  reference page shows (`content_from_pid`, declared through its canonical)
+  as the same content instead of `otherContent`, and suggest that page as
+  target for such a URL when it is missing
+- Report a redirect chain to the same content in the migration check as
+  `redirectNotFinal` instead of `movedWithRedirect` with a warning; a run with
+  `--fail-on-problems` fails on it now. Re-run the check, or recompute the
+  verdicts with `--analyze-only`; canonical URLs are only known after a re-run
+
 ## [0.9.0] — 2026-10-01
 
 ### Added

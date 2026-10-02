@@ -42,6 +42,16 @@
         <source>Error marker</source>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.final_url">
+      <segment>
+        <source>Final URL after redirects</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the page</source>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.checked_at">
       <segment>
         <source>Checked at</source>
@@ -140,6 +150,11 @@
     <unit id="tx_otwebsitecheck_domain_model_observation.abort_reason">
       <segment>
         <source>Abort reason</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the final page</source>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_observation.page_uid">

@@ -60,11 +60,17 @@ class RedirectChainFollower
             }
 
             $status = $response->getStatusCode();
-            $steps[] = ['url' => $currentUrl, 'status' => $status];
-
             if (!in_array($status, self::REDIRECT_STATUS_CODES, true)) {
+                $steps[] = ['url' => $currentUrl, 'status' => $status];
                 return new RedirectChain($steps, (string)$response->getBody());
             }
+
+            // TYPO3 names what made a redirect, e.g. "TYPO3 Shortcut/Mountpoint"
+            // for a shortcut page — the only way to tell one from any other 307.
+            $redirectBy = $response->getHeaderLine('X-Redirect-By');
+            $steps[] = $redirectBy === ''
+                ? ['url' => $currentUrl, 'status' => $status]
+                : ['url' => $currentUrl, 'status' => $status, 'redirectBy' => $redirectBy];
 
             $location = $response->getHeaderLine('Location');
             if ($location === '') {

@@ -192,6 +192,142 @@ final class MigrationAnalyzerTest extends UnitTestCase
         self::assertContains(MigrationAnalyzer::WARNING_DUPLICATE_DETAIL_PAGE, $results[$second->uid]['warnings']);
     }
 
+    #[Test]
+    public function redirectChainToTheSamePageIsNotFinal(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 301],
+            ['url' => 'https://target.example.com/interim/', 'status' => 301],
+            ['url' => 'https://target.example.com/new/', 'status' => 200],
+        ], new PageIdentity(10, 'en'));
+
+        $result = $this->subject->analyze([$reference, $target])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_REDIRECT_NOT_FINAL, $result['verdict']);
+        self::assertContains(MigrationAnalyzer::WARNING_REDIRECT_CHAIN, $result['warnings']);
+        self::assertSame('/new/', $result['suggestedTarget']);
+        self::assertContains(MigrationAnalyzer::VERDICT_REDIRECT_NOT_FINAL, MigrationAnalyzer::PROBLEM_VERDICTS);
+    }
+
+    #[Test]
+    public function redirectToAPageWithAnotherCanonicalIsNotFinal(): void
+    {
+        // /alias/ shows the content of page 10 and names it as canonical.
+        $reference = $this->reference('/old/', new PageIdentity(11, 'en'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 301],
+            ['url' => 'https://target.example.com/alias/', 'status' => 200],
+        ], new PageIdentity(11, 'en'), canonicalUrl: 'https://target.example.com/original/');
+
+        $result = $this->subject->analyze([$reference, $target])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_REDIRECT_NOT_FINAL, $result['verdict']);
+        self::assertSame([MigrationAnalyzer::WARNING_CANONICAL_DIFFERS], $result['warnings']);
+        self::assertSame('/original/', $result['suggestedTarget']);
+    }
+
+    #[Test]
+    public function redirectToAPageThatIsItsOwnCanonicalIsFinal(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 301],
+            ['url' => 'https://target.example.com/new/', 'status' => 200],
+        ], new PageIdentity(10, 'en'), canonicalUrl: 'https://www.example.com/new/');
+
+        $result = $this->subject->analyze([$reference, $target])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT, $result['verdict']);
+        self::assertSame([], $result['warnings']);
+        self::assertSame('', $result['suggestedTarget']);
+    }
+
+    #[Test]
+    public function redirectToAPageWithoutCanonicalIsFinal(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 301],
+            ['url' => 'https://target.example.com/new/', 'status' => 200],
+        ], new PageIdentity(10, 'en'));
+
+        self::assertSame(MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT, $this->verdictOf($target, [$reference, $target]));
+    }
+
+    #[Test]
+    public function redirectToAShortcutPageIsNamed(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 301],
+            ['url' => 'https://target.example.com/shortcut/', 'status' => 307, 'redirectBy' => 'TYPO3 Shortcut/Mountpoint'],
+            ['url' => 'https://target.example.com/new/', 'status' => 200],
+        ], new PageIdentity(10, 'en'));
+
+        $result = $this->subject->analyze([$reference, $target])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_REDIRECT_NOT_FINAL, $result['verdict']);
+        self::assertContains(MigrationAnalyzer::WARNING_SHORTCUT_IN_CHAIN, $result['warnings']);
+        self::assertSame('/new/', $result['suggestedTarget']);
+    }
+
+    #[Test]
+    public function requestedUrlThatIsAShortcutItselfIsASingleRedirect(): void
+    {
+        $reference = $this->reference('/old/', new PageIdentity(10, 'en'));
+        $target = $this->target('/old/', [
+            ['url' => 'https://target.example.com/old/', 'status' => 307, 'redirectBy' => 'TYPO3 Shortcut/Mountpoint'],
+            ['url' => 'https://target.example.com/new/', 'status' => 200],
+        ], new PageIdentity(10, 'en'));
+
+        $result = $this->subject->analyze([$reference, $target])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT, $result['verdict']);
+        self::assertSame([MigrationAnalyzer::WARNING_TEMPORARY_REDIRECT], $result['warnings']);
+    }
+
+    #[Test]
+    public function redirectToThePageWhoseContentAPageShowsIsTheSameContent(): void
+    {
+        // Page 11 shows the content of page 10 and declares it as canonical.
+        $original = $this->reference('/original/', new PageIdentity(10, 'en'));
+        $alias = $this->reference('/alias/', new PageIdentity(11, 'en'), canonicalUrl: 'https://www.example.com/original/');
+        $target = $this->target('/alias/', [
+            ['url' => 'https://target.example.com/alias/', 'status' => 301],
+            ['url' => 'https://target.example.com/original/', 'status' => 200],
+        ], new PageIdentity(10, 'en'));
+
+        self::assertSame(MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT, $this->verdictOf($target, [$original, $alias, $target]));
+    }
+
+    #[Test]
+    public function missingAliasGetsThePageItShowsAsSuggestion(): void
+    {
+        $original = $this->reference('/original/', new PageIdentity(10, 'en'));
+        $alias = $this->reference('/alias/', new PageIdentity(11, 'en'), canonicalUrl: 'https://www.example.com/original/');
+        $target = $this->target('/alias/', [['url' => 'https://target.example.com/alias/', 'status' => 404]]);
+        $newAlias = $this->observation(Observation::ROLE_TARGET_SITEMAP, 'target-sitemap', '/new-alias/', [['url' => 'https://target.example.com/new-alias/', 'status' => 200]], new PageIdentity(11, 'en'), canonicalUrl: 'https://target.example.com/new-original/');
+        $newOriginal = $this->observation(Observation::ROLE_TARGET_SITEMAP, 'target-sitemap', '/new-original/', [['url' => 'https://target.example.com/new-original/', 'status' => 200]], new PageIdentity(10, 'en'));
+
+        $result = $this->subject->analyze([$original, $alias, $target, $newAlias, $newOriginal])[$target->uid];
+
+        self::assertSame(MigrationAnalyzer::VERDICT_MISSING, $result['verdict']);
+        self::assertSame('/new-original/', $result['suggestedTarget']);
+    }
+
+    #[Test]
+    public function sitemapListingANonCanonicalUrlIsWarned(): void
+    {
+        $alias = $this->reference('/alias/', new PageIdentity(11, 'en'), canonicalUrl: 'https://www.example.com/original/');
+        $original = $this->reference('/original/', new PageIdentity(10, 'en'), canonicalUrl: 'https://www.example.com/original/');
+
+        $results = $this->subject->analyze([$alias, $original]);
+
+        self::assertSame([MigrationAnalyzer::WARNING_LISTED_URL_NOT_CANONICAL], $results[$alias->uid]['warnings']);
+        self::assertSame([], $results[$original->uid]['warnings']);
+    }
+
     /**
      * @param list<Observation> $observations
      */
@@ -200,26 +336,26 @@ final class MigrationAnalyzerTest extends UnitTestCase
         return $this->subject->analyze($observations)[$observation->uid]['verdict'];
     }
 
-    private function reference(string $path, PageIdentity $identity, int $status = 200): Observation
+    private function reference(string $path, PageIdentity $identity, int $status = 200, string $canonicalUrl = ''): Observation
     {
-        return $this->observation(Observation::ROLE_REFERENCE, 'reference', $path, [['url' => 'https://www.example.com' . $path, 'status' => $status]], $identity);
+        return $this->observation(Observation::ROLE_REFERENCE, 'reference', $path, [['url' => 'https://www.example.com' . $path, 'status' => $status]], $identity, canonicalUrl: $canonicalUrl);
     }
 
     /**
-     * @param list<array{url: string, status: int}> $chain
+     * @param list<array{url: string, status: int, redirectBy?: string}> $chain
      */
-    private function target(string $path, array $chain, PageIdentity $identity = new PageIdentity(), string $abortReason = RedirectChain::ABORT_NONE): Observation
+    private function target(string $path, array $chain, PageIdentity $identity = new PageIdentity(), string $abortReason = RedirectChain::ABORT_NONE, string $canonicalUrl = ''): Observation
     {
-        return $this->observation(Observation::ROLE_TARGET, 'target', $path, $chain, $identity, $abortReason);
+        return $this->observation(Observation::ROLE_TARGET, 'target', $path, $chain, $identity, $abortReason, $canonicalUrl);
     }
 
     /**
      * Built through RedirectChain, so final status, final path and hop count
      * follow the same rules as in a real run.
      *
-     * @param list<array{url: string, status: int}> $chain
+     * @param list<array{url: string, status: int, redirectBy?: string}> $chain
      */
-    private function observation(string $role, string $environment, string $path, array $chain, PageIdentity $identity, string $abortReason = RedirectChain::ABORT_NONE): Observation
+    private function observation(string $role, string $environment, string $path, array $chain, PageIdentity $identity, string $abortReason = RedirectChain::ABORT_NONE, string $canonicalUrl = ''): Observation
     {
         $redirectChain = new RedirectChain($chain, '', $abortReason);
         $finalPath = parse_url($redirectChain->getFinalUrl(), PHP_URL_PATH);
@@ -240,6 +376,7 @@ final class MigrationAnalyzerTest extends UnitTestCase
             redirectChain: $chain,
             abortReason: $abortReason,
             identity: $identity,
+            canonicalUrl: $canonicalUrl,
         );
     }
 }

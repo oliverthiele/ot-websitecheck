@@ -7,6 +7,7 @@ namespace OliverThiele\OtWebsitecheck\Service;
 use OliverThiele\OtWebsitecheck\Domain\Model\Observation;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 
 /**
  * Compares the observations of a migration check run: for every path that
@@ -22,6 +23,7 @@ class MigrationAnalyzer
     public const string VERDICT_REFERENCE_NOT_OK = 'referenceNotOk';
     public const string VERDICT_OK = 'ok';
     public const string VERDICT_MOVED_WITH_REDIRECT = 'movedWithRedirect';
+    public const string VERDICT_REDIRECT_NOT_FINAL = 'redirectNotFinal';
     public const string VERDICT_MISSING = 'missing';
     public const string VERDICT_REDIRECT_BROKEN = 'redirectBroken';
     public const string VERDICT_OTHER_CONTENT = 'otherContent';
@@ -38,6 +40,7 @@ class MigrationAnalyzer
         self::VERDICT_OTHER_CONTENT,
         self::VERDICT_IDENTITY_UNKNOWN,
         self::VERDICT_TIMEOUT,
+        self::VERDICT_REDIRECT_NOT_FINAL,
     ];
 
     public const string WARNING_REDIRECT_CHAIN = 'redirectChain';
@@ -47,8 +50,16 @@ class MigrationAnalyzer
     public const string WARNING_LANGUAGE_CHANGED = 'languageChanged';
     public const string WARNING_RECORD_IDENTITY_UNKNOWN = 'recordIdentityUnknown';
     public const string WARNING_DUPLICATE_DETAIL_PAGE = 'duplicateDetailPage';
+    public const string WARNING_SHORTCUT_IN_CHAIN = 'shortcutInChain';
+    public const string WARNING_CANONICAL_DIFFERS = 'canonicalDiffers';
+    public const string WARNING_LISTED_URL_NOT_CANONICAL = 'listedUrlNotCanonical';
 
     private const array TEMPORARY_REDIRECT_STATUS_CODES = [302, 303, 307];
+
+    /**
+     * X-Redirect-By of a redirect TYPO3 makes for a shortcut or mount point page.
+     */
+    private const string SHORTCUT_REDIRECT_BY = 'TYPO3 Shortcut/Mountpoint';
 
     /**
      * A path that consists of nothing but an optional language segment, e.g.
@@ -67,10 +78,14 @@ class MigrationAnalyzer
     public function analyze(array $observations): array
     {
         $referenceByPath = [];
+        $workingReferenceByFinalPath = [];
         $candidatesOnTarget = [];
         foreach ($observations as $observation) {
             if ($observation->role === Observation::ROLE_REFERENCE) {
                 $referenceByPath[$observation->requestedPath] = $observation;
+                if ($observation->finalStatus === 200) {
+                    $workingReferenceByFinalPath[UrlUtility::comparablePath($observation->finalPath)] = $observation;
+                }
             }
             if (in_array($observation->role, [Observation::ROLE_TARGET, Observation::ROLE_TARGET_SITEMAP], true)
                 && $observation->finalStatus === 200
@@ -88,23 +103,28 @@ class MigrationAnalyzer
 
             if ($observation->role === Observation::ROLE_REFERENCE) {
                 $verdict = $observation->finalStatus === 200 ? self::VERDICT_REFERENCE : self::VERDICT_REFERENCE_NOT_OK;
-                if ($observation->hopCount > 0) {
-                    $warnings[] = self::WARNING_LISTED_URL_REDIRECTS;
-                }
+                $warnings = [...$warnings, ...$this->collectListingWarnings($observation)];
             } elseif ($observation->role === Observation::ROLE_TARGET) {
                 $reference = $referenceByPath[$observation->requestedPath] ?? null;
-                $verdict = $reference === null ? '' : $this->resolveTargetVerdict($reference, $observation);
+                $canonicalReference = $reference === null ? null : $this->findCanonicalReference($reference, $workingReferenceByFinalPath);
+                $verdict = $reference === null ? '' : $this->resolveTargetVerdict($reference, $observation, $canonicalReference);
                 if ($reference !== null && $this->isLanguageChanged($reference->identity, $observation->identity)) {
                     $warnings[] = self::WARNING_LANGUAGE_CHANGED;
                 }
                 if ($reference !== null && in_array($verdict, [self::VERDICT_MISSING, self::VERDICT_REDIRECT_BROKEN, self::VERDICT_OTHER_CONTENT], true)) {
-                    $suggestedTarget = $this->findSuggestedTarget($reference, $observation, $candidatesOnTarget);
+                    $suggestedTarget = $this->findSuggestedTarget($reference, $canonicalReference, $observation, $candidatesOnTarget);
+                }
+                if ($verdict === self::VERDICT_REDIRECT_NOT_FINAL) {
+                    if ($this->declaresCanonicalElsewhere($observation)) {
+                        $warnings[] = self::WARNING_CANONICAL_DIFFERS;
+                        $suggestedTarget = UrlUtility::comparablePath($observation->canonicalUrl);
+                    } else {
+                        $suggestedTarget = $observation->finalPath;
+                    }
                 }
             } elseif ($observation->role === Observation::ROLE_TARGET_SITEMAP) {
                 $verdict = self::VERDICT_LISTED;
-                if ($observation->hopCount > 0) {
-                    $warnings[] = self::WARNING_LISTED_URL_REDIRECTS;
-                }
+                $warnings = [...$warnings, ...$this->collectListingWarnings($observation)];
             } else {
                 $verdict = '';
             }
@@ -120,7 +140,10 @@ class MigrationAnalyzer
         return $results;
     }
 
-    private function resolveTargetVerdict(Observation $reference, Observation $target): string
+    /**
+     * @param Observation|null $canonicalReference the reference row of the page the reference declares as canonical, see findCanonicalReference()
+     */
+    private function resolveTargetVerdict(Observation $reference, Observation $target, ?Observation $canonicalReference): string
     {
         if ($reference->finalStatus !== 200) {
             return self::VERDICT_REFERENCE_NOT_OK;
@@ -141,14 +164,69 @@ class MigrationAnalyzer
         }
 
         $sameContent = $this->isSameContent($reference->identity, $target->identity);
+        // A page that shows the content of another one declares that page as
+        // canonical. A redirect straight to it leads to the same content.
+        if ($sameContent !== true
+            && $canonicalReference !== null
+            && $this->isSameContent($canonicalReference->identity, $target->identity) === true
+        ) {
+            $sameContent = true;
+        }
         if ($sameContent === null) {
             return self::VERDICT_IDENTITY_UNKNOWN;
         }
         if ($sameContent === false) {
             return self::VERDICT_OTHER_CONTENT;
         }
+        if ($target->hopCount === 0) {
+            return self::VERDICT_OK;
+        }
 
-        return $target->hopCount > 0 ? self::VERDICT_MOVED_WITH_REDIRECT : self::VERDICT_OK;
+        // Right content, but the redirect should lead there in one step.
+        return $target->hopCount > 1 || $this->declaresCanonicalElsewhere($target)
+            ? self::VERDICT_REDIRECT_NOT_FINAL
+            : self::VERDICT_MOVED_WITH_REDIRECT;
+    }
+
+    /**
+     * The reference row of the page a reference declares as canonical, when
+     * that is another page of the run — e.g. the page whose content a page
+     * shows with "show content from page".
+     *
+     * @param array<string, Observation> $workingReferenceByFinalPath comparable final path => reference row answering 200
+     */
+    private function findCanonicalReference(Observation $reference, array $workingReferenceByFinalPath): ?Observation
+    {
+        if (!$this->declaresCanonicalElsewhere($reference)) {
+            return null;
+        }
+
+        return $workingReferenceByFinalPath[UrlUtility::comparablePath($reference->canonicalUrl)] ?? null;
+    }
+
+    /**
+     * A working page whose canonical names another path than its own.
+     */
+    private function declaresCanonicalElsewhere(Observation $observation): bool
+    {
+        return $observation->finalStatus === 200
+            && $observation->canonicalUrl !== ''
+            && UrlUtility::comparablePath($observation->canonicalUrl) !== UrlUtility::comparablePath($observation->finalPath);
+    }
+
+    /**
+     * What a URL listed in a sitemap should not do: redirect, or name another
+     * URL as canonical. A sitemap lists the URLs a search engine should index.
+     *
+     * @return list<string>
+     */
+    private function collectListingWarnings(Observation $observation): array
+    {
+        if ($observation->hopCount > 0) {
+            return [self::WARNING_LISTED_URL_REDIRECTS];
+        }
+
+        return $this->declaresCanonicalElsewhere($observation) ? [self::WARNING_LISTED_URL_NOT_CANONICAL] : [];
     }
 
     /**
@@ -190,16 +268,39 @@ class MigrationAnalyzer
      * record of a detail page shares its page uid, so several different paths
      * match — and any one of them would be a wrong redirect target.
      *
+     * The page the reference declares as canonical comes first: that is where
+     * a redirect should end. A candidate that declares another page as
+     * canonical is no final target itself and is left out.
+     *
      * @param list<Observation> $candidates
      */
-    private function findSuggestedTarget(Observation $reference, Observation $target, array $candidates): string
+    private function findSuggestedTarget(Observation $reference, ?Observation $canonicalReference, Observation $target, array $candidates): string
     {
-        if (!$reference->identity->hasPage() && !$reference->identity->hasRecord()) {
+        $finalCandidates = array_filter(
+            $candidates,
+            fn(Observation $candidate): bool => $candidate->uid !== $target->uid && !$this->declaresCanonicalElsewhere($candidate),
+        );
+        if ($canonicalReference !== null) {
+            $suggestion = $this->findUnambiguousPath($canonicalReference->identity, $finalCandidates);
+            if ($suggestion !== '') {
+                return $suggestion;
+            }
+        }
+
+        return $this->findUnambiguousPath($reference->identity, $finalCandidates);
+    }
+
+    /**
+     * @param array<int, Observation> $candidates
+     */
+    private function findUnambiguousPath(PageIdentity $identity, array $candidates): string
+    {
+        if (!$identity->hasPage() && !$identity->hasRecord()) {
             return '';
         }
         $matchingPaths = [];
         foreach ($candidates as $candidate) {
-            if ($candidate->uid !== $target->uid && $this->isSameContent($reference->identity, $candidate->identity) === true) {
+            if ($this->isSameContent($identity, $candidate->identity) === true) {
                 $matchingPaths[$candidate->finalPath] = true;
             }
         }
@@ -221,6 +322,14 @@ class MigrationAnalyzer
         foreach ($redirectSteps as $step) {
             if (in_array($step['status'], self::TEMPORARY_REDIRECT_STATUS_CODES, true)) {
                 $warnings[] = self::WARNING_TEMPORARY_REDIRECT;
+                break;
+            }
+        }
+        // A redirect that leads to a shortcut page, which redirects again. The
+        // requested URL being a shortcut itself is a single redirect.
+        foreach (array_slice($redirectSteps, 1) as $step) {
+            if (str_starts_with($step['redirectBy'] ?? '', self::SHORTCUT_REDIRECT_BY)) {
+                $warnings[] = self::WARNING_SHORTCUT_IN_CHAIN;
                 break;
             }
         }

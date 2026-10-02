@@ -29,7 +29,14 @@ URL of the live site still leads to the same page or record on the new one.
 - **Independent of how redirects are made** — only HTTP answers are evaluated,
   so webserver rules, `.htaccess` and EXT:redirects are all covered
 - **Redirect quality** — redirect chains, temporary redirects, loops and
-  redirects to a start page are reported as warnings
+  redirects to a start page are reported as warnings; a redirect that does not
+  lead to the final URL in one step — a chain, a TYPO3 shortcut page on the way,
+  or a page naming another URL as canonical — is reported with the URL it
+  should point at
+- **Canonical URLs** — the `<link rel="canonical">` every page renders through
+  EXT:seo is read: a sitemap entry whose page names another URL as canonical is
+  reported, and a redirect to the page another one shows the content of counts
+  as the same content
 - **Identity per page and record** — pages and detail records are matched by
   uid, not by URL, so a moved detail page is compared with the same record;
   the same record on several pages is reported as duplicate content
@@ -437,6 +444,7 @@ problems and warnings" is set.
 |---------|---------|
 | `ok` | Same path, same page or record |
 | `movedWithRedirect` | Redirects to the same page or record |
+| `redirectNotFinal` | Redirects to the same page or record, but not in one step: the redirect leads to another redirect, or to a page that names another URL as canonical. The suggested target is the final URL |
 | `missing` | 4xx, 5xx or no connection — the finding this tool exists for |
 | `redirectBroken` | Redirects, but ends in an error, a loop or too many hops |
 | `timeout` | No complete answer within `--timeout`, also after the retries — slow, not necessarily missing; check again |
@@ -449,9 +457,12 @@ problems and warnings" is set.
 | Warning | Meaning |
 |---------|---------|
 | `redirectChain` | More than one redirect before the final page |
+| `shortcutInChain` | A redirect leads to a TYPO3 shortcut page, which redirects again — recognised by the header `X-Redirect-By: TYPO3 Shortcut/Mountpoint` |
+| `canonicalDiffers` | The redirect ends on a page that names another URL as canonical, e.g. a page that shows the content of another page |
 | `temporaryRedirect` | A 302, 303 or 307 in the chain — a move should be permanent |
 | `redirectToRootPage` | A deep URL redirects to a start page, often treated as a soft 404 |
 | `listedUrlRedirects` | A sitemap lists a URL that redirects |
+| `listedUrlNotCanonical` | A sitemap lists a URL whose page names another URL as canonical |
 | `languageChanged` | The target page is in a different language |
 | `recordIdentityUnknown` | Several URLs render the same page without a record marker |
 | `duplicateDetailPage` | The same record is rendered by more than one page |
@@ -671,16 +682,40 @@ accept the connection — counts as no connection.
 
 `checksitemap` and `crawllinks` follow up to ten redirects and store the status
 of the page they end on. A URL that works only through a redirect gets the
-marker `redirected`, unless the final page shows an error, whose marker wins;
-more than ten redirects give the marker `tooManyRedirects`. The migration check
-follows redirects itself, one hop at a time, see above.
+marker `redirected`, through more than one the marker `redirectChain`, unless
+the final page shows an error, whose marker wins; more than ten redirects give
+the marker `tooManyRedirects`. A URL of `checksitemap` that answers directly
+but names another URL as canonical gets the marker `canonicalElsewhere`. The
+module shows the URL the redirects end on, or the canonical URL, as the final
+URL. The migration check follows redirects itself, one hop at a time, see above.
+
+Canonical URLs are compared by path and query, not by host: a staging system
+often renders the live domain into its canonical.
+
+#### Pages that show the content of another page
+
+A page with "Show content from page" (`content_from_pid`) answers under its own
+path and names the other page as canonical — EXT:seo does that by itself. That
+is correct for search engines, but the page should not be in the sitemap. The
+page sitemap of EXT:seo leaves out pages with `no_index` or their own
+`canonical_link`, not these. Exclude them in the site settings:
+
+```yaml
+# config/sites/<site>/settings.yaml
+seo:
+  sitemap:
+    pages:
+      additionalWhere: "{#no_index} = 0 AND {#canonical_link} = '' AND {#content_from_pid} = 0"
+```
 
 `checksitemap`, `crawllinks` and `migrationcheck` exit with a failure code when
 not a single URL got an HTTP answer — a wrong host, no network or rejected
 credentials. With `--fail-on-problems`, they also fail when a result needs
 attention: a status other than 200, an error marker or a timeout, ignored link
 arguments, or one of the verdicts `missing`, `redirectBroken`, `otherContent`,
-`identityUnknown` and `timeout`. A redirect alone does not fail a run.
+`identityUnknown`, `timeout` and `redirectNotFinal`. A redirect alone does not
+fail a run, and neither do the markers `redirected`, `redirectChain` and
+`canonicalElsewhere`.
 
 ### `websitecheck:exportsnapshots`
 

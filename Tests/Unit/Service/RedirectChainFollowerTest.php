@@ -90,6 +90,27 @@ final class RedirectChainFollowerTest extends UnitTestCase
     }
 
     #[Test]
+    public function originOfARedirectIsRecordedPerHop(): void
+    {
+        $requestFactory = self::createStub(RequestFactory::class);
+        $requestFactory->method('request')->willReturnCallback(
+            static fn(string $url): Response => match ($url) {
+                'https://www.example.com/old/' => new Response('php://temp', 301, ['Location' => '/shortcut/']),
+                'https://www.example.com/shortcut/' => new Response('php://temp', 307, ['Location' => '/target/', 'X-Redirect-By' => 'TYPO3 Shortcut/Mountpoint']),
+                default => new Response('php://temp', 200, ['X-Redirect-By' => 'not a redirect']),
+            },
+        );
+
+        $chain = (new RedirectChainFollower($requestFactory))->follow('https://www.example.com/old/', 5, 10);
+
+        self::assertSame([
+            ['url' => 'https://www.example.com/old/', 'status' => 301],
+            ['url' => 'https://www.example.com/shortcut/', 'status' => 307, 'redirectBy' => 'TYPO3 Shortcut/Mountpoint'],
+            ['url' => 'https://www.example.com/target/', 'status' => 200],
+        ], $chain->steps);
+    }
+
+    #[Test]
     public function serverErrorEndsTheChainAndIsNotRetryable(): void
     {
         $chain = $this->followerAnswering(['https://www.example.com/' => [500, '']])->follow('https://www.example.com/', 5, 10);

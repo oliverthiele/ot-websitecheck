@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
@@ -29,15 +30,29 @@ class CheckResultRepository extends AbstractRepository
      * status is a new finding and needs review again.
      *
      * @param int $runStartedAt start of the checksitemap run storing the result, 0 for other commands
+     * @param string $finalUrl the URL that answered after redirects; empty without redirects
+     * @param string $canonicalUrl the canonical URL the page declares; empty when it declares none or was not read
      */
-    public function storeResult(string $url, string $environment, string $source, ?int $pageUid, int $httpStatus, string $errorMarker, int $checkedAt, int $runStartedAt = 0): void
-    {
+    public function storeResult(
+        string $url,
+        string $environment,
+        string $source,
+        ?int $pageUid,
+        int $httpStatus,
+        string $errorMarker,
+        int $checkedAt,
+        int $runStartedAt = 0,
+        string $finalUrl = '',
+        string $canonicalUrl = '',
+    ): void {
         $values = [
             'path' => UrlUtility::pathWithQuery($url),
             'source' => $source,
             'page_uid' => $pageUid ?? 0,
             'http_status' => $httpStatus,
             'error_marker' => $errorMarker,
+            'final_url' => $finalUrl,
+            'canonical_url' => $canonicalUrl,
             'checked_at' => $checkedAt,
             'run_started_at' => $runStartedAt,
         ];
@@ -77,9 +92,10 @@ class CheckResultRepository extends AbstractRepository
 
     /**
      * @param int $limit rows per page, 0 for all
+     * @param list<string> $markers only rows with one of these markers; all when empty
      * @return array<int, array<string, mixed>>
      */
-    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0): array
+    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0, array $markers = []): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         // Group by page uid first, then path: the same page uid/path can carry
@@ -92,7 +108,7 @@ class CheckResultRepository extends AbstractRepository
             ->addOrderBy('path', 'ASC')
             ->addOrderBy('environment', 'ASC');
 
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers);
         if ($limit > 0) {
             $queryBuilder->setMaxResults($limit)->setFirstResult(max(0, $offset));
         }
@@ -100,11 +116,14 @@ class CheckResultRepository extends AbstractRepository
         return $queryBuilder->executeQuery()->fetchAllAssociative();
     }
 
-    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false): int
+    /**
+     * @param list<string> $markers only rows with one of these markers; all when empty
+     */
+    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, array $markers = []): int
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         $queryBuilder->count('uid')->from(self::TABLE);
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers);
         $count = $queryBuilder->executeQuery()->fetchOne();
 
         return is_numeric($count) ? (int)$count : 0;
@@ -191,6 +210,26 @@ class CheckResultRepository extends AbstractRepository
     }
 
     /**
+     * @return list<string> the markers stored for an environment, or for all
+     */
+    public function findDistinctMarkers(string $environment = ''): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->selectLiteral('DISTINCT error_marker')
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->neq('error_marker', $queryBuilder->createNamedParameter('')))
+            ->orderBy('error_marker', 'ASC');
+        if ($environment !== '') {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)),
+            );
+        }
+        $rows = $queryBuilder->executeQuery()->fetchFirstColumn();
+
+        return array_map(static fn(mixed $marker): string => is_scalar($marker) ? (string)$marker : '', $rows);
+    }
+
+    /**
      * @return array<int, string>
      */
     public function findDistinctSources(string $environment = ''): array
@@ -272,7 +311,10 @@ class CheckResultRepository extends AbstractRepository
         return 'checksitemap.run.' . hash('sha256', $environment . "\n" . $source);
     }
 
-    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed): void
+    /**
+     * @param list<string> $markers
+     */
+    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed, array $markers = []): void
     {
         if ($environment !== '') {
             $queryBuilder->andWhere(
@@ -290,6 +332,11 @@ class CheckResultRepository extends AbstractRepository
         if ($onlyUnreviewed) {
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->eq('reviewed', $queryBuilder->createNamedParameter(0, ParameterType::INTEGER)),
+            );
+        }
+        if ($markers !== []) {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->in('error_marker', $queryBuilder->createNamedParameter($markers, ArrayParameterType::STRING)),
             );
         }
     }

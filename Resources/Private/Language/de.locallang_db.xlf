@@ -51,6 +51,18 @@
         <target>Fehlermerkmal</target>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.final_url">
+      <segment>
+        <source>Final URL after redirects</source>
+        <target>End-URL nach Weiterleitungen</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the page</source>
+        <target>Von der Seite angegebene Canonical-URL</target>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.checked_at">
       <segment>
         <source>Checked at</source>
@@ -169,6 +181,12 @@
       <segment>
         <source>Abort reason</source>
         <target>Abbruchgrund</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the final page</source>
+        <target>Von der Endseite angegebene Canonical-URL</target>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_observation.page_uid">

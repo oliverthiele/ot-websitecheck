@@ -11,6 +11,7 @@ use OliverThiele\OtWebsitecheck\Domain\ValueObject\IdentityPatterns;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
+use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\IdentityExtractor;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\RedirectChainFollower;
@@ -50,6 +51,7 @@ class MigrationCheckCommand extends Command
         private readonly BasicAuthResolver $basicAuthResolver,
         private readonly UrlHostRewriter $urlHostRewriter,
         private readonly RetryRounds $retryRounds,
+        private readonly CanonicalExtractor $canonicalExtractor,
     ) {
         parent::__construct();
     }
@@ -72,7 +74,7 @@ class MigrationCheckCommand extends Command
         $this->addOption('record-pattern', null, InputOption::VALUE_REQUIRED, 'Regular expression reading the record table (group 1) and uid (group 2) from the HTML of a detail page.', IdentityPatterns::DEFAULT_RECORD);
         $this->addOption('reference-run', null, InputOption::VALUE_REQUIRED, 'Take the reference rows from this earlier run instead of requesting the reference again, e.g. after the reference site has been replaced. The run must have compared the same reference snapshot; may equal --run.');
         $this->addOption('analyze-only', null, InputOption::VALUE_NONE, 'Do not request anything; recompute verdicts, warnings and suggestions for the stored rows of --run.');
-        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a target row has a verdict that needs attention (missing, redirectBroken, otherContent, identityUnknown, timeout) — for CI. A run in which no target URL answered at all fails without this option, too.');
+        $this->addOption('fail-on-problems', null, InputOption::VALUE_NONE, 'Exit with a failure code when a target row has a verdict that needs attention (missing, redirectBroken, otherContent, identityUnknown, timeout, redirectNotFinal) — for CI. A run in which no target URL answered at all fails without this option, too.');
         $this->addOption('reference-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the reference environment as "user:password". Falls back to WEBSITECHECK_REFERENCE_BASIC_AUTH_USER/_PASS. Visible in the shell history and the process list — prefer the environment variables.');
         $this->addOption('target-basic-auth', null, InputOption::VALUE_REQUIRED, 'HTTP Basic Auth for the target environment as "user:password". Falls back to WEBSITECHECK_TARGET_BASIC_AUTH_USER/_PASS. Visible in the shell history and the process list — prefer the environment variables.');
     }
@@ -403,11 +405,15 @@ class MigrationCheckCommand extends Command
                     $answeredCount++;
                 }
                 // An error page renders its own page uid — only a working page has an identity worth comparing.
-                $identity = $redirectChain->getFinalStatus() === 200
+                $isWorkingPage = $redirectChain->getFinalStatus() === 200;
+                $identity = $isWorkingPage
                     ? $this->identityExtractor->extract($redirectChain->finalBody, $patterns)
                     : new PageIdentity();
+                $canonicalUrl = $isWorkingPage
+                    ? $this->canonicalExtractor->extract($redirectChain->finalBody, $redirectChain->getFinalUrl())
+                    : '';
 
-                $this->observationRepository->storeObservation($runLabel, $observation['environment'], $observation['role'], $observation['group'], $redirectChain, $identity, time());
+                $this->observationRepository->storeObservation($runLabel, $observation['environment'], $observation['role'], $observation['group'], $redirectChain, $identity, time(), $canonicalUrl);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {

@@ -23,6 +23,17 @@ final class UrlUtility
     }
 
     /**
+     * Path and query for comparing two URLs as pages: "https://www.example.com"
+     * and "https://www.example.com/" are the same page.
+     */
+    public static function comparablePath(string $url): string
+    {
+        $path = self::pathWithQuery($url);
+
+        return $path === '' || str_starts_with($path, '?') ? '/' . $path : $path;
+    }
+
+    /**
      * Whether credentials given for $authorizedUrl may be sent to $url: same
      * host, same port, and no step down from https to http. The rule Guzzle
      * applies to its own redirects; an upgrade to https keeps the credentials,

@@ -429,6 +429,12 @@
         <target>— alle Umgebungen —</target>
       </segment>
     </unit>
+    <unit id="statusResults.allMarkers">
+      <segment>
+        <source>— all markers —</source>
+        <target>— alle Marker —</target>
+      </segment>
+    </unit>
     <unit id="statusResults.onlyProblems">
       <segment>
         <source>only problems (no HTTP 200, or an error marker)</source>
@@ -463,6 +469,12 @@
       <segment>
         <source>Error marker</source>
         <target>Fehlermarker</target>
+      </segment>
+    </unit>
+    <unit id="statusResults.column.finalUrl">
+      <segment>
+        <source>Final URL</source>
+        <target>Endgültige URL</target>
       </segment>
     </unit>
     <unit id="statusResults.column.checkedAt">
@@ -529,6 +541,18 @@
       <segment>
         <source>Only through a redirect</source>
         <target>Nur über eine Weiterleitung</target>
+      </segment>
+    </unit>
+    <unit id="errorMarker.redirectChain">
+      <segment>
+        <source>Through several redirects</source>
+        <target>Über mehrere Weiterleitungen</target>
+      </segment>
+    </unit>
+    <unit id="errorMarker.canonicalElsewhere">
+      <segment>
+        <source>Canonical URL elsewhere</source>
+        <target>Canonical-URL zeigt woanders hin</target>
       </segment>
     </unit>
     <unit id="errorMarker.tooManyRedirects">
@@ -669,6 +693,12 @@
         <target>Verschoben mit Weiterleitung</target>
       </segment>
     </unit>
+    <unit id="verdict.redirectNotFinal">
+      <segment>
+        <source>Redirect not final</source>
+        <target>Weiterleitung nicht aufs Endziel</target>
+      </segment>
+    </unit>
     <unit id="verdict.missing">
       <segment>
         <source>Missing</source>
@@ -739,6 +769,12 @@
       <segment>
         <source>The URL redirects to the same page or record. Nothing to do, unless a warning says otherwise.</source>
         <target>Die URL leitet auf dieselbe Seite bzw. denselben Datensatz weiter. Nichts zu tun, sofern keine Warnung etwas anderes sagt.</target>
+      </segment>
+    </unit>
+    <unit id="verdict.redirectNotFinal.help">
+      <segment>
+        <source>The URL leads to the same page or record, but not in one step: the redirect points at a URL that redirects again, or at a page that names another URL as canonical. Point the redirect directly at the suggested final URL.</source>
+        <target>Die URL führt zur selben Seite bzw. zum selben Datensatz, aber nicht in einem Schritt: Die Weiterleitung zeigt auf eine URL, die erneut weiterleitet, oder auf eine Seite, die eine andere URL als Canonical nennt. Die Weiterleitung direkt auf die vorgeschlagene End-URL zeigen lassen.</target>
       </segment>
     </unit>
     <unit id="verdict.missing.help">
@@ -919,6 +955,42 @@
       <segment>
         <source>The same record is rendered by more than one page. That is duplicate content.</source>
         <target>Derselbe Datensatz wird von mehr als einer Seite ausgegeben. Das ist Duplicate Content.</target>
+      </segment>
+    </unit>
+    <unit id="warning.shortcutInChain">
+      <segment>
+        <source>Shortcut page in the chain</source>
+        <target>Verweisseite in der Kette</target>
+      </segment>
+    </unit>
+    <unit id="warning.shortcutInChain.description">
+      <segment>
+        <source>A redirect leads to a TYPO3 shortcut page, which redirects again with 307. Point the redirect at the target of the shortcut.</source>
+        <target>Eine Weiterleitung führt auf eine TYPO3-Verweisseite, die selbst mit 307 weiterleitet. Die Weiterleitung auf das Ziel der Verweisseite zeigen lassen.</target>
+      </segment>
+    </unit>
+    <unit id="warning.canonicalDiffers">
+      <segment>
+        <source>Canonical URL differs</source>
+        <target>Canonical-URL weicht ab</target>
+      </segment>
+    </unit>
+    <unit id="warning.canonicalDiffers.description">
+      <segment>
+        <source>The redirect ends on a page that names another URL as canonical — typically a page that shows the content of another page. Point the redirect at the canonical URL.</source>
+        <target>Die Weiterleitung endet auf einer Seite, die eine andere URL als Canonical nennt — typisch für eine Seite, die den Inhalt einer anderen Seite anzeigt. Die Weiterleitung auf die Canonical-URL zeigen lassen.</target>
+      </segment>
+    </unit>
+    <unit id="warning.listedUrlNotCanonical">
+      <segment>
+        <source>Sitemap URL not canonical</source>
+        <target>Sitemap-URL nicht kanonisch</target>
+      </segment>
+    </unit>
+    <unit id="warning.listedUrlNotCanonical.description">
+      <segment>
+        <source>The sitemap lists a URL whose page names another URL as canonical. A sitemap should only contain canonical URLs.</source>
+        <target>Die Sitemap enthält eine URL, deren Seite eine andere URL als Canonical nennt. Eine Sitemap sollte nur kanonische URLs enthalten.</target>
       </segment>
     </unit>
     <unit id="abortReason.loop">

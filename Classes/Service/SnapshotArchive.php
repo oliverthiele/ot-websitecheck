@@ -172,6 +172,11 @@ class SnapshotArchive
             $observation = $this->record($observation, $context);
             $values = [];
             foreach (ObservationRepository::ROW_FIELDS as $field => $type) {
+                // Every field added later is a string.
+                if (!array_key_exists($field, $observation) && in_array($field, ObservationRepository::FIELDS_ADDED_LATER, true)) {
+                    $values[$field] = '';
+                    continue;
+                }
                 $values[$field] = $type === ParameterType::INTEGER
                     ? $this->int($observation, $field, $context)
                     : $this->string($observation, $field, $context);

@@ -6,6 +6,8 @@ namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
+use OliverThiele\OtWebsitecheck\Utility\RowValue;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
@@ -27,12 +29,17 @@ class WebsiteCheckModuleController extends AbstractModuleController
     ) {
     }
 
-    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, int $page = 1): ResponseInterface
+    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, string $marker = '', int $page = 1): ResponseInterface
     {
         $environments = $this->checkResultRepository->findDistinctEnvironments();
+        $markers = $this->checkResultRepository->findDistinctMarkers($environment);
+        if (!in_array($marker, $markers, true)) {
+            $marker = '';
+        }
+        $markerFilter = $marker === '' ? [] : [$marker];
         // A crawl of a large site stores tens of thousands of rows; the table
         // shows one page of them.
-        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed);
+        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed, $markerFilter);
         $pageCount = max(1, (int)ceil($total / self::RESULTS_PER_PAGE));
         $page = min(max(1, $page), $pageCount);
         $offset = ($page - 1) * self::RESULTS_PER_PAGE;
@@ -40,7 +47,10 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
         $moduleTemplate = $this->createModuleTemplate();
         $moduleTemplate->assignMultiple([
-            'results' => $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset),
+            'results' => array_map(
+                $this->addFinalUrl(...),
+                $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset, $markerFilter),
+            ),
             'pagination' => [
                 'page' => $page,
                 'pageCount' => $pageCount,
@@ -51,6 +61,8 @@ class WebsiteCheckModuleController extends AbstractModuleController
                 'nextPage' => $page < $pageCount ? $page + 1 : 0,
             ],
             'environmentOptions' => $environmentOptions,
+            'markerOptions' => ['' => $this->translate('statusResults.allMarkers')] + $this->buildMarkerOptions($markers),
+            'currentMarker' => $marker,
             // Results of any environment — the filter must stay even when the chosen one has none.
             'hasResults' => $environments !== [],
             'sources' => $this->checkResultRepository->findDistinctSources($environment),
@@ -64,6 +76,45 @@ class WebsiteCheckModuleController extends AbstractModuleController
         ]);
 
         return $moduleTemplate->renderResponse('WebsiteCheckModule/Index');
+    }
+
+    /**
+     * Where a URL should lead in the end: the page its canonical names, or
+     * else the URL its redirects ended on. Empty when that is the URL itself.
+     *
+     * @param array<string, mixed> $result
+     * @return array<string, mixed>
+     */
+    private function addFinalUrl(array $result): array
+    {
+        $url = RowValue::string($result, 'url');
+        $finalUrl = RowValue::string($result, 'final_url');
+        $canonicalUrl = RowValue::string($result, 'canonical_url');
+        $answeredUrl = $finalUrl !== '' ? $finalUrl : $url;
+        $suggestedUrl = match (true) {
+            $canonicalUrl !== '' && UrlUtility::comparablePath($canonicalUrl) !== UrlUtility::comparablePath($answeredUrl) => $canonicalUrl,
+            $finalUrl !== '' && $finalUrl !== $url => $finalUrl,
+            default => '',
+        };
+
+        return $result + ['suggestedUrl' => $suggestedUrl];
+    }
+
+    /**
+     * @param list<string> $markers
+     * @return array<string, string>
+     */
+    private function buildMarkerOptions(array $markers): array
+    {
+        $options = [];
+        foreach ($markers as $marker) {
+            $key = 'errorMarker.' . $marker;
+            $label = $this->translate($key);
+            // Exception class names are markers as well and have no label.
+            $options[$marker] = $label !== $key ? $label : $marker;
+        }
+
+        return $options;
     }
 
     public function initializeDeleteAction(): void

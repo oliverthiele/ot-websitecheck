@@ -7,6 +7,7 @@ namespace OliverThiele\OtWebsitecheck\Command;
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
+use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
@@ -41,6 +42,7 @@ class CheckSitemapCommand extends Command
         private readonly BasicAuthResolver $basicAuthResolver,
         private readonly UrlHostRewriter $urlHostRewriter,
         private readonly RetryRounds $retryRounds,
+        private readonly CanonicalExtractor $canonicalExtractor,
     ) {
         parent::__construct();
     }
@@ -140,7 +142,7 @@ class CheckSitemapCommand extends Command
         $notOkCount = 0;
         $errorMarkerCount = 0;
         $timeoutCount = 0;
-        $redirectedCount = 0;
+        $noticeCount = 0;
         $answeredCount = 0;
         $this->retryRounds->run(
             $urls,
@@ -151,8 +153,10 @@ class CheckSitemapCommand extends Command
                 return $page;
             },
             static fn(FetchedPage $page): bool => $page->isRetryable(),
-            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$redirectedCount, &$answeredCount): void {
-                $errorMarker = $this->errorMarkerDetector->detectFor($page);
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$noticeCount, &$answeredCount): void {
+                $finalUrl = $page->finalUrl !== '' ? $page->finalUrl : $url;
+                $canonicalUrl = $page->isOk() ? $this->canonicalExtractor->extract($page->body, $finalUrl) : '';
+                $errorMarker = $this->errorMarkerDetector->detectFor($page, $this->canonicalExtractor->isElsewhere($canonicalUrl, $finalUrl));
                 if (!$page->isConnectionError()) {
                     $answeredCount++;
                 }
@@ -161,13 +165,13 @@ class CheckSitemapCommand extends Command
                 }
                 if ($page->isTimeout()) {
                     $timeoutCount++;
-                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
-                    $redirectedCount++;
+                } elseif (in_array($errorMarker, ErrorMarkerDetector::NOTICE_MARKERS, true)) {
+                    $noticeCount++;
                 } elseif ($errorMarker !== '') {
                     $errorMarkerCount++;
                 }
 
-                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time(), $runStartedAt);
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {
@@ -180,12 +184,12 @@ class CheckSitemapCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d only through a redirect.',
+            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d only through a redirect or with a canonical URL elsewhere.',
             count($urls),
             $notOkCount,
             $errorMarkerCount,
             $timeoutCount,
-            $redirectedCount,
+            $noticeCount,
         ));
 
         if ($answeredCount === 0) {

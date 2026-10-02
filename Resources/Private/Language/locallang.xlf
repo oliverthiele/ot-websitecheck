@@ -357,6 +357,11 @@
         <source>— all environments —</source>
       </segment>
     </unit>
+    <unit id="statusResults.allMarkers">
+      <segment>
+        <source>— all markers —</source>
+      </segment>
+    </unit>
     <unit id="statusResults.onlyProblems">
       <segment>
         <source>only problems (no HTTP 200, or an error marker)</source>
@@ -385,6 +390,11 @@
     <unit id="statusResults.column.errorMarker">
       <segment>
         <source>Error marker</source>
+      </segment>
+    </unit>
+    <unit id="statusResults.column.finalUrl">
+      <segment>
+        <source>Final URL</source>
       </segment>
     </unit>
     <unit id="statusResults.column.checkedAt">
@@ -440,6 +450,16 @@
     <unit id="errorMarker.redirected">
       <segment>
         <source>Only through a redirect</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.redirectChain">
+      <segment>
+        <source>Through several redirects</source>
+      </segment>
+    </unit>
+    <unit id="errorMarker.canonicalElsewhere">
+      <segment>
+        <source>Canonical URL elsewhere</source>
       </segment>
     </unit>
     <unit id="errorMarker.tooManyRedirects">
@@ -557,6 +577,11 @@
         <source>Moved with redirect</source>
       </segment>
     </unit>
+    <unit id="verdict.redirectNotFinal">
+      <segment>
+        <source>Redirect not final</source>
+      </segment>
+    </unit>
     <unit id="verdict.missing">
       <segment>
         <source>Missing</source>
@@ -615,6 +640,11 @@
     <unit id="verdict.movedWithRedirect.help">
       <segment>
         <source>The URL redirects to the same page or record. Nothing to do, unless a warning says otherwise.</source>
+      </segment>
+    </unit>
+    <unit id="verdict.redirectNotFinal.help">
+      <segment>
+        <source>The URL leads to the same page or record, but not in one step: the redirect points at a URL that redirects again, or at a page that names another URL as canonical. Point the redirect directly at the suggested final URL.</source>
       </segment>
     </unit>
     <unit id="verdict.missing.help">
@@ -765,6 +795,36 @@
     <unit id="warning.duplicateDetailPage.description">
       <segment>
         <source>The same record is rendered by more than one page. That is duplicate content.</source>
+      </segment>
+    </unit>
+    <unit id="warning.shortcutInChain">
+      <segment>
+        <source>Shortcut page in the chain</source>
+      </segment>
+    </unit>
+    <unit id="warning.shortcutInChain.description">
+      <segment>
+        <source>A redirect leads to a TYPO3 shortcut page, which redirects again with 307. Point the redirect at the target of the shortcut.</source>
+      </segment>
+    </unit>
+    <unit id="warning.canonicalDiffers">
+      <segment>
+        <source>Canonical URL differs</source>
+      </segment>
+    </unit>
+    <unit id="warning.canonicalDiffers.description">
+      <segment>
+        <source>The redirect ends on a page that names another URL as canonical — typically a page that shows the content of another page. Point the redirect at the canonical URL.</source>
+      </segment>
+    </unit>
+    <unit id="warning.listedUrlNotCanonical">
+      <segment>
+        <source>Sitemap URL not canonical</source>
+      </segment>
+    </unit>
+    <unit id="warning.listedUrlNotCanonical.description">
+      <segment>
+        <source>The sitemap lists a URL whose page names another URL as canonical. A sitemap should only contain canonical URLs.</source>
       </segment>
     </unit>
     <unit id="abortReason.loop">

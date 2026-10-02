@@ -46,6 +46,30 @@ final class CheckResultRepositoryTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function finalAndCanonicalUrlAreStored(): void
+    {
+        $this->subject->storeResult('https://www.example.com/alias/', 'staging', 'staging-current', 7, 200, 'canonicalElsewhere', 1790001000, 1790000900, '', 'https://www.example.com/original/');
+        $this->subject->storeResult('https://www.example.com/moved/', 'staging', 'staging-current', 4, 200, 'redirectChain', 1790001000, 1790000900, 'https://www.example.com/new/');
+
+        $alias = $this->findRow('https://www.example.com/alias/', 'staging');
+        self::assertSame('', $alias['final_url']);
+        self::assertSame('https://www.example.com/original/', $alias['canonical_url']);
+        $moved = $this->findRow('https://www.example.com/moved/', 'staging');
+        self::assertSame('https://www.example.com/new/', $moved['final_url']);
+        self::assertSame('', $moved['canonical_url']);
+    }
+
+    #[Test]
+    public function resultsAreFilteredByMarker(): void
+    {
+        self::assertSame(['redirected', 'timeout'], $this->subject->findDistinctMarkers('staging'));
+        self::assertSame([], $this->subject->findDistinctMarkers('live'));
+        self::assertSame(1, $this->subject->countAll('staging', false, false, ['redirected']));
+        self::assertSame(2, $this->subject->countAll('', true, false, ['redirected', 'timeout']));
+        self::assertSame([4], array_map(static fn(array $row): int => (int)$row['uid'], $this->subject->findAll('staging', false, false, 0, 0, ['redirected'])));
+    }
+
+    #[Test]
     public function newUrlIsInsertedPerEnvironment(): void
     {
         $this->subject->storeResult('https://www.example.com/broken/', 'live', 'live-current', 2, 500, '', 1790001000);
