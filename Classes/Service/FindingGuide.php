@@ -86,6 +86,8 @@ class FindingGuide
         MetadataAnalyzer::FINDING_DESCRIPTION_MISSING => [self::ACTOR_EDITOR, 'metadata'],
         MetadataAnalyzer::FINDING_OPEN_GRAPH_IMAGE_MISSING => [self::ACTOR_EDITOR, 'metadata'],
         MetadataAnalyzer::FINDING_LISTED_BUT_NOINDEX => [self::ACTOR_INTEGRATOR, 'metadata'],
+        MetadataAnalyzer::FINDING_BREADCRUMB_ITEM_BROKEN => [self::ACTOR_INTEGRATOR, 'breadcrumb'],
+        MetadataAnalyzer::FINDING_BREADCRUMB_ITEM_REDIRECTS => [self::ACTOR_INTEGRATOR, 'breadcrumb'],
     ];
 
     /**

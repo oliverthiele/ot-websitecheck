@@ -6,11 +6,15 @@ namespace OliverThiele\OtWebsitecheck\Domain\ValueObject;
 
 /**
  * What a rendered page tells search engines and social networks about itself:
- * the title, the meta description and robots directives, and the OpenGraph
- * tags shared links are previewed with. Empty where the page renders none.
+ * the title, the meta description and robots directives, the OpenGraph tags
+ * shared links are previewed with, and the breadcrumb trail of its structured
+ * data. Empty where the page renders none.
  */
 final readonly class PageMetadata
 {
+    /**
+     * @param list<array{name: string, url: string}> $breadcrumb the items of a JSON-LD BreadcrumbList, in their order; url is empty where an item names none
+     */
     public function __construct(
         public string $title = '',
         public string $description = '',
@@ -18,6 +22,7 @@ final readonly class PageMetadata
         public string $openGraphTitle = '',
         public string $openGraphDescription = '',
         public string $openGraphImage = '',
+        public array $breadcrumb = [],
     ) {
     }
 
@@ -26,13 +31,8 @@ final readonly class PageMetadata
         return preg_match('/\b(noindex|none)\b/i', $this->robots) === 1;
     }
 
-    public function isEmpty(): bool
-    {
-        return $this->toArray() === [];
-    }
-
     /**
-     * @return array<string, string> only the values the page renders
+     * @return array<string, string> only the texts the page renders, without the breadcrumb
      */
     public function toArray(): array
     {
@@ -46,9 +46,22 @@ final readonly class PageMetadata
         ], static fn(string $value): bool => $value !== '');
     }
 
+    public function isEmpty(): bool
+    {
+        return $this->toArray() === [] && $this->breadcrumb === [];
+    }
+
     public function toJson(): string
     {
-        return $this->isEmpty() ? '' : json_encode($this->toArray(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        if ($this->isEmpty()) {
+            return '';
+        }
+        $data = $this->toArray();
+        if ($this->breadcrumb !== []) {
+            $data['breadcrumb'] = $this->breadcrumb;
+        }
+
+        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -60,7 +73,7 @@ final readonly class PageMetadata
             return new self();
         }
         try {
-            $data = json_decode($json, true, 2, JSON_THROW_ON_ERROR);
+            $data = json_decode($json, true, 4, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
             return new self();
         }
@@ -68,6 +81,15 @@ final readonly class PageMetadata
             return new self();
         }
         $value = static fn(string $key): string => is_string($data[$key] ?? null) ? $data[$key] : '';
+        $breadcrumb = [];
+        foreach (is_array($data['breadcrumb'] ?? null) ? $data['breadcrumb'] : [] as $item) {
+            if (is_array($item)) {
+                $breadcrumb[] = [
+                    'name' => is_string($item['name'] ?? null) ? $item['name'] : '',
+                    'url' => is_string($item['url'] ?? null) ? $item['url'] : '',
+                ];
+            }
+        }
 
         return new self(
             $value('title'),
@@ -76,6 +98,7 @@ final readonly class PageMetadata
             $value('ogTitle'),
             $value('ogDescription'),
             $value('ogImage'),
+            $breadcrumb,
         );
     }
 }

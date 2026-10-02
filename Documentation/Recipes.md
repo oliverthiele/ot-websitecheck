@@ -170,6 +170,39 @@ once every detail view has its own title and description.
 
 ---
 
+## Structured data for the breadcrumb
+
+**Finding:** the status check marks a page with "Breadcrumb links a broken
+page" or "Breadcrumb links a redirect".
+
+**Why:** a `BreadcrumbList` in JSON-LD lets search engines show the path of a
+page in their results. On the detail view of a plugin, the trail is usually
+built from the page tree, so its last item is the detail page itself — a URL
+without the record, which answers with a list, an empty page or an error.
+
+**Fix:** let the trail of a detail view end with the record, or leave the
+detail page out. The current page does not have to be part of the trail at
+all: Google takes the URL of the page itself for a last item without `item`.
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.example.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Jobs", "item": "https://www.example.com/jobs/"},
+    {"@type": "ListItem", "position": 3, "name": "Title of the record"}
+  ]
+}
+```
+
+Item URLs should be the final URLs: no redirect, and the canonical URL of the
+page they link. The check compares them with the results of the same run and,
+for a URL the sitemap does not list, with the pages marked as requiring a
+parameter — see [Pages that require a parameter](#pages-that-require-a-parameter).
+
+---
+
 ## Markers the checked site has to render
 
 The migration check compares pages by uid and records by table and uid, not by

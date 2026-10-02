@@ -39,6 +39,7 @@ class HelpModuleController extends AbstractModuleController
         'markers' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::README_URL . 'requirements-on-the-checked-site'],
         'duplicateDetailPage' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => ''],
         'metadata' => ['actors' => [FindingGuide::ACTOR_EDITOR, FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::RECIPES_URL . '#metadata-of-detail-pages'],
+        'breadcrumb' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::RECIPES_URL . '#structured-data-for-the-breadcrumb'],
         'argumentsIgnored' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::README_URL . 'websitecheckcrawllinks'],
         'referenceNotOk' => ['actors' => [FindingGuide::ACTOR_NONE], 'readOn' => ''],
     ];
@@ -63,6 +64,7 @@ class HelpModuleController extends AbstractModuleController
         'metaDescription',
         'openGraph',
         'noIndex',
+        'structuredData',
         'languageFallback',
         'markers',
     ];

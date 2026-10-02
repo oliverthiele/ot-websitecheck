@@ -561,6 +561,36 @@
         <target>Die Sitemap führt die Seite, die Seite bittet Suchmaschinen aber, sie nicht zu indexieren. Eins von beidem ist falsch.</target>
       </segment>
     </unit>
+    <unit id="metaFinding.breadcrumbItemBroken">
+      <segment>
+        <source>Breadcrumb links a broken page</source>
+        <target>Brotkrumen verlinken kaputte Seite</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.breadcrumbItemBroken.help">
+      <segment>
+        <source>The structured data of the breadcrumb links a URL that answers with an error, or a detail page without its record — typically the last item of a detail view, linking the detail page itself.</source>
+        <target>Die strukturierten Daten des Brotkrumenpfads verlinken eine URL, die mit einem Fehler antwortet, oder eine Detailseite ohne ihren Datensatz — typisch der letzte Eintrag einer Detailansicht, der auf die Detailseite selbst zeigt.</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.breadcrumbItemRedirects">
+      <segment>
+        <source>Breadcrumb links a redirect</source>
+        <target>Brotkrumen verlinken Weiterleitung</target>
+      </segment>
+    </unit>
+    <unit id="metaFinding.breadcrumbItemRedirects.help">
+      <segment>
+        <source>The structured data of the breadcrumb links a URL that only answers through a redirect, or that names another URL as canonical. It should link the final URL.</source>
+        <target>Die strukturierten Daten des Brotkrumenpfads verlinken eine URL, die nur über eine Weiterleitung antwortet oder eine andere URL als Canonical nennt. Sie sollten die End-URL verlinken.</target>
+      </segment>
+    </unit>
+    <unit id="metadata.breadcrumb">
+      <segment>
+        <source>Breadcrumb</source>
+        <target>Brotkrumen</target>
+      </segment>
+    </unit>
     <unit id="metadata.title">
       <segment>
         <source>Title</source>
@@ -2547,6 +2577,30 @@
         <target>Eine normale Seite: ihre Seiteneigenschaften ausfüllen — Reiter SEO, „Titel für Suchmaschinen“ und „Beschreibung für Suchmaschinen“; Reiter Social Media, Bereich „Open Graph (Facebook)“, „OpenGraph-Bild“. Eine Detailansicht oder „Mit anderen URLs geteilt“: an die Integration weitergeben, das Template der Detailansicht muss die Metadaten seines Datensatzes setzen. „In der Sitemap, aber noindex“: den Schalter „Diese Seite indizieren“ auf dem Reiter SEO prüfen; soll er aus sein, muss die Integration die Seite aus der Sitemap nehmen.</target>
       </segment>
     </unit>
+    <unit id="faq.breadcrumb.title">
+      <segment>
+        <source>The breadcrumb links a broken page or a redirect</source>
+        <target>Der Brotkrumenpfad verlinkt eine kaputte Seite oder eine Weiterleitung</target>
+      </segment>
+    </unit>
+    <unit id="faq.breadcrumb.findings">
+      <segment>
+        <source>Status check: Breadcrumb links a broken page, Breadcrumb links a redirect</source>
+        <target>Status-Check: Brotkrumen verlinken kaputte Seite, Brotkrumen verlinken Weiterleitung</target>
+      </segment>
+    </unit>
+    <unit id="faq.breadcrumb.meaning">
+      <segment>
+        <source>Many websites describe their breadcrumb as structured data, so search engines can show the path in their results. On the detail view of a plugin, the last item often links the detail page itself — a URL without the record, which shows a list, an empty page or an error. Search engines then follow a link that leads nowhere. Whether the current page is part of the breadcrumb at all is up to the website; search engines do not require it.</source>
+        <target>Viele Websites beschreiben ihren Brotkrumenpfad als strukturierte Daten, damit Suchmaschinen den Pfad in ihren Ergebnissen zeigen können. Auf der Detailansicht eines Plugins verlinkt der letzte Eintrag oft die Detailseite selbst — eine URL ohne den Datensatz, die eine Liste, eine leere Seite oder einen Fehler zeigt. Suchmaschinen folgen dann einem Link, der ins Leere führt. Ob die aktuelle Seite überhaupt zum Brotkrumenpfad gehört, entscheidet die Website; Suchmaschinen verlangen es nicht.</target>
+      </segment>
+    </unit>
+    <unit id="faq.breadcrumb.action">
+      <segment>
+        <source>Pass it on to the integrator: the breadcrumb of a detail view has to end with the record, or leave out the detail page. Nothing to do in the content.</source>
+        <target>An die Integration weitergeben: Der Brotkrumenpfad einer Detailansicht muss mit dem Datensatz enden oder die Detailseite auslassen. Im Inhalt ist nichts zu tun.</target>
+      </segment>
+    </unit>
     <unit id="faq.argumentsIgnored.title">
       <segment>
         <source>Link arguments have no effect</source>
@@ -2785,6 +2839,18 @@
       <segment>
         <source>Page properties, tab SEO, switch "Index this page": switched off, search engines are asked not to index the page, and it is left out of the sitemap.</source>
         <target>Seiteneigenschaften, Reiter SEO, Schalter „Diese Seite indizieren“: Ausgeschaltet werden Suchmaschinen gebeten, die Seite nicht zu indexieren, und sie fehlt in der Sitemap.</target>
+      </segment>
+    </unit>
+    <unit id="glossary.structuredData.term">
+      <segment>
+        <source>Structured data</source>
+        <target>Strukturierte Daten</target>
+      </segment>
+    </unit>
+    <unit id="glossary.structuredData">
+      <segment>
+        <source>Information about a page in a form search engines read directly, usually as JSON-LD in the HTML — e.g. the breadcrumb trail, an article or a job offer. Visitors do not see it; it comes from the templates and plugins, not from a field editors fill in.</source>
+        <target>Angaben über eine Seite in einer Form, die Suchmaschinen direkt lesen, meist als JSON-LD im HTML — etwa der Brotkrumenpfad, ein Artikel oder ein Stellenangebot. Besucher sehen sie nicht; sie kommen aus den Templates und Plugins, nicht aus einem Feld, das Redakteure ausfüllen.</target>
       </segment>
     </unit>
     <unit id="glossary.languageFallback.term">

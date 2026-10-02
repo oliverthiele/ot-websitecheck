@@ -187,6 +187,12 @@ class WebsiteCheckModuleController extends AbstractModuleController
         foreach ($metadata->toArray() as $key => $value) {
             $parts[] = $this->translate('metadata.' . $key) . ': ' . $value;
         }
+        if ($metadata->breadcrumb !== []) {
+            $parts[] = $this->translate('metadata.breadcrumb') . ': ' . implode(' › ', array_map(
+                static fn(array $item): string => $item['name'] !== '' ? $item['name'] : $item['url'],
+                $metadata->breadcrumb,
+            ));
+        }
 
         return implode(' · ', $parts);
     }

@@ -256,6 +256,30 @@ class CheckResultRepository extends AbstractRepository
     }
 
     /**
+     * Status and marker of every URL of an environment, by comparable path.
+     *
+     * @return array<string, array{status: int, marker: string}>
+     */
+    public function findUrlStates(string $environment): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('url', 'http_status', 'error_marker')
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)))
+            ->executeQuery()
+            ->fetchAllAssociative();
+        $states = [];
+        foreach ($rows as $row) {
+            $states[UrlUtility::comparablePath(RowValue::string($row, 'url'))] = [
+                'status' => RowValue::int($row, 'http_status'),
+                'marker' => RowValue::string($row, 'error_marker'),
+            ];
+        }
+
+        return $states;
+    }
+
+    /**
      * @param list<string> $findings
      */
     public function updateMetaFindings(int $uid, array $findings): void

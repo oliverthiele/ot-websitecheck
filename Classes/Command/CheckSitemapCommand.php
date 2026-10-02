@@ -7,6 +7,7 @@ namespace OliverThiele\OtWebsitecheck\Command;
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
 use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
@@ -221,6 +222,44 @@ class CheckSitemapCommand extends Command
     }
 
     /**
+     * What the URLs breadcrumbs link to do: taken from the results of the
+     * environment, and — for a URL the sitemap does not list — from the pages
+     * marked as requiring a parameter. Nothing is requested for it.
+     *
+     * @param list<array{uid: int, url: string, pageUid: int, metadata: PageMetadata, metaFindings: string}> $pages
+     * @return array<string, string> comparable path => MetadataAnalyzer::URL_*
+     */
+    private function findUrlStates(string $environment, array $pages): array
+    {
+        $urlStates = [];
+        $knownPaths = [];
+        foreach ($this->checkResultRepository->findUrlStates($environment) as $path => $state) {
+            $knownPaths[$path] = true;
+            $marker = $state['marker'];
+            // Too slow or unreachable during the run says nothing about the page.
+            if (in_array($marker, [ErrorMarkerDetector::MARKER_TIMEOUT, ErrorMarkerDetector::MARKER_CONNECTION_ERROR], true)) {
+                continue;
+            }
+            if ($state['status'] !== 200 || $marker === ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD || ($marker !== '' && !in_array($marker, ErrorMarkerDetector::NOTICE_MARKERS, true))) {
+                $urlStates[$path] = MetadataAnalyzer::URL_BROKEN;
+            } elseif (in_array($marker, [ErrorMarkerDetector::MARKER_REDIRECTED, ErrorMarkerDetector::MARKER_REDIRECT_CHAIN, ErrorMarkerDetector::MARKER_CANONICAL_ELSEWHERE], true)) {
+                $urlStates[$path] = MetadataAnalyzer::URL_REDIRECTS;
+            }
+        }
+        foreach ($pages as $page) {
+            foreach (MetadataAnalyzer::findBreadcrumbUrlsOnHost($page['metadata'], $page['url']) as $url) {
+                $path = UrlUtility::comparablePath($url);
+                if (!isset($knownPaths[$path]) && $this->requiredParameterPages->isCalledWithoutParameter($this->pageUidResolver->resolveArguments($url), new PageIdentity())) {
+                    $urlStates[$path] = MetadataAnalyzer::URL_BROKEN;
+                }
+                $knownPaths[$path] = true;
+            }
+        }
+
+        return $urlStates;
+    }
+
+    /**
      * Judges the metadata of every working page of the environment: whether
      * URLs of one page share a title or description needs all of them, also
      * those of earlier runs on the environment.
@@ -228,7 +267,7 @@ class CheckSitemapCommand extends Command
     private function analyzeMetadata(string $environment): void
     {
         $pages = $this->checkResultRepository->findPagesWithMetadata($environment);
-        $findings = $this->metadataAnalyzer->analyze($pages);
+        $findings = $this->metadataAnalyzer->analyze($pages, $this->findUrlStates($environment, $pages));
         foreach ($pages as $page) {
             $pageFindings = $findings[$page['uid']] ?? [];
             if (implode(',', $pageFindings) !== $page['metaFindings']) {

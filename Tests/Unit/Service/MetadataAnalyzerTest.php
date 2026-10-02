@@ -44,6 +44,40 @@ final class MetadataAnalyzerTest extends UnitTestCase
         ], $results[1]);
     }
 
+    #[Test]
+    public function breadcrumbLinkingABrokenOrRedirectingUrlIsFound(): void
+    {
+        $breadcrumb = [
+            ['name' => 'Home', 'url' => 'https://www.example.com/'],
+            ['name' => 'Detail', 'url' => 'https://www.example.com/jobs/detail/'],
+            ['name' => 'Old', 'url' => 'https://www.example.com/old/'],
+            ['name' => 'Elsewhere', 'url' => 'https://other.example.org/broken/'],
+            ['name' => 'A job', 'url' => ''],
+        ];
+        $results = (new MetadataAnalyzer())->analyze(
+            [$this->row(1, '/jobs/detail/a-job', 30, new PageMetadata('A job', 'About it', '', '', '', 'https://www.example.com/a.jpg', $breadcrumb))],
+            [
+                '/jobs/detail/' => MetadataAnalyzer::URL_BROKEN,
+                '/old/' => MetadataAnalyzer::URL_REDIRECTS,
+                '/broken/' => MetadataAnalyzer::URL_BROKEN,
+            ],
+        );
+
+        self::assertSame([MetadataAnalyzer::FINDING_BREADCRUMB_ITEM_BROKEN, MetadataAnalyzer::FINDING_BREADCRUMB_ITEM_REDIRECTS], $results[1]);
+    }
+
+    #[Test]
+    public function breadcrumbOnAnotherHostIsNotJudged(): void
+    {
+        $breadcrumb = [['name' => 'Elsewhere', 'url' => 'https://other.example.org/broken/']];
+        $results = (new MetadataAnalyzer())->analyze(
+            [$this->row(1, '/page/', 30, new PageMetadata('Page', 'About it', '', '', '', 'https://www.example.com/a.jpg', $breadcrumb))],
+            ['/broken/' => MetadataAnalyzer::URL_BROKEN],
+        );
+
+        self::assertSame([], $results[1]);
+    }
+
     /**
      * @return array{uid: int, url: string, pageUid: int, metadata: PageMetadata}
      */

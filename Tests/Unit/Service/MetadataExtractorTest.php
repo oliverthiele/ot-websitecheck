@@ -35,6 +35,25 @@ final class MetadataExtractorTest extends UnitTestCase
     }
 
     #[Test]
+    public function breadcrumbIsReadFromJsonLdInAnyForm(): void
+    {
+        $graph = '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"Acme"},'
+            . '{"@type":"BreadcrumbList","itemListElement":['
+            . '{"@type":"ListItem","position":2,"name":"Jobs","item":{"@id":"/jobs/","name":"Jobs"}},'
+            . '{"@type":"ListItem","position":1,"name":"Home","item":"https://www.example.com/"},'
+            . '{"@type":"ListItem","position":3,"name":"A job &amp; more"}]}]}</script>';
+
+        $metadata = (new MetadataExtractor())->extract('<script type="application/ld+json">{broken</script>' . $graph, 'https://www.example.com/jobs/a-job');
+
+        self::assertSame([
+            ['name' => 'Home', 'url' => 'https://www.example.com/'],
+            ['name' => 'Jobs', 'url' => 'https://www.example.com/jobs/'],
+            ['name' => 'A job & more', 'url' => ''],
+        ], $metadata->breadcrumb);
+        self::assertEquals($metadata, $metadata::fromJson($metadata->toJson()));
+    }
+
+    #[Test]
     public function pageWithoutMetadataHasNone(): void
     {
         $metadata = (new MetadataExtractor())->extract('<html><head></head><body><title>Not in the head</title></body></html>', 'https://www.example.com/');

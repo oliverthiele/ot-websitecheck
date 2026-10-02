@@ -467,6 +467,31 @@
         <source>The sitemap lists the page, but the page asks search engines not to index it. One of the two is wrong.</source>
       </segment>
     </unit>
+    <unit id="metaFinding.breadcrumbItemBroken">
+      <segment>
+        <source>Breadcrumb links a broken page</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.breadcrumbItemBroken.help">
+      <segment>
+        <source>The structured data of the breadcrumb links a URL that answers with an error, or a detail page without its record — typically the last item of a detail view, linking the detail page itself.</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.breadcrumbItemRedirects">
+      <segment>
+        <source>Breadcrumb links a redirect</source>
+      </segment>
+    </unit>
+    <unit id="metaFinding.breadcrumbItemRedirects.help">
+      <segment>
+        <source>The structured data of the breadcrumb links a URL that only answers through a redirect, or that names another URL as canonical. It should link the final URL.</source>
+      </segment>
+    </unit>
+    <unit id="metadata.breadcrumb">
+      <segment>
+        <source>Breadcrumb</source>
+      </segment>
+    </unit>
     <unit id="metadata.title">
       <segment>
         <source>Title</source>
@@ -2122,6 +2147,26 @@
         <source>A normal page: fill in its page properties — tab SEO, "Title for search engines" and "Description for search engines"; tab Social Media, section "Open Graph (Facebook)", "Open Graph Image". A detail view, or "Shared with other URLs": pass it on to the integrator, the template of the detail view has to set the metadata of its record. "In the sitemap, but noindex": check the switch "Index this page" on the tab SEO; if it is meant to be off, the integrator has to leave the page out of the sitemap.</source>
       </segment>
     </unit>
+    <unit id="faq.breadcrumb.title">
+      <segment>
+        <source>The breadcrumb links a broken page or a redirect</source>
+      </segment>
+    </unit>
+    <unit id="faq.breadcrumb.findings">
+      <segment>
+        <source>Status check: Breadcrumb links a broken page, Breadcrumb links a redirect</source>
+      </segment>
+    </unit>
+    <unit id="faq.breadcrumb.meaning">
+      <segment>
+        <source>Many websites describe their breadcrumb as structured data, so search engines can show the path in their results. On the detail view of a plugin, the last item often links the detail page itself — a URL without the record, which shows a list, an empty page or an error. Search engines then follow a link that leads nowhere. Whether the current page is part of the breadcrumb at all is up to the website; search engines do not require it.</source>
+      </segment>
+    </unit>
+    <unit id="faq.breadcrumb.action">
+      <segment>
+        <source>Pass it on to the integrator: the breadcrumb of a detail view has to end with the record, or leave out the detail page. Nothing to do in the content.</source>
+      </segment>
+    </unit>
     <unit id="faq.argumentsIgnored.title">
       <segment>
         <source>Link arguments have no effect</source>
@@ -2320,6 +2365,16 @@
     <unit id="glossary.noIndex">
       <segment>
         <source>Page properties, tab SEO, switch "Index this page": switched off, search engines are asked not to index the page, and it is left out of the sitemap.</source>
+      </segment>
+    </unit>
+    <unit id="glossary.structuredData.term">
+      <segment>
+        <source>Structured data</source>
+      </segment>
+    </unit>
+    <unit id="glossary.structuredData">
+      <segment>
+        <source>Information about a page in a form search engines read directly, usually as JSON-LD in the HTML — e.g. the breadcrumb trail, an article or a job offer. Visitors do not see it; it comes from the templates and plugins, not from a field editors fill in.</source>
       </segment>
     </unit>
     <unit id="glossary.languageFallback.term">

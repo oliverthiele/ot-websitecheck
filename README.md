@@ -771,6 +771,13 @@ their own; none of them fails a run:
 | `metaDescriptionMissing` | No meta description |
 | `openGraphImageMissing` | No `og:image`; TYPO3 renders OpenGraph tags only when they are filled in |
 | `listedButNoindex` | The sitemap lists a page whose robots tag says noindex |
+| `breadcrumbItemBroken` | The JSON-LD `BreadcrumbList` links a URL of the same host that fails in this run, or a page marked as requiring a parameter without one |
+| `breadcrumbItemRedirects` | The JSON-LD `BreadcrumbList` links a URL that only answers through a redirect or names another URL as canonical |
+
+Breadcrumb items are judged by the results of the same run; a URL the sitemap
+does not list is only judged through the pages marked as requiring a
+parameter, never requested. Whether the current page is the last item is left
+to the site — search engines do not require it.
 
 How to set the metadata of a detail view is in
 [Documentation/Recipes.md](Documentation/Recipes.md#metadata-of-detail-pages).

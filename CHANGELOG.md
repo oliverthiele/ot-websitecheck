@@ -46,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a missing description or preview image and sitemap URLs marked noindex, in
   a column and filter of the status check module. Requires a database schema
   update
+- Read the JSON-LD `BreadcrumbList` of every page in
+  `websitecheck:checksitemap` and report items that link a broken page or a
+  detail page without its record (`breadcrumbItemBroken`), or a redirect
+  (`breadcrumbItemRedirects`)
 - Warn in the migration check when the same content loses its meta
   description (`metaDescriptionLost`) or `og:image` (`openGraphImageLost`)
 - Add a glossary to the help module: the terms of the checks, and where the
