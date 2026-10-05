@@ -10,12 +10,14 @@ final readonly class FetchedPage
      * @param int $httpStatus 0 when no response arrived at all.
      * @param TransferFailure|null $transferFailure why no response arrived; null when one did.
      * @param int $redirectCount redirects followed before the answer
+     * @param string $finalUrl the URL that answered after the redirects; empty when none were followed
      */
     public function __construct(
         public int $httpStatus,
         public string $body,
         public ?TransferFailure $transferFailure = null,
         public int $redirectCount = 0,
+        public string $finalUrl = '',
     ) {
     }
 

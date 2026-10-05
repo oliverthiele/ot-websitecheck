@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Domain\Repository;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -14,6 +17,13 @@ use TYPO3\CMS\Core\Registry;
 class CheckResultRepository extends AbstractRepository
 {
     public const string TABLE = 'tx_otwebsitecheck_domain_model_check';
+
+    /**
+     * What a result without a marker must answer to match an actor filter.
+     */
+    public const string PLAIN_NOT_FOUND = 'notFound';
+    public const string PLAIN_OTHER_ERROR = 'otherError';
+    public const string PLAIN_OK = 'ok';
     private const string REGISTRY_NAMESPACE = 'ot_websitecheck';
 
     public function __construct(
@@ -29,15 +39,35 @@ class CheckResultRepository extends AbstractRepository
      * status is a new finding and needs review again.
      *
      * @param int $runStartedAt start of the checksitemap run storing the result, 0 for other commands
+     * @param string $finalUrl the URL that answered after redirects; empty without redirects
+     * @param string $canonicalUrl the canonical URL the page declares; empty when it declares none or was not read
+     * @param int $languageUid the site language the local routing reads from the URL
+     * @param string $metadata the page's metadata as PageMetadata::toJson() writes it
      */
-    public function storeResult(string $url, string $environment, string $source, ?int $pageUid, int $httpStatus, string $errorMarker, int $checkedAt, int $runStartedAt = 0): void
-    {
+    public function storeResult(
+        string $url,
+        string $environment,
+        string $source,
+        ?int $pageUid,
+        int $httpStatus,
+        string $errorMarker,
+        int $checkedAt,
+        int $runStartedAt = 0,
+        string $finalUrl = '',
+        string $canonicalUrl = '',
+        int $languageUid = 0,
+        string $metadata = '',
+    ): void {
         $values = [
             'path' => UrlUtility::pathWithQuery($url),
             'source' => $source,
             'page_uid' => $pageUid ?? 0,
+            'language_uid' => $languageUid,
+            'metadata' => $metadata,
             'http_status' => $httpStatus,
             'error_marker' => $errorMarker,
+            'final_url' => $finalUrl,
+            'canonical_url' => $canonicalUrl,
             'checked_at' => $checkedAt,
             'run_started_at' => $runStartedAt,
         ];
@@ -77,9 +107,12 @@ class CheckResultRepository extends AbstractRepository
 
     /**
      * @param int $limit rows per page, 0 for all
+     * @param list<string> $markers only rows with one of these markers; all when empty
+     * @param array{markers: list<string>, plain: string}|null $actorFilter rows with one of these markers, or without a marker and a status as named by "plain" (a PLAIN_* constant or ''); all when null
+     * @param string $metaFinding only rows with this metadata finding; all when empty
      * @return array<int, array<string, mixed>>
      */
-    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0): array
+    public function findAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, int $limit = 0, int $offset = 0, array $markers = [], ?array $actorFilter = null, string $metaFinding = ''): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         // Group by page uid first, then path: the same page uid/path can carry
@@ -92,7 +125,7 @@ class CheckResultRepository extends AbstractRepository
             ->addOrderBy('path', 'ASC')
             ->addOrderBy('environment', 'ASC');
 
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter, $metaFinding);
         if ($limit > 0) {
             $queryBuilder->setMaxResults($limit)->setFirstResult(max(0, $offset));
         }
@@ -100,11 +133,15 @@ class CheckResultRepository extends AbstractRepository
         return $queryBuilder->executeQuery()->fetchAllAssociative();
     }
 
-    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false): int
+    /**
+     * @param list<string> $markers only rows with one of these markers; all when empty
+     * @param array{markers: list<string>, plain: string}|null $actorFilter see findAll()
+     */
+    public function countAll(string $environment = '', bool $onlyProblems = false, bool $onlyUnreviewed = false, array $markers = [], ?array $actorFilter = null, string $metaFinding = ''): int
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE);
         $queryBuilder->count('uid')->from(self::TABLE);
-        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed);
+        $this->applyFilters($queryBuilder, $environment, $onlyProblems, $onlyUnreviewed, $markers, $actorFilter, $metaFinding);
         $count = $queryBuilder->executeQuery()->fetchOne();
 
         return is_numeric($count) ? (int)$count : 0;
@@ -191,6 +228,90 @@ class CheckResultRepository extends AbstractRepository
     }
 
     /**
+     * The working pages of an environment with their metadata, as the
+     * metadata analysis needs them.
+     *
+     * @return list<array{uid: int, url: string, pageUid: int, metadata: PageMetadata, metaFindings: string}>
+     */
+    public function findPagesWithMetadata(string $environment): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('uid', 'url', 'page_uid', 'metadata', 'meta_findings')
+            ->from(self::TABLE)
+            ->where(
+                $queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)),
+                $queryBuilder->expr()->eq('http_status', $queryBuilder->createNamedParameter(200, ParameterType::INTEGER)),
+                $queryBuilder->expr()->neq('metadata', $queryBuilder->createNamedParameter('')),
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(static fn(array $row): array => [
+            'uid' => RowValue::int($row, 'uid'),
+            'url' => RowValue::string($row, 'url'),
+            'pageUid' => RowValue::int($row, 'page_uid'),
+            'metadata' => PageMetadata::fromJson(RowValue::string($row, 'metadata')),
+            'metaFindings' => RowValue::string($row, 'meta_findings'),
+        ], $rows);
+    }
+
+    /**
+     * Status and marker of every URL of an environment, by comparable path.
+     *
+     * @return array<string, array{status: int, marker: string}>
+     */
+    public function findUrlStates(string $environment): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $rows = $queryBuilder->select('url', 'http_status', 'error_marker')
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)))
+            ->executeQuery()
+            ->fetchAllAssociative();
+        $states = [];
+        foreach ($rows as $row) {
+            $states[UrlUtility::comparablePath(RowValue::string($row, 'url'))] = [
+                'status' => RowValue::int($row, 'http_status'),
+                'marker' => RowValue::string($row, 'error_marker'),
+            ];
+        }
+
+        return $states;
+    }
+
+    /**
+     * @param list<string> $findings
+     */
+    public function updateMetaFindings(int $uid, array $findings): void
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->update(self::TABLE)
+            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, ParameterType::INTEGER)))
+            ->set('meta_findings', implode(',', $findings))
+            ->executeStatement();
+    }
+
+    /**
+     * @return list<string> the markers stored for an environment, or for all
+     */
+    public function findDistinctMarkers(string $environment = ''): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE);
+        $queryBuilder->selectLiteral('DISTINCT error_marker')
+            ->from(self::TABLE)
+            ->where($queryBuilder->expr()->neq('error_marker', $queryBuilder->createNamedParameter('')))
+            ->orderBy('error_marker', 'ASC');
+        if ($environment !== '') {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq('environment', $queryBuilder->createNamedParameter($environment)),
+            );
+        }
+        $rows = $queryBuilder->executeQuery()->fetchFirstColumn();
+
+        return array_map(static fn(mixed $marker): string => is_scalar($marker) ? (string)$marker : '', $rows);
+    }
+
+    /**
      * @return array<int, string>
      */
     public function findDistinctSources(string $environment = ''): array
@@ -272,7 +393,11 @@ class CheckResultRepository extends AbstractRepository
         return 'checksitemap.run.' . hash('sha256', $environment . "\n" . $source);
     }
 
-    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed): void
+    /**
+     * @param list<string> $markers
+     * @param array{markers: list<string>, plain: string}|null $actorFilter
+     */
+    private function applyFilters(QueryBuilder $queryBuilder, string $environment, bool $onlyProblems, bool $onlyUnreviewed, array $markers = [], ?array $actorFilter = null, string $metaFinding = ''): void
     {
         if ($environment !== '') {
             $queryBuilder->andWhere(
@@ -292,5 +417,46 @@ class CheckResultRepository extends AbstractRepository
                 $queryBuilder->expr()->eq('reviewed', $queryBuilder->createNamedParameter(0, ParameterType::INTEGER)),
             );
         }
+        if ($markers !== []) {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->in('error_marker', $queryBuilder->createNamedParameter($markers, ArrayParameterType::STRING)),
+            );
+        }
+        if ($actorFilter !== null) {
+            $queryBuilder->andWhere($this->buildActorConstraint($queryBuilder, $actorFilter));
+        }
+        if ($metaFinding !== '') {
+            $queryBuilder->andWhere($queryBuilder->expr()->inSet('meta_findings', $queryBuilder->quote($metaFinding)));
+        }
+    }
+
+    /**
+     * @param array{markers: list<string>, plain: string} $actorFilter
+     */
+    private function buildActorConstraint(QueryBuilder $queryBuilder, array $actorFilter): string
+    {
+        $expr = $queryBuilder->expr();
+        $alternatives = [];
+        if ($actorFilter['markers'] !== []) {
+            $alternatives[] = $expr->in('error_marker', $queryBuilder->createNamedParameter($actorFilter['markers'], ArrayParameterType::STRING));
+        }
+        $notFoundStatuses = $queryBuilder->createNamedParameter(FindingGuide::NOT_FOUND_STATUSES, ArrayParameterType::INTEGER);
+        $statusConstraint = match ($actorFilter['plain']) {
+            self::PLAIN_NOT_FOUND => $expr->in('http_status', $notFoundStatuses),
+            self::PLAIN_OTHER_ERROR => $expr->and(
+                $expr->neq('http_status', $queryBuilder->createNamedParameter(200, ParameterType::INTEGER)),
+                $expr->notIn('http_status', $notFoundStatuses),
+            ),
+            self::PLAIN_OK => $expr->eq('http_status', $queryBuilder->createNamedParameter(200, ParameterType::INTEGER)),
+            default => null,
+        };
+        if ($statusConstraint !== null) {
+            $alternatives[] = $expr->and(
+                $expr->eq('error_marker', $queryBuilder->createNamedParameter('')),
+                $statusConstraint,
+            );
+        }
+
+        return $alternatives === [] ? '1 = 0' : (string)$expr->or(...$alternatives);
     }
 }

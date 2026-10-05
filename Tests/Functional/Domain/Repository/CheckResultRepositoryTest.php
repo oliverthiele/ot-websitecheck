@@ -24,6 +24,18 @@ final class CheckResultRepositoryTest extends FunctionalTestCase
         $this->subject = new CheckResultRepository($this->get(ConnectionPool::class), GeneralUtility::makeInstance(Registry::class));
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return list<int>
+     */
+    private function uidsOf(array $rows): array
+    {
+        $uids = array_map(static fn(array $row): int => is_numeric($row['uid'] ?? null) ? (int)$row['uid'] : 0, $rows);
+        sort($uids);
+
+        return $uids;
+    }
+
     #[Test]
     public function reviewIsKeptWhileTheStatusStaysTheSame(): void
     {
@@ -43,6 +55,59 @@ final class CheckResultRepositoryTest extends FunctionalTestCase
         $row = $this->findRow('https://www.example.com/broken/', 'staging');
         self::assertSame(0, (int)$row['reviewed']);
         self::assertSame('known', $row['note']);
+    }
+
+    #[Test]
+    public function finalAndCanonicalUrlAreStored(): void
+    {
+        $this->subject->storeResult('https://www.example.com/alias/', 'staging', 'staging-current', 7, 200, 'canonicalElsewhere', 1790001000, 1790000900, '', 'https://www.example.com/original/');
+        $this->subject->storeResult('https://www.example.com/moved/', 'staging', 'staging-current', 4, 200, 'redirectChain', 1790001000, 1790000900, 'https://www.example.com/new/');
+
+        $alias = $this->findRow('https://www.example.com/alias/', 'staging');
+        self::assertSame('', $alias['final_url']);
+        self::assertSame('https://www.example.com/original/', $alias['canonical_url']);
+        $moved = $this->findRow('https://www.example.com/moved/', 'staging');
+        self::assertSame('https://www.example.com/new/', $moved['final_url']);
+        self::assertSame('', $moved['canonical_url']);
+    }
+
+    #[Test]
+    public function metadataFindingsAreStoredAndFiltered(): void
+    {
+        $this->subject->storeResult('https://www.example.com/news/a', 'staging', 'staging-current', 7, 200, '', 1790001000, 1790000900, '', '', 0, '{"title":"News"}');
+        $pages = $this->subject->findPagesWithMetadata('staging');
+        self::assertCount(1, $pages);
+        self::assertSame('News', $pages[0]['metadata']->title);
+
+        $this->subject->updateMetaFindings($pages[0]['uid'], ['metaShared', 'metaDescriptionMissing']);
+
+        self::assertSame(1, $this->subject->countAll('staging', false, false, [], null, 'metaDescriptionMissing'));
+        self::assertSame(1, $this->subject->countAll('staging', false, false, [], null, 'metaShared'));
+        self::assertSame(0, $this->subject->countAll('staging', false, false, [], null, 'listedButNoindex'));
+    }
+
+    #[Test]
+    public function resultsAreFilteredByMarker(): void
+    {
+        self::assertSame(['redirected', 'timeout'], $this->subject->findDistinctMarkers('staging'));
+        self::assertSame([], $this->subject->findDistinctMarkers('live'));
+        self::assertSame(1, $this->subject->countAll('staging', false, false, ['redirected']));
+        self::assertSame(2, $this->subject->countAll('', true, false, ['redirected', 'timeout']));
+        self::assertSame([4], array_map(static fn(array $row): int => (int)$row['uid'], $this->subject->findAll('staging', false, false, 0, 0, ['redirected'])));
+    }
+
+    #[Test]
+    public function resultsAreFilteredByWhoActs(): void
+    {
+        // Fixture: 200 (1, 5), 500 (2), timeout (3), redirected (4), 404 (6).
+        $integrator = ['markers' => ['timeout', 'redirected'], 'plain' => CheckResultRepository::PLAIN_OTHER_ERROR];
+        $editor = ['markers' => [], 'plain' => CheckResultRepository::PLAIN_NOT_FOUND];
+        $nobody = ['markers' => [], 'plain' => CheckResultRepository::PLAIN_OK];
+
+        self::assertSame([2, 3, 4], $this->uidsOf($this->subject->findAll('staging', false, false, 0, 0, [], $integrator)));
+        self::assertSame([6], $this->uidsOf($this->subject->findAll('staging', false, false, 0, 0, [], $editor)));
+        self::assertSame([1], $this->uidsOf($this->subject->findAll('staging', false, false, 0, 0, [], $nobody)));
+        self::assertSame(0, $this->subject->countAll('', false, false, [], ['markers' => [], 'plain' => '']));
     }
 
     #[Test]

@@ -1,6 +1,7 @@
 <html
     xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
     data-namespace-typo3-fluid="true"
 >
 
@@ -28,6 +29,9 @@
                 </f:for>
             </ol>
             <p>{f:translate(key: '{languageFile}guide.{guide}.note')}</p>
+            <a href="{be:moduleLink(route: 'site_websitecheck_help')}" class="btn btn-default btn-sm">
+                <core:icon identifier="actions-question-circle" size="small"/> {f:translate(key: '{languageFile}guide.help')}
+            </a>
             <a href="https://github.com/oliverthiele/ot-websitecheck#{documentation}" target="_blank" rel="noreferrer" class="btn btn-default btn-sm">
                 <core:icon identifier="actions-window-open" size="small"/> {f:translate(key: '{languageFile}guide.documentation')}
             </a>

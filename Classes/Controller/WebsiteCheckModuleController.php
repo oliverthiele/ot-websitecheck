@@ -5,8 +5,15 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Controller;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
+use OliverThiele\OtWebsitecheck\Service\BackendPageLinks;
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
+use OliverThiele\OtWebsitecheck\Service\MetadataAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
+use OliverThiele\OtWebsitecheck\Utility\RowValue;
+use OliverThiele\OtWebsitecheck\Utility\UrlUtility;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
@@ -21,18 +28,46 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
     private const int RESULTS_PER_PAGE = 500;
 
+    /**
+     * Filter value for every exception class at once: one finding for an
+     * editor, however many classes there are.
+     */
+    private const string RENDERING_ERROR = 'renderingError';
+
     public function __construct(
         private readonly CheckResultRepository $checkResultRepository,
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
+        private readonly FindingGuide $findingGuide,
+        private readonly BackendPageLinks $backendPageLinks,
     ) {
     }
 
-    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, int $page = 1): ResponseInterface
+    public function indexAction(string $environment = '', bool $onlyProblems = true, bool $onlyUnreviewed = false, string $marker = '', string $actor = '', string $metaFinding = '', int $page = 1): ResponseInterface
     {
+        if (!in_array($metaFinding, MetadataAnalyzer::FINDINGS, true)) {
+            $metaFinding = '';
+        }
         $environments = $this->checkResultRepository->findDistinctEnvironments();
+        $markers = $this->checkResultRepository->findDistinctMarkers($environment);
+        $exceptionMarkers = array_values(array_filter($markers, $this->findingGuide->isExceptionMarker(...)));
+        $markerFilter = match (true) {
+            $marker === self::RENDERING_ERROR && $exceptionMarkers !== [] => $exceptionMarkers,
+            in_array($marker, $markers, true) && !$this->findingGuide->isExceptionMarker($marker) => [$marker],
+            default => [],
+        };
+        if ($markerFilter === []) {
+            $marker = '';
+        }
+        if (!in_array($actor, FindingGuide::ACTORS, true)) {
+            $actor = '';
+        }
+        $actorFilter = $actor === '' ? null : $this->buildActorFilter($actor, $markers);
+        // "Nothing to do" lists what "only problems" hides; a chosen actor or
+        // metadata finding wins — metadata findings are no problem of the URL.
+        $onlyProblems = $onlyProblems && $actor === '' && $metaFinding === '';
         // A crawl of a large site stores tens of thousands of rows; the table
         // shows one page of them.
-        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed);
+        $total = $this->checkResultRepository->countAll($environment, $onlyProblems, $onlyUnreviewed, $markerFilter, $actorFilter, $metaFinding);
         $pageCount = max(1, (int)ceil($total / self::RESULTS_PER_PAGE));
         $page = min(max(1, $page), $pageCount);
         $offset = ($page - 1) * self::RESULTS_PER_PAGE;
@@ -40,7 +75,10 @@ class WebsiteCheckModuleController extends AbstractModuleController
 
         $moduleTemplate = $this->createModuleTemplate();
         $moduleTemplate->assignMultiple([
-            'results' => $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset),
+            'results' => array_map(
+                $this->addGuidance(...),
+                $this->checkResultRepository->findAll($environment, $onlyProblems, $onlyUnreviewed, self::RESULTS_PER_PAGE, $offset, $markerFilter, $actorFilter, $metaFinding),
+            ),
             'pagination' => [
                 'page' => $page,
                 'pageCount' => $pageCount,
@@ -51,6 +89,13 @@ class WebsiteCheckModuleController extends AbstractModuleController
                 'nextPage' => $page < $pageCount ? $page + 1 : 0,
             ],
             'environmentOptions' => $environmentOptions,
+            'markerOptions' => ['' => $this->translate('statusResults.allMarkers')] + $this->buildMarkerOptions($markers, $exceptionMarkers !== []),
+            'actorCounts' => $this->countByActor($environment, $markers),
+            'currentMarker' => $marker,
+            'actorOptions' => $this->buildActorOptions(),
+            'currentActor' => $actor,
+            'metaFindingOptions' => $this->buildMetaFindingOptions(),
+            'currentMetaFinding' => $metaFinding,
             // Results of any environment — the filter must stay even when the chosen one has none.
             'hasResults' => $environments !== [],
             'sources' => $this->checkResultRepository->findDistinctSources($environment),
@@ -64,6 +109,137 @@ class WebsiteCheckModuleController extends AbstractModuleController
         ]);
 
         return $moduleTemplate->renderResponse('WebsiteCheckModule/Index');
+    }
+
+    /**
+     * Who acts on a result, the help entry that explains it, and where the URL
+     * should lead in the end: the page its canonical names, or else the URL
+     * its redirects ended on — empty when that is the URL itself.
+     *
+     * @param array<string, mixed> $result
+     * @return array<string, mixed>
+     */
+    private function addGuidance(array $result): array
+    {
+        $url = RowValue::string($result, 'url');
+        $finalUrl = RowValue::string($result, 'final_url');
+        $canonicalUrl = RowValue::string($result, 'canonical_url');
+        $answeredUrl = $finalUrl !== '' ? $finalUrl : $url;
+        $suggestedUrl = match (true) {
+            $canonicalUrl !== '' && UrlUtility::comparablePath($canonicalUrl) !== UrlUtility::comparablePath($answeredUrl) => $canonicalUrl,
+            $finalUrl !== '' && $finalUrl !== $url => $finalUrl,
+            default => '',
+        };
+
+        $marker = RowValue::string($result, 'error_marker');
+        $isException = $this->findingGuide->isExceptionMarker($marker);
+        $pageUid = RowValue::int($result, 'page_uid');
+        $page = $pageUid > 0 ? BackendUtility::getRecord('pages', $pageUid, 'title') : null;
+        $pageTitle = $page['title'] ?? '';
+
+        return $result + [
+            'pageTitle' => is_string($pageTitle) ? $pageTitle : '',
+            'metaFindings' => array_map(
+                fn(string $finding): array => ['name' => $finding] + $this->findingGuide->forMetaFinding($finding),
+                array_values(array_filter(explode(',', RowValue::string($result, 'meta_findings')))),
+            ),
+            'metadataSummary' => $this->summarizeMetadata(PageMetadata::fromJson(RowValue::string($result, 'metadata'))),
+            // An exception class is shown by its short name; the popover names it in full.
+            'markerLabel' => match (true) {
+                $marker === '' => '',
+                $isException => substr((string)strrchr('\\' . $marker, '\\'), 1),
+                default => $this->translate('errorMarker.' . $marker),
+            },
+            'markerHelp' => $this->translate($isException ? 'errorMarker.exception.help' : 'errorMarker.' . $marker . '.help'),
+            'suggestedUrl' => $suggestedUrl,
+            'backendLink' => $this->backendPageLinks->forPageOfUrl($url, RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid'), $this->request),
+            'languageTitle' => $this->backendPageLinks->findLanguageTitle(RowValue::int($result, 'page_uid'), RowValue::int($result, 'language_uid')),
+            'guide' => $this->findingGuide->forStatusResult($marker, RowValue::int($result, 'http_status')),
+        ];
+    }
+
+    /**
+     * @param list<string> $markers
+     * @return array<string, string>
+     */
+    private function buildMarkerOptions(array $markers, bool $hasExceptions): array
+    {
+        $options = [];
+        foreach ($markers as $marker) {
+            if (!$this->findingGuide->isExceptionMarker($marker)) {
+                $options[$marker] = $this->translate('errorMarker.' . $marker);
+            }
+        }
+        if ($hasExceptions) {
+            $options[self::RENDERING_ERROR] = $this->translate('statusResults.renderingError');
+        }
+
+        return $options;
+    }
+
+    /**
+     * The metadata of a page in one line, for a popover: the values come from
+     * a checked page and are shown as text, never as HTML.
+     */
+    private function summarizeMetadata(PageMetadata $metadata): string
+    {
+        $parts = [];
+        foreach ($metadata->toArray() as $key => $value) {
+            $parts[] = $this->translate('metadata.' . $key) . ': ' . $value;
+        }
+        if ($metadata->breadcrumb !== []) {
+            $parts[] = $this->translate('metadata.breadcrumb') . ': ' . implode(' › ', array_map(
+                static fn(array $item): string => $item['name'] !== '' ? $item['name'] : $item['url'],
+                $metadata->breadcrumb,
+            ));
+        }
+
+        return implode(' · ', $parts);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildMetaFindingOptions(): array
+    {
+        $options = ['' => $this->translate('metaFinding.all')];
+        foreach (MetadataAnalyzer::FINDINGS as $finding) {
+            $options[$finding] = $this->translate('metaFinding.' . $finding);
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param list<string> $markers the markers stored for the environment
+     * @return array{markers: list<string>, plain: string}
+     */
+    private function buildActorFilter(string $actor, array $markers): array
+    {
+        return [
+            'markers' => $this->findingGuide->filterMarkers($markers, $actor),
+            'plain' => match ($actor) {
+                FindingGuide::ACTOR_EDITOR => CheckResultRepository::PLAIN_NOT_FOUND,
+                FindingGuide::ACTOR_INTEGRATOR => CheckResultRepository::PLAIN_OTHER_ERROR,
+                default => CheckResultRepository::PLAIN_OK,
+            },
+        ];
+    }
+
+    /**
+     * How many results each actor has to look at; nothing to do is not counted.
+     *
+     * @param list<string> $markers
+     * @return array<string, int>
+     */
+    private function countByActor(string $environment, array $markers): array
+    {
+        $counts = [];
+        foreach ([FindingGuide::ACTOR_EDITOR, FindingGuide::ACTOR_INTEGRATOR] as $actor) {
+            $counts[$actor] = $this->checkResultRepository->countAll($environment, false, false, [], $this->buildActorFilter($actor, $markers));
+        }
+
+        return $counts;
     }
 
     public function initializeDeleteAction(): void

@@ -22,7 +22,7 @@ final readonly class RedirectChain
     public const string ABORT_RESPONSE_TOO_LARGE = 'responseTooLarge';
 
     /**
-     * @param list<array{url: string, status: int}> $steps
+     * @param list<array{url: string, status: int, redirectBy?: string}> $steps
      * @param TransferFailure|null $transferFailure set when a request of the chain got no response.
      */
     public function __construct(
@@ -34,7 +34,7 @@ final readonly class RedirectChain
     }
 
     /**
-     * @param list<array{url: string, status: int}> $steps
+     * @param list<array{url: string, status: int, redirectBy?: string}> $steps
      */
     public static function abortedByTransferFailure(array $steps, TransferFailure $transferFailure): self
     {
@@ -88,7 +88,7 @@ final readonly class RedirectChain
     }
 
     /**
-     * @return array{url: string, status: int}|null
+     * @return array{url: string, status: int, redirectBy?: string}|null
      */
     private function getLastStep(): ?array
     {

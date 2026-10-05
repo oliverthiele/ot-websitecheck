@@ -214,7 +214,7 @@ class CrawlLinksCommand extends Command
                     $ignoredArguments++;
                 } elseif ($errorMarker === ErrorMarkerDetector::MARKER_TIMEOUT) {
                     $timedOut++;
-                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
+                } elseif (in_array($errorMarker, ErrorMarkerDetector::NOTICE_MARKERS, true)) {
                     $redirected++;
                 } elseif ($errorMarker !== '') {
                     $withMarker++;
@@ -281,7 +281,7 @@ class CrawlLinksCommand extends Command
         $errorMarker = $this->errorMarkerDetector->detectFor($linkedPage);
         $retryable = $linkedPage->isRetryable();
 
-        if ($linkedPage->isOk() && ($errorMarker === '' || $errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED)) {
+        if ($linkedPage->isOk() && ($errorMarker === '' || in_array($errorMarker, ErrorMarkerDetector::NOTICE_MARKERS, true))) {
             $baseUrl = $this->pageLinkCollector->withoutArguments($link);
             if ($baseUrl !== $link) {
                 if (!array_key_exists($baseUrl, $baselineCache)) {

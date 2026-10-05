@@ -17,6 +17,35 @@ export function quote(value) {
 }
 
 /**
+ * Reverses quote(): the Scheduler takes every option value as it stands.
+ */
+function unquote(value) {
+  return value.startsWith("'") && value.endsWith("'") ? value.slice(1, -1).replaceAll("'\\''", "'") : value;
+}
+
+/**
+ * Shows the command as a task of the Scheduler: its name, and every option
+ * with its value as the task form asks for it.
+ */
+function renderScheduler(commandScheduler, parts) {
+  if (!commandScheduler) {
+    return;
+  }
+  const [command, ...options] = parts;
+  const commandSchedulerText = commandScheduler.querySelector('[data-js="commandSchedulerText"]');
+  const commandSchedulerOptions = commandScheduler.querySelector('[data-js="commandSchedulerOptions"]');
+  commandSchedulerText.textContent = commandScheduler.dataset.label.replace('__COMMAND__', command);
+  commandSchedulerOptions.replaceChildren(...options.map((option) => {
+    const [name, ...value] = option.split('=');
+    const item = document.createElement('li');
+    const code = document.createElement('code');
+    code.textContent = value.length > 0 ? `${name}: ${unquote(value.join('='))}` : name;
+    item.append(code);
+    return item;
+  }));
+}
+
+/**
  * @param {HTMLElement} form
  * @param {() => {parts: string[], warnings: string[]}} build
  * @returns {() => void} renders the command again
@@ -26,6 +55,7 @@ export function initializeCommandOutput(form, build) {
   const commandOutput = form.querySelector('[data-js="commandOutput"]');
   const commandWarning = form.querySelector('[data-js="commandWarning"]');
   const commandCopy = form.querySelector('[data-js="commandCopy"]');
+  const commandScheduler = form.querySelector('[data-js="commandScheduler"]');
 
   try {
     const storedPrefix = window.localStorage.getItem(PREFIX_STORAGE_KEY);
@@ -39,6 +69,7 @@ export function initializeCommandOutput(form, build) {
   function render() {
     const { parts, warnings } = build();
     commandOutput.textContent = [commandPrefix.value, ...parts].join(' ');
+    renderScheduler(commandScheduler, parts);
     commandWarning.replaceChildren(...warnings.map((warning) => {
       const line = document.createElement('div');
       line.textContent = warning;

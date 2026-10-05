@@ -12,6 +12,11 @@
         <source>Page UID</source>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.language_uid">
+      <segment>
+        <source>Site language uid</source>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.url">
       <segment>
         <source>URL</source>
@@ -40,6 +45,26 @@
     <unit id="tx_otwebsitecheck_domain_model_check.error_marker">
       <segment>
         <source>Error marker</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.final_url">
+      <segment>
+        <source>Final URL after redirects</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the page</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.metadata">
+      <segment>
+        <source>Metadata of the page</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.meta_findings">
+      <segment>
+        <source>Metadata findings</source>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.checked_at">
@@ -140,6 +165,16 @@
     <unit id="tx_otwebsitecheck_domain_model_observation.abort_reason">
       <segment>
         <source>Abort reason</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the final page</source>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.metadata">
+      <segment>
+        <source>Metadata of the final page</source>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_observation.page_uid">

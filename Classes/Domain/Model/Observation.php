@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OliverThiele\OtWebsitecheck\Domain\Model;
 
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Utility\RowValue;
 
 /**
@@ -18,8 +19,9 @@ final readonly class Observation
     public const string ROLE_TARGET_SITEMAP = 'targetSitemap';
 
     /**
-     * @param list<array{url: string, status: int}> $redirectChain
+     * @param list<array{url: string, status: int, redirectBy?: string}> $redirectChain
      * @param list<string> $warnings
+     * @param string $canonicalUrl the canonical URL the final page declares, empty when it declares none
      */
     public function __construct(
         public int $uid,
@@ -43,6 +45,8 @@ final readonly class Observation
         public bool $reviewed = false,
         public string $note = '',
         public int $checkedAt = 0,
+        public string $canonicalUrl = '',
+        public PageMetadata $metadata = new PageMetadata(),
     ) {
     }
 
@@ -78,11 +82,13 @@ final readonly class Observation
             reviewed: RowValue::int($row, 'reviewed') === 1,
             note: RowValue::string($row, 'note'),
             checkedAt: RowValue::int($row, 'checked_at'),
+            canonicalUrl: RowValue::string($row, 'canonical_url'),
+            metadata: PageMetadata::fromJson(RowValue::string($row, 'metadata')),
         );
     }
 
     /**
-     * @return list<array{url: string, status: int}>
+     * @return list<array{url: string, status: int, redirectBy?: string}>
      */
     private static function decodeRedirectChain(string $json): array
     {
@@ -102,10 +108,15 @@ final readonly class Observation
             }
             $url = $step['url'] ?? null;
             $status = $step['status'] ?? null;
-            $steps[] = [
+            $redirectBy = $step['redirectBy'] ?? null;
+            $decodedStep = [
                 'url' => is_string($url) ? $url : '',
                 'status' => is_int($status) ? $status : 0,
             ];
+            if (is_string($redirectBy) && $redirectBy !== '') {
+                $decodedStep['redirectBy'] = $redirectBy;
+            }
+            $steps[] = $decodedStep;
         }
 
         return $steps;

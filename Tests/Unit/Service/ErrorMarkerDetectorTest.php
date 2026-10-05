@@ -21,6 +21,32 @@ final class ErrorMarkerDetectorTest extends UnitTestCase
     }
 
     #[Test]
+    public function workingPageReachedThroughSeveralRedirectsIsMarkedAsChain(): void
+    {
+        $page = new FetchedPage(200, '<html><body>Welcome</body></html>', null, 2);
+
+        self::assertSame(ErrorMarkerDetector::MARKER_REDIRECT_CHAIN, (new ErrorMarkerDetector())->detectFor($page));
+    }
+
+    #[Test]
+    public function workingPageNamingAnotherCanonicalIsMarked(): void
+    {
+        $page = new FetchedPage(200, '<html><body>Welcome</body></html>');
+
+        self::assertSame(ErrorMarkerDetector::MARKER_CANONICAL_ELSEWHERE, (new ErrorMarkerDetector())->detectFor($page, true));
+    }
+
+    #[Test]
+    public function redirectAndErrorOutrankTheCanonical(): void
+    {
+        $detector = new ErrorMarkerDetector();
+
+        self::assertSame(ErrorMarkerDetector::MARKER_REDIRECTED, $detector->detectFor(new FetchedPage(200, '', null, 1), true));
+        self::assertSame('productionException', $detector->detectFor(new FetchedPage(200, '<h1>Oops, an error occurred!</h1>'), true));
+        self::assertSame('', $detector->detectFor(new FetchedPage(404, ''), true));
+    }
+
+    #[Test]
     public function errorPageBehindARedirectKeepsItsErrorMarker(): void
     {
         $page = new FetchedPage(200, '<h1>Oops, an error occurred!</h1>', null, 2);

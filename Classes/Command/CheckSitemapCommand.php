@@ -6,10 +6,16 @@ namespace OliverThiele\OtWebsitecheck\Command;
 
 use OliverThiele\OtWebsitecheck\Domain\Repository\CheckResultRepository;
 use OliverThiele\OtWebsitecheck\Domain\ValueObject\FetchedPage;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageMetadata;
 use OliverThiele\OtWebsitecheck\Service\BasicAuthResolver;
+use OliverThiele\OtWebsitecheck\Service\CanonicalExtractor;
 use OliverThiele\OtWebsitecheck\Service\ErrorMarkerDetector;
+use OliverThiele\OtWebsitecheck\Service\MetadataAnalyzer;
+use OliverThiele\OtWebsitecheck\Service\MetadataExtractor;
 use OliverThiele\OtWebsitecheck\Service\PageFetcher;
 use OliverThiele\OtWebsitecheck\Service\PageUidResolver;
+use OliverThiele\OtWebsitecheck\Service\RequiredParameterPages;
 use OliverThiele\OtWebsitecheck\Service\RetryRounds;
 use OliverThiele\OtWebsitecheck\Service\SitemapSnapshotLocator;
 use OliverThiele\OtWebsitecheck\Service\UrlHostRewriter;
@@ -41,6 +47,10 @@ class CheckSitemapCommand extends Command
         private readonly BasicAuthResolver $basicAuthResolver,
         private readonly UrlHostRewriter $urlHostRewriter,
         private readonly RetryRounds $retryRounds,
+        private readonly CanonicalExtractor $canonicalExtractor,
+        private readonly RequiredParameterPages $requiredParameterPages,
+        private readonly MetadataExtractor $metadataExtractor,
+        private readonly MetadataAnalyzer $metadataAnalyzer,
     ) {
         parent::__construct();
     }
@@ -140,7 +150,7 @@ class CheckSitemapCommand extends Command
         $notOkCount = 0;
         $errorMarkerCount = 0;
         $timeoutCount = 0;
-        $redirectedCount = 0;
+        $noticeCount = 0;
         $answeredCount = 0;
         $this->retryRounds->run(
             $urls,
@@ -151,23 +161,33 @@ class CheckSitemapCommand extends Command
                 return $page;
             },
             static fn(FetchedPage $page): bool => $page->isRetryable(),
-            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$redirectedCount, &$answeredCount): void {
-                $errorMarker = $this->errorMarkerDetector->detectFor($page);
+            function (string $url, FetchedPage $page) use ($environment, $snapshot, $runStartedAt, &$notOkCount, &$errorMarkerCount, &$timeoutCount, &$noticeCount, &$answeredCount): void {
+                $finalUrl = $page->finalUrl !== '' ? $page->finalUrl : $url;
+                $canonicalUrl = $page->isOk() ? $this->canonicalExtractor->extract($page->body, $finalUrl) : '';
+                $metadata = $page->isOk() ? $this->metadataExtractor->extract($page->body, $finalUrl)->toJson() : '';
+                $errorMarker = $this->errorMarkerDetector->detectFor($page, $this->canonicalExtractor->isElsewhere($canonicalUrl, $finalUrl));
+                $route = $this->pageUidResolver->resolveRoute($url);
+                $pageArguments = $route?->pageArguments;
+                // A detail page without a record answers with a fallback or an
+                // error by design; what is wrong is that the sitemap lists it.
+                if (!$page->isConnectionError() && $this->requiredParameterPages->isCalledWithoutParameter($pageArguments, new PageIdentity())) {
+                    $errorMarker = ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD;
+                }
                 if (!$page->isConnectionError()) {
                     $answeredCount++;
                 }
-                if (!$page->isOk()) {
+                if (!$page->isOk() && $errorMarker !== ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD) {
                     $notOkCount++;
                 }
                 if ($page->isTimeout()) {
                     $timeoutCount++;
-                } elseif ($errorMarker === ErrorMarkerDetector::MARKER_REDIRECTED) {
-                    $redirectedCount++;
+                } elseif (in_array($errorMarker, ErrorMarkerDetector::NOTICE_MARKERS, true)) {
+                    $noticeCount++;
                 } elseif ($errorMarker !== '') {
                     $errorMarkerCount++;
                 }
 
-                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $this->pageUidResolver->resolve($url), $page->httpStatus, $errorMarker, time(), $runStartedAt);
+                $this->checkResultRepository->storeResult($url, $environment, $snapshot->label, $pageArguments?->getPageId(), $page->httpStatus, $errorMarker, time(), $runStartedAt, $page->finalUrl, $canonicalUrl, $route->languageId ?? 0, $metadata);
             },
             static function (int $round, int $count) use ($io): void {
                 if ($round > 1) {
@@ -180,13 +200,15 @@ class CheckSitemapCommand extends Command
 
         $io->progressFinish();
         $io->writeln(sprintf(
-            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d only through a redirect.',
+            '%d URLs checked, %d without HTTP 200, %d with a detected error marker, %d timed out, %d with a notice (redirect, canonical URL elsewhere, detail page without record).',
             count($urls),
             $notOkCount,
             $errorMarkerCount,
             $timeoutCount,
-            $redirectedCount,
+            $noticeCount,
         ));
+
+        $this->analyzeMetadata($environment);
 
         if ($answeredCount === 0) {
             $io->error('Not a single URL answered. Check the host, the network and the Basic Auth credentials.');
@@ -197,5 +219,60 @@ class CheckSitemapCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * What the URLs breadcrumbs link to do: taken from the results of the
+     * environment, and — for a URL the sitemap does not list — from the pages
+     * marked as requiring a parameter. Nothing is requested for it.
+     *
+     * @param list<array{uid: int, url: string, pageUid: int, metadata: PageMetadata, metaFindings: string}> $pages
+     * @return array<string, string> comparable path => MetadataAnalyzer::URL_*
+     */
+    private function findUrlStates(string $environment, array $pages): array
+    {
+        $urlStates = [];
+        $knownPaths = [];
+        foreach ($this->checkResultRepository->findUrlStates($environment) as $path => $state) {
+            $knownPaths[$path] = true;
+            $marker = $state['marker'];
+            // Too slow or unreachable during the run says nothing about the page.
+            if (in_array($marker, [ErrorMarkerDetector::MARKER_TIMEOUT, ErrorMarkerDetector::MARKER_CONNECTION_ERROR], true)) {
+                continue;
+            }
+            if ($state['status'] !== 200 || $marker === ErrorMarkerDetector::MARKER_DETAIL_PAGE_WITHOUT_RECORD || ($marker !== '' && !in_array($marker, ErrorMarkerDetector::NOTICE_MARKERS, true))) {
+                $urlStates[$path] = MetadataAnalyzer::URL_BROKEN;
+            } elseif (in_array($marker, [ErrorMarkerDetector::MARKER_REDIRECTED, ErrorMarkerDetector::MARKER_REDIRECT_CHAIN, ErrorMarkerDetector::MARKER_CANONICAL_ELSEWHERE], true)) {
+                $urlStates[$path] = MetadataAnalyzer::URL_REDIRECTS;
+            }
+        }
+        foreach ($pages as $page) {
+            foreach (MetadataAnalyzer::findBreadcrumbUrlsOnHost($page['metadata'], $page['url']) as $url) {
+                $path = UrlUtility::comparablePath($url);
+                if (!isset($knownPaths[$path]) && $this->requiredParameterPages->isCalledWithoutParameter($this->pageUidResolver->resolveArguments($url), new PageIdentity())) {
+                    $urlStates[$path] = MetadataAnalyzer::URL_BROKEN;
+                }
+                $knownPaths[$path] = true;
+            }
+        }
+
+        return $urlStates;
+    }
+
+    /**
+     * Judges the metadata of every working page of the environment: whether
+     * URLs of one page share a title or description needs all of them, also
+     * those of earlier runs on the environment.
+     */
+    private function analyzeMetadata(string $environment): void
+    {
+        $pages = $this->checkResultRepository->findPagesWithMetadata($environment);
+        $findings = $this->metadataAnalyzer->analyze($pages, $this->findUrlStates($environment, $pages));
+        foreach ($pages as $page) {
+            $pageFindings = $findings[$page['uid']] ?? [];
+            if (implode(',', $pageFindings) !== $page['metaFindings']) {
+                $this->checkResultRepository->updateMetaFindings($page['uid'], $pageFindings);
+            }
+        }
     }
 }

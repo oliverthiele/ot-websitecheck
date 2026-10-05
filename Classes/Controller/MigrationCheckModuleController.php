@@ -11,12 +11,15 @@ use OliverThiele\OtWebsitecheck\Domain\Repository\SitemapSnapshotRepository;
 use OliverThiele\OtWebsitecheck\Exception\SnapshotArchiveException;
 use OliverThiele\OtWebsitecheck\Service\ArchiveDirectory;
 use OliverThiele\OtWebsitecheck\Service\ArchiveFileService;
+use OliverThiele\OtWebsitecheck\Service\BackendPageLinks;
+use OliverThiele\OtWebsitecheck\Service\FindingGuide;
 use OliverThiele\OtWebsitecheck\Service\MigrationAnalyzer;
 use OliverThiele\OtWebsitecheck\Service\MigrationCheckSuggestion;
 use OliverThiele\OtWebsitecheck\Service\SnapshotOptionsProvider;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Http\AllowedMethodsTrait;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
 /**
@@ -43,6 +46,8 @@ class MigrationCheckModuleController extends AbstractModuleController
         private readonly SnapshotOptionsProvider $snapshotOptionsProvider,
         private readonly ArchiveDirectory $archiveDirectory,
         private readonly ArchiveFileService $archiveFileService,
+        private readonly FindingGuide $findingGuide,
+        private readonly BackendPageLinks $backendPageLinks,
     ) {
     }
 
@@ -51,11 +56,15 @@ class MigrationCheckModuleController extends AbstractModuleController
         string $group = '',
         string $language = '',
         string $verdict = '',
+        string $actor = '',
         bool $onlyProblems = true,
         bool $onlyUnreviewed = false,
         bool $showTargetSitemap = false,
         int $page = 1,
     ): ResponseInterface {
+        if (!in_array($actor, FindingGuide::ACTORS, true)) {
+            $actor = '';
+        }
         $runs = $this->observationRepository->findDistinctRuns();
         if ($run === '' || !in_array($run, $runs, true)) {
             $run = $runs[0] ?? '';
@@ -77,6 +86,7 @@ class MigrationCheckModuleController extends AbstractModuleController
         $groupOptions = [];
         $languageOptions = [];
         $verdictCounts = [];
+        $actorCounts = [FindingGuide::ACTOR_EDITOR => 0, FindingGuide::ACTOR_INTEGRATOR => 0];
         /** @var array<string, array<string, list<Observation>>> $observationsBySection sitemap group => identity key => observations */
         $observationsBySection = [];
         foreach ($referenceByPath as $path => $reference) {
@@ -87,16 +97,21 @@ class MigrationCheckModuleController extends AbstractModuleController
             if ($rowLanguage !== '') {
                 $languageOptions[$rowLanguage] = $rowLanguage;
             }
+            $actors = $this->collectActors($reference, $target);
             if ($target !== null) {
                 $verdictKey = $this->verdictKey($target);
                 $verdictCounts[$verdictKey] = ($verdictCounts[$verdictKey] ?? 0) + 1;
+                foreach (array_intersect($actors, array_keys($actorCounts)) as $countedActor) {
+                    $actorCounts[$countedActor]++;
+                }
             }
 
             if (($group !== '' && $reference->sitemapGroup !== $group)
                 || ($language !== '' && $rowLanguage !== $language)
                 || ($verdict !== '' && ($target === null || $this->verdictKey($target) !== $verdict))
-                // An explicitly chosen verdict is shown whether it counts as a problem or not.
-                || ($onlyProblems && $verdict === '' && !$this->isProblem($reference, $target))
+                || ($actor !== '' && !in_array($actor, $actors, true))
+                // An explicitly chosen verdict or actor is shown whether it counts as a problem or not.
+                || ($onlyProblems && $verdict === '' && $actor === '' && !$this->isProblem($reference, $target))
                 || ($onlyUnreviewed && ($target === null || $target->reviewed))
             ) {
                 continue;
@@ -149,11 +164,14 @@ class MigrationCheckModuleController extends AbstractModuleController
             'languageOptions' => ['' => $this->translate('filter.allLanguages')] + $languageOptions,
             'verdictOptions' => ['' => $this->translate('filter.allVerdicts')] + $this->buildVerdictOptions(array_keys($verdictCounts)),
             'verdictCounts' => $verdictCounts,
+            'actorCounts' => $actorCounts,
             'currentRun' => $run,
             'runSnapshots' => $this->buildRunSnapshots($run),
             'currentGroup' => $group,
             'currentLanguage' => $language,
             'currentVerdict' => $verdict,
+            'actorOptions' => $this->buildActorOptions(),
+            'currentActor' => $actor,
             'onlyProblems' => $onlyProblems,
             'onlyUnreviewed' => $onlyUnreviewed,
             'showTargetSitemap' => $showTargetSitemap,
@@ -276,6 +294,41 @@ class MigrationCheckModuleController extends AbstractModuleController
         }
     }
 
+    /**
+     * Everyone who acts on a reference row and its target row. Nothing to do
+     * only when no finding asks anyone.
+     *
+     * @return list<string>
+     */
+    private function collectActors(Observation $reference, ?Observation $target): array
+    {
+        $actors = [];
+        foreach (array_filter([$reference, $target]) as $observation) {
+            foreach ($this->buildFindings($observation) as $finding) {
+                $actors[$finding['actor']] = true;
+            }
+        }
+        unset($actors[FindingGuide::ACTOR_NONE]);
+
+        return $actors === [] ? [FindingGuide::ACTOR_NONE] : array_keys($actors);
+    }
+
+    /**
+     * The verdict and the warnings of a row with who acts on them and the
+     * help entry that explains them.
+     *
+     * @return list<array{type: string, name: string, actor: string, entry: string}>
+     */
+    private function buildFindings(Observation $observation): array
+    {
+        $findings = [['type' => 'verdict', 'name' => $this->verdictKey($observation)] + $this->findingGuide->forVerdict($observation->verdict)];
+        foreach ($observation->warnings as $warning) {
+            $findings[] = ['type' => 'warning', 'name' => $warning] + $this->findingGuide->forWarning($warning);
+        }
+
+        return $findings;
+    }
+
     private function isProblem(Observation $reference, ?Observation $target): bool
     {
         if ($target === null) {
@@ -328,6 +381,7 @@ class MigrationCheckModuleController extends AbstractModuleController
             'recordTable' => $identity->recordTable,
             'recordUid' => $identity->recordUid,
             'title' => $title,
+            'recordUrl' => $identity->hasRecord() ? $this->backendPageLinks->forRecord($identity->recordTable, $identity->recordUid, $this->getReturnUrl()) : '',
         ];
     }
 
@@ -354,6 +408,12 @@ class MigrationCheckModuleController extends AbstractModuleController
             'role' => $observation->role,
             'language' => $observation->identity->language,
             'pageUid' => $observation->identity->pageUid,
+            'backendLink' => $this->backendPageLinks->forPageOfUrl(
+                $observation->finalUrl !== '' ? $observation->finalUrl : $observation->requestedUrl,
+                $observation->identity->pageUid,
+                $this->backendPageLinks->findLanguageId($observation->identity->pageUid, $observation->identity->language, $observation->finalUrl),
+                $this->request,
+            ),
             'firstStatus' => $observation->firstStatus,
             'finalStatus' => $observation->finalStatus,
             'firstStatusSeverity' => match (true) {
@@ -371,7 +431,15 @@ class MigrationCheckModuleController extends AbstractModuleController
             'abortReason' => $observation->abortReason,
             'verdict' => $this->verdictKey($observation),
             'verdictSeverity' => $this->verdictSeverity($observation->verdict),
-            'warnings' => $observation->warnings,
+            'verdictGuide' => $this->findingGuide->forVerdict($observation->verdict),
+            'warnings' => array_map(
+                fn(string $warning): array => ['name' => $warning] + $this->findingGuide->forWarning($warning),
+                $observation->warnings,
+            ),
+            'actors' => array_values(array_diff(
+                array_unique(array_column($this->buildFindings($observation), 'actor')),
+                [FindingGuide::ACTOR_NONE],
+            )),
             'suggestedTarget' => $observation->suggestedTarget,
             'reviewed' => $observation->reviewed,
             'note' => $observation->note,
@@ -401,10 +469,23 @@ class MigrationCheckModuleController extends AbstractModuleController
                     'rows' => array_map($this->buildRow(...), $observations),
                 ];
             }
-            $sections[] = ['name' => (string)$sectionName, 'identities' => $identities];
+            $sections[] = ['name' => (string)$sectionName, 'label' => $this->buildSectionLabel((string)$sectionName), 'identities' => $identities];
         }
 
         return $sections;
+    }
+
+    /**
+     * A sitemap group in words: the page sitemap is "pages" in TYPO3, every
+     * other group lists records.
+     */
+    private function buildSectionLabel(string $group): string
+    {
+        return match ($group) {
+            '' => $this->translate('section.noGroup'),
+            'pages' => $this->translate('section.pages'),
+            default => sprintf($this->translate('section.records'), $group),
+        };
     }
 
     /**
@@ -452,9 +533,20 @@ class MigrationCheckModuleController extends AbstractModuleController
         return match ($verdict) {
             MigrationAnalyzer::VERDICT_OK, MigrationAnalyzer::VERDICT_MOVED_WITH_REDIRECT => 'success',
             MigrationAnalyzer::VERDICT_MISSING, MigrationAnalyzer::VERDICT_REDIRECT_BROKEN, MigrationAnalyzer::VERDICT_OTHER_CONTENT => 'danger',
-            MigrationAnalyzer::VERDICT_IDENTITY_UNKNOWN, MigrationAnalyzer::VERDICT_REFERENCE_NOT_OK, MigrationAnalyzer::VERDICT_TIMEOUT => 'warning',
+            MigrationAnalyzer::VERDICT_IDENTITY_UNKNOWN, MigrationAnalyzer::VERDICT_REFERENCE_NOT_OK, MigrationAnalyzer::VERDICT_TIMEOUT, MigrationAnalyzer::VERDICT_REDIRECT_NOT_FINAL => 'warning',
+            MigrationAnalyzer::VERDICT_DETAIL_PAGE_WITHOUT_RECORD => 'info',
             default => 'default',
         };
+    }
+
+    /**
+     * The module page as it is shown now, to come back to after editing.
+     */
+    private function getReturnUrl(): string
+    {
+        $normalizedParams = $this->request->getAttribute('normalizedParams');
+
+        return $normalizedParams instanceof NormalizedParams ? $normalizedParams->getRequestUri() : '';
     }
 
     private function shortenUrl(string $url, string $host): string

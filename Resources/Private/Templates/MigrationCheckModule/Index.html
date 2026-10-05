@@ -13,6 +13,7 @@
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/reviewed-toggle.js"/>
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/migration-command.js"/>
     <f:asset.module identifier="@typo3/backend/popover.js"/>
+    <f:asset.module identifier="@oliverthiele/ot-websitecheck/page-preview.js"/>
     <f:asset.module identifier="@oliverthiele/ot-websitecheck/module-guide.js"/>
     <f:asset.css identifier="ot-websitecheck-sitemap-snapshots" href="EXT:ot_websitecheck/Resources/Public/Css/sitemap-snapshots.css"/>
     <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
@@ -144,6 +145,10 @@
             <div class="col-auto">
                 <f:form.select name="verdict" options="{verdictOptions}" value="{currentVerdict}" class="form-select"/>
             </div>
+            <div class="col-auto">
+                <label class="visually-hidden" for="websitecheckActor">{f:translate(key: '{languageFile}label.actor')}</label>
+                <f:form.select name="actor" id="websitecheckActor" options="{actorOptions}" value="{currentActor}" class="form-select"/>
+            </div>
             <div class="col-auto form-check">
                 <f:form.checkbox name="onlyProblems" id="websitecheckOnlyProblems" value="1" checked="{onlyProblems}" class="form-check-input"/>
                 <label class="form-check-label" for="websitecheckOnlyProblems">{f:translate(key: '{languageFile}filter.onlyProblems')}</label>
@@ -178,6 +183,10 @@
         <f:for each="{verdictCounts}" as="count" key="verdictName">
             <f:link.action action="index" arguments="{run: currentRun, verdict: verdictName}" class="badge badge-{f:if(condition: '{verdictName} == {currentVerdict}', then: 'primary', else: 'default')}" title="{f:translate(key: '{languageFile}summary.filterBy')}">{f:translate(key: '{languageFile}verdict.{verdictName}')}: {count}</f:link.action>
         </f:for>
+        <span class="ms-2">{f:translate(key: '{languageFile}summary.byActor')}:</span>
+        <f:for each="{actorCounts}" as="count" key="actorName">
+            <f:link.action action="index" arguments="{run: currentRun, actor: actorName}" class="text-decoration-none" title="{f:translate(key: '{languageFile}summary.filterBy')}"><f:render partial="ActorBadge" arguments="{actor: actorName}"/> {count}</f:link.action>
+        </f:for>
         <f:if condition="{archiveEnabled}">
             <f:form action="saveRun" method="post" class="ms-auto">
                 <f:form.hidden name="run" value="{currentRun}"/>
@@ -197,10 +206,7 @@
     <f:render section="Pagination" arguments="{_all}"/>
     <f:for each="{sections}" as="section">
         <h2 class="mt-4">
-            <f:if condition="{section.name}">
-                <f:then>{section.name}</f:then>
-                <f:else>{f:translate(key: '{languageFile}section.noGroup')}</f:else>
-            </f:if>
+            {section.label}
         </h2>
 
         <f:for each="{section.identities}" as="identity">
@@ -246,24 +252,28 @@
         <div class="d-flex flex-wrap align-items-center gap-2 my-3">
             <span>{f:translate(key: '{languageFile}migrationResults.pagination', arguments: {0: pagination.from, 1: pagination.to, 2: pagination.total})}</span>
             <f:if condition="{pagination.previousPage}">
-                <f:link.action action="index" arguments="{run: currentRun, group: currentGroup, language: currentLanguage, verdict: currentVerdict, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', showTargetSitemap: '{f:if(condition: showTargetSitemap, then: 1, else: 0)}', page: pagination.previousPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.previousPage')}</f:link.action>
+                <f:link.action action="index" arguments="{run: currentRun, group: currentGroup, language: currentLanguage, verdict: currentVerdict, actor: currentActor, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', showTargetSitemap: '{f:if(condition: showTargetSitemap, then: 1, else: 0)}', page: pagination.previousPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.previousPage')}</f:link.action>
             </f:if>
             <f:if condition="{pagination.nextPage}">
-                <f:link.action action="index" arguments="{run: currentRun, group: currentGroup, language: currentLanguage, verdict: currentVerdict, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', showTargetSitemap: '{f:if(condition: showTargetSitemap, then: 1, else: 0)}', page: pagination.nextPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.nextPage')}</f:link.action>
+                <f:link.action action="index" arguments="{run: currentRun, group: currentGroup, language: currentLanguage, verdict: currentVerdict, actor: currentActor, onlyProblems: '{f:if(condition: onlyProblems, then: 1, else: 0)}', onlyUnreviewed: '{f:if(condition: onlyUnreviewed, then: 1, else: 0)}', showTargetSitemap: '{f:if(condition: showTargetSitemap, then: 1, else: 0)}', page: pagination.nextPage}" class="btn btn-default btn-sm">{f:translate(key: '{languageFile}button.nextPage')}</f:link.action>
             </f:if>
         </div>
     </f:if>
 </f:section>
 
 <f:section name="IdentityHeading">
-    <strong>
-        <f:if condition="{identity.recordUid}">
-            <f:then>{f:translate(key: '{languageFile}identity.record', arguments: {0: identity.recordTable, 1: identity.recordUid, 2: identity.pageUid})}</f:then>
-            <f:else if="{identity.pageUid}">{f:translate(key: '{languageFile}identity.page', arguments: {0: identity.pageUid})}</f:else>
-            <f:else>{f:translate(key: '{languageFile}identity.unknown')}</f:else>
-        </f:if>
-    </strong>
-    <f:if condition="{identity.title}"> — {identity.title}</f:if>
+    <f:comment><!-- The uid stays in the text, in brackets as TYPO3 shows it: it is copied into the page tree search. --></f:comment>
+    <f:if condition="{identity.recordUid}">
+        <f:then>
+            <strong><f:if condition="{identity.title}">{identity.title} </f:if>[{identity.recordTable}:{identity.recordUid}]</strong>
+            <span class="text-body-secondary">— {f:translate(key: '{languageFile}identity.page', arguments: {0: '[{identity.pageUid}]'})}</span>
+        </f:then>
+        <f:else if="{identity.pageUid}">
+            <strong><f:if condition="{identity.title}"><f:then>{identity.title} [{identity.pageUid}]</f:then><f:else>{f:translate(key: '{languageFile}identity.page', arguments: {0: '[{identity.pageUid}]'})}</f:else></f:if></strong>
+        </f:else>
+        <f:else><strong>{f:translate(key: '{languageFile}identity.unknown')}</strong></f:else>
+    </f:if>
+    <f:render partial="BackendLink" arguments="{link: {url: identity.recordUrl, host: ''}, title: '{f:translate(key: \'{languageFile}backend.editRecord\')}'}"/>
 </f:section>
 
 <f:section name="StatusBadge">
@@ -312,7 +322,10 @@
                 <br/><small class="text-danger">{f:translate(key: '{languageFile}abortReason.{row.abortReason}')}</small>
             </f:if>
         </td>
-        <td><ws:webLink url="{row.finalUrl}" target="_blank" rel="noreferrer" title="{row.finalUrl}">{row.finalPath}</ws:webLink></td>
+        <td>
+            <f:render partial="PageLink" arguments="{url: row.finalUrl, label: row.finalPath}"/>
+            <f:render partial="BackendLink" arguments="{link: row.backendLink, pageUid: row.pageUid, language: row.language}"/>
+        </td>
         <td>
             <f:for each="{row.chain}" as="step" iteration="stepIteration">
                 <f:if condition="{stepIteration.isFirst}">
@@ -328,9 +341,22 @@
                 title: '{f:translate(key: \'{languageFile}verdict.{row.verdict}\')}',
                 content: '{f:translate(key: \'{languageFile}verdict.{row.verdict}.help\')}'
             }"/>
+            <f:render partial="HelpLink" arguments="{entry: row.verdictGuide.entry}"/>
             <f:for each="{row.warnings}" as="warning">
-                <span class="badge badge-warning" title="{f:translate(key: '{languageFile}warning.{warning}.description')}">{f:translate(key: '{languageFile}warning.{warning}')}</span>
+                <f:render section="HelpBadge" arguments="{
+                    label: '{f:translate(key: \'{languageFile}warning.{warning.name}\')}',
+                    severity: 'warning',
+                    title: '{f:translate(key: \'{languageFile}warning.{warning.name}\')}',
+                    content: '{f:translate(key: \'{languageFile}warning.{warning.name}.description\')}'
+                }"/>
+                <f:render partial="HelpLink" arguments="{entry: warning.entry}"/>
             </f:for>
+            <f:if condition="{row.actors}">
+                <br/><small>{f:translate(key: '{languageFile}label.actor')}:</small>
+                <f:for each="{row.actors}" as="actor">
+                    <f:render partial="ActorBadge" arguments="{actor: actor}"/>
+                </f:for>
+            </f:if>
             <f:if condition="{row.suggestedTarget}">
                 <br/><small>{f:translate(key: '{languageFile}label.suggestedTarget')}: <code>{row.suggestedTarget}</code></small>
             </f:if>

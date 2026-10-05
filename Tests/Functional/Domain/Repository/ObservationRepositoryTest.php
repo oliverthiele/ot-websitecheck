@@ -6,6 +6,8 @@ namespace OliverThiele\OtWebsitecheck\Tests\Functional\Domain\Repository;
 
 use OliverThiele\OtWebsitecheck\Domain\Model\Observation;
 use OliverThiele\OtWebsitecheck\Domain\Repository\ObservationRepository;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\PageIdentity;
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\RedirectChain;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -71,6 +73,26 @@ final class ObservationRepositoryTest extends FunctionalTestCase
             $byEnvironmentAndPath[$row['environment'] . ' ' . $row['requested_path']] = $row['final_status'];
         }
         self::assertSame(['live /a/' => 301, 'live /b/' => 200, 'live-copy /a/' => 200], $byEnvironmentAndPath);
+    }
+
+    #[Test]
+    public function canonicalOfTheFinalPageIsStored(): void
+    {
+        $chain = new RedirectChain([
+            ['url' => 'https://staging.example.com/old/', 'status' => 301],
+            ['url' => 'https://staging.example.com/shortcut/', 'status' => 307, 'redirectBy' => 'TYPO3 Shortcut/Mountpoint'],
+            ['url' => 'https://staging.example.com/alias/', 'status' => 200],
+        ], '');
+        $this->subject->storeObservation('relaunch', 'staging', Observation::ROLE_TARGET, 'pages', $chain, new PageIdentity(11, 'de-de'), 1790001000, 'https://staging.example.com/original/');
+
+        $stored = array_values(array_filter(
+            $this->subject->findByRun('relaunch'),
+            static fn(Observation $observation): bool => $observation->requestedPath === '/old/',
+        ));
+        self::assertCount(1, $stored);
+        self::assertSame('https://staging.example.com/original/', $stored[0]->canonicalUrl);
+        self::assertSame('TYPO3 Shortcut/Mountpoint', $stored[0]->redirectChain[1]['redirectBy'] ?? '');
+        self::assertArrayNotHasKey('redirectBy', $stored[0]->redirectChain[0]);
     }
 
     #[Test]

@@ -29,7 +29,20 @@ URL of the live site still leads to the same page or record on the new one.
 - **Independent of how redirects are made** — only HTTP answers are evaluated,
   so webserver rules, `.htaccess` and EXT:redirects are all covered
 - **Redirect quality** — redirect chains, temporary redirects, loops and
-  redirects to a start page are reported as warnings
+  redirects to a start page are reported as warnings; a redirect that does not
+  lead to the final URL in one step — a chain, a TYPO3 shortcut page on the way,
+  or a page naming another URL as canonical — is reported with the URL it
+  should point at
+- **Canonical URLs** — the `<link rel="canonical">` every page renders through
+  EXT:seo is read: a sitemap entry whose page names another URL as canonical is
+  reported, and a redirect to the page another one shows the content of counts
+  as the same content
+- **Metadata as delivered** — the status check reads title, meta description,
+  robots and OpenGraph tags of every page as it is delivered, so metadata a
+  plugin sets — or does not set — on a detail view shows up, which the backend
+  cannot show: URLs of one page sharing a title or description, a missing
+  description or preview image, a sitemap URL marked noindex. The migration
+  check warns when the same content loses its description or preview image
 - **Identity per page and record** — pages and detail records are matched by
   uid, not by URL, so a moved detail page is compared with the same record;
   the same record on several pages is reported as duplicate content
@@ -167,6 +180,36 @@ page.meta.websitecheck:record {
 Add one `TEXT` per detail plugin. The value is empty on all other pages, so no
 tag is rendered there.
 
+### Pages that require a parameter
+
+The detail page of a plugin shows content only with a record in its URL.
+Called without one it shows a fallback — often the list — or an error. When a
+sitemap lists such a page, the checks report it as missing on the target or as
+broken, although there is no page of its own to keep: the detail views are
+checked one by one.
+
+TYPO3 has no page property for this. When the project adds a checkbox field to
+the pages for it, name the field in **Settings > Extension Configuration >
+ot_websitecheck** as `requiresParameterField`. A URL that calls a marked page
+without arguments is then reported as a detail page without record:
+
+- the migration check gives its target row the verdict `detailPageWithoutRecord`
+  instead of `missing`, `redirectBroken`, `otherContent`, `identityUnknown` or
+  `referenceNotOk`, and the sitemap row the warning
+  `listedDetailPageWithoutRecord`
+- `checksitemap` gives it the marker `detailPageWithoutRecord`
+
+Neither fails a run with `--fail-on-problems`. The pages are read from the
+local database, and a URL is matched to its page through the local routing —
+so this applies where the checked environments share the local page tree,
+e.g. a relaunch on a migrated database. Without the field, the migration check
+still hints at such a page with the warning `pageAlsoRendersRecords`: the same
+page renders records under other URLs. That is only a hint, since a list and
+its detail view may share one page.
+
+A recipe for such a field, which also takes the pages out of the sitemap, is in
+[Documentation/Recipes.md](Documentation/Recipes.md).
+
 ### Requirements for sitemap snapshots
 
 The sitemap import finds the languages of a site from the outside, the way a
@@ -302,24 +345,9 @@ no credentials. The checks take these URLs from the snapshot they read; with
 ## Usage
 
 The backend module **Sites > Website Check** (admin-only) shows one card per
-tool:
+tool, in the order of the workflow — every check reads its URLs from a sitemap
+snapshot, so the snapshots come first:
 
-- **Status check** — a form that composes the `checksitemap` or `crawllinks`
-  command for a snapshot, and the results, filterable by environment, only
-  problems and only not yet reviewed, 500 rows per page. The form suggests the
-  newest snapshot and an environment label from it — with `-links` for a link
-  check, so its results do not replace those of a status check.
-- **Migration check** — a form that composes the `migrationcheck` command, and
-  the results, see [Migration check results](#migration-check-results), 200
-  pages and records per page. A run can be saved as a file together with the
-  snapshots it compared. The
-  form offers every complete snapshot and suggests the pair to compare: a
-  locked live snapshot, otherwise the newest live one, as reference; the
-  newest staging snapshot, otherwise development, then local, as target. It
-  suggests labels from the environments, offers the earlier runs whose
-  reference results can be reused, warns about label clashes before anything
-  runs, and prints the command for `vendor/bin/typo3`, `typo3` or
-  `ddev typo3`, with quoting, ready to copy.
 - **Sitemaps** — import form and the stored snapshots, newest first:
   - **Import** — choose one of the base URLs of the configured sites (`base`
     and every `baseVariants` entry), "Find sitemaps" lists the sitemap of
@@ -349,6 +377,47 @@ tool:
     hovered or focused. The lock icon protects a snapshot from deletion. The
     language filter applies to all snapshots. A snapshot whose import was
     interrupted is marked as incomplete.
+- **Status check** — a form that composes the `checksitemap` or `crawllinks`
+  command for a snapshot, and the results, filterable by environment, marker,
+  who acts, only problems and only not yet reviewed, 500 rows per page. The form suggests the
+  newest snapshot and an environment label from it — with `-links` for a link
+  check, so its results do not replace those of a status check.
+- **Migration check** — a form that composes the `migrationcheck` command, and
+  the results, see [Migration check results](#migration-check-results), 200
+  pages and records per page, filterable by sitemap group, language, verdict
+  and who acts. A run can be saved as a file together with the
+  snapshots it compared. The
+  form offers every complete snapshot and suggests the pair to compare: a
+  locked live snapshot, otherwise the newest live one, as reference; the
+  newest staging snapshot, otherwise development, then local, as target. It
+  suggests labels from the environments, offers the earlier runs whose
+  reference results can be reused, warns about label clashes before anything
+  runs, and prints the command for `vendor/bin/typo3`, `typo3` or
+  `ddev typo3`, with quoting, ready to copy.
+- **Page links** — a click on a checked URL previews the page in a modal
+  inside the module; the icon beside it, or a click with a modifier key, opens
+  it in a new window, where the browser console is at hand. The modules allow
+  frames from the hosts of the configured sites, the stored snapshots and the
+  migration check runs — the rest of the backend keeps its policy. A page that
+  forbids being framed (`X-Frame-Options`, `frame-ancestors`) stays empty in
+  the modal; open it in a new window then. The edit icon beside a page uid or
+  path opens the page in the page module, in the language of the result — in
+  the backend of the host the result was checked on, since the uid belongs to
+  that environment. Another host opens in a new window; TYPO3 asks for a login
+  there if needed and opens the page afterwards. The path of that backend is
+  taken from this installation (usually `/typo3`). On this host the link needs
+  the page in this database, and a record block links to the form of its
+  record
+- **Help** — every verdict, warning and marker explained for editors: what it
+  means, who acts on it and what to do. Every finding in the other modules
+  links to its entry, and the explanation of a finding opens on hover or
+  keyboard focus. Who acts is one of three:
+  - **Editor** — fixed in the backend: a redirect in Link Management › Redirects, a
+    page property, a translation
+  - **Integrator** — comes from the configuration, the templates or the server,
+    e.g. a sitemap that lists pages it should not; the entries link on to
+    [Documentation/Recipes.md](Documentation/Recipes.md)
+  - **Nothing to do** — works, or is shown for completeness
 
 ### Relaunch workflow
 
@@ -437,21 +506,30 @@ problems and warnings" is set.
 |---------|---------|
 | `ok` | Same path, same page or record |
 | `movedWithRedirect` | Redirects to the same page or record |
+| `redirectNotFinal` | Redirects to the same page or record, but not in one step: the redirect leads to another redirect, or to a page that names another URL as canonical. The suggested target is the final URL |
 | `missing` | 4xx, 5xx or no connection — the finding this tool exists for |
 | `redirectBroken` | Redirects, but ends in an error, a loop or too many hops |
 | `timeout` | No complete answer within `--timeout`, also after the retries — slow, not necessarily missing; check again |
 | `otherContent` | Answers 200 with a different page, record or language |
 | `identityUnknown` | Answers 200, but the markers needed for a comparison are missing — or the page is larger than 50 MB and was not read |
 | `referenceNotOk` | Already not working on the reference — not compared, but listed with the problems: the sitemap lists a broken URL |
+| `detailPageWithoutRecord` | A page marked as requiring a parameter, called without one — see [Pages that require a parameter](#pages-that-require-a-parameter). Not a problem |
 
 ### Warnings
 
 | Warning | Meaning |
 |---------|---------|
 | `redirectChain` | More than one redirect before the final page |
+| `shortcutInChain` | A redirect leads to a TYPO3 shortcut page, which redirects again — recognised by the header `X-Redirect-By: TYPO3 Shortcut/Mountpoint` |
+| `canonicalDiffers` | The redirect ends on a page that names another URL as canonical, e.g. a page that shows the content of another page |
 | `temporaryRedirect` | A 302, 303 or 307 in the chain — a move should be permanent |
 | `redirectToRootPage` | A deep URL redirects to a start page, often treated as a soft 404 |
 | `listedUrlRedirects` | A sitemap lists a URL that redirects |
+| `listedUrlNotCanonical` | A sitemap lists a URL whose page names another URL as canonical |
+| `listedDetailPageWithoutRecord` | A sitemap lists a page marked as requiring a parameter, without one |
+| `pageAlsoRendersRecords` | The page renders records under other URLs — maybe a detail page called without a record |
+| `metaDescriptionLost` | The reference page had a meta description, the same content on the target has none |
+| `openGraphImageLost` | The reference page had an `og:image`, the same content on the target has none |
 | `languageChanged` | The target page is in a different language |
 | `recordIdentityUnknown` | Several URLs render the same page without a record marker |
 | `duplicateDetailPage` | The same record is rendered by more than one page |
@@ -671,16 +749,63 @@ accept the connection — counts as no connection.
 
 `checksitemap` and `crawllinks` follow up to ten redirects and store the status
 of the page they end on. A URL that works only through a redirect gets the
-marker `redirected`, unless the final page shows an error, whose marker wins;
-more than ten redirects give the marker `tooManyRedirects`. The migration check
-follows redirects itself, one hop at a time, see above.
+marker `redirected`, through more than one the marker `redirectChain`, unless
+the final page shows an error, whose marker wins; more than ten redirects give
+the marker `tooManyRedirects`. A URL of `checksitemap` that answers directly
+but names another URL as canonical gets the marker `canonicalElsewhere`. The
+module shows the URL the redirects end on, or the canonical URL, as the final
+URL. The migration check follows redirects itself, one hop at a time, see above.
+
+Canonical URLs are compared by path and query, not by host: a staging system
+often renders the live domain into its canonical.
+
+`checksitemap` also reads the metadata of every page that answers with 200 —
+`<title>`, meta description and robots, `og:title`, `og:description` and
+`og:image` — and judges it once the run is complete, across all results of the
+environment. The module shows the values and these findings in a column of
+their own; none of them fails a run:
+
+| Finding | Meaning |
+|---------|---------|
+| `metaShared` | Other URLs of the same page have the same title or description — the detail views of a plugin that sets no metadata of its own |
+| `metaDescriptionMissing` | No meta description |
+| `openGraphImageMissing` | No `og:image`; TYPO3 renders OpenGraph tags only when they are filled in |
+| `listedButNoindex` | The sitemap lists a page whose robots tag says noindex |
+| `breadcrumbItemBroken` | The JSON-LD `BreadcrumbList` links a URL of the same host that fails in this run, or a page marked as requiring a parameter without one |
+| `breadcrumbItemRedirects` | The JSON-LD `BreadcrumbList` links a URL that only answers through a redirect or names another URL as canonical |
+
+Breadcrumb items are judged by the results of the same run; a URL the sitemap
+does not list is only judged through the pages marked as requiring a
+parameter, never requested. Whether the current page is the last item is left
+to the site — search engines do not require it.
+
+How to set the metadata of a detail view is in
+[Documentation/Recipes.md](Documentation/Recipes.md#metadata-of-detail-pages).
+
+#### Pages that show the content of another page
+
+A page with "Show Content from this page" (`content_from_pid`, tab Appearance) answers under its own
+path and names the other page as canonical — EXT:seo does that by itself. That
+is correct for search engines, but the page should not be in the sitemap. The
+page sitemap of EXT:seo leaves out pages with `no_index` or their own
+`canonical_link`, not these. Exclude them in the site settings:
+
+```yaml
+# config/sites/<site>/settings.yaml
+seo:
+  sitemap:
+    pages:
+      additionalWhere: "{#no_index} = 0 AND {#canonical_link} = '' AND {#content_from_pid} = 0"
+```
 
 `checksitemap`, `crawllinks` and `migrationcheck` exit with a failure code when
 not a single URL got an HTTP answer — a wrong host, no network or rejected
 credentials. With `--fail-on-problems`, they also fail when a result needs
 attention: a status other than 200, an error marker or a timeout, ignored link
 arguments, or one of the verdicts `missing`, `redirectBroken`, `otherContent`,
-`identityUnknown` and `timeout`. A redirect alone does not fail a run.
+`identityUnknown`, `timeout` and `redirectNotFinal`. A redirect alone does not
+fail a run, and neither do the markers `redirected`, `redirectChain` and
+`canonicalElsewhere`.
 
 ### `websitecheck:exportsnapshots`
 

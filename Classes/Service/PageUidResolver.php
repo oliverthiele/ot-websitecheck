@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OliverThiele\OtWebsitecheck\Service;
 
+use OliverThiele\OtWebsitecheck\Domain\ValueObject\ResolvedRoute;
 use Psr\Http\Message\UriInterface;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Http\Uri;
@@ -34,6 +35,23 @@ class PageUidResolver
     }
 
     public function resolve(string $url): ?int
+    {
+        return $this->resolveArguments($url)?->getPageId();
+    }
+
+    /**
+     * The page and the arguments the local routing reads from a URL — e.g.
+     * whether a detail page is called with a record or without one.
+     */
+    public function resolveArguments(string $url): ?PageArguments
+    {
+        return $this->resolveRoute($url)?->pageArguments;
+    }
+
+    /**
+     * Page, arguments and language the local routing reads from a URL.
+     */
+    public function resolveRoute(string $url): ?ResolvedRoute
     {
         $path = parse_url($url, PHP_URL_PATH);
         $path = is_string($path) ? $path : '/';
@@ -67,7 +85,7 @@ class PageUidResolver
                 }
 
                 if ($result instanceof PageArguments) {
-                    return $result->getPageId();
+                    return new ResolvedRoute($result, $language->getLanguageId());
                 }
             }
         }

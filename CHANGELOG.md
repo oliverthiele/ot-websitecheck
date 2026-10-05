@@ -7,6 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-10-05
+
+### Added
+
+- Read the canonical URL (`<link rel="canonical">`) of every page the
+  migration check and `websitecheck:checksitemap` request, and store it with
+  the result. Requires a database schema update
+- Add the verdict `redirectNotFinal` to the migration check: a redirect that
+  reaches the same page or record, but through another redirect or on a page
+  that names another URL as canonical. The suggested target is the final URL.
+  It counts as a problem for `--fail-on-problems`
+- Add the warnings `shortcutInChain` (a redirect leads to a TYPO3 shortcut
+  page, recognised by `X-Redirect-By`), `canonicalDiffers` and
+  `listedUrlNotCanonical` (a sitemap lists a URL whose page names another URL
+  as canonical) to the migration check
+- Add the markers `redirectChain` and `canonicalElsewhere` to the status
+  check; like `redirected`, they do not fail a run with `--fail-on-problems`
+- Show the final URL — the canonical URL, or where the redirects end — in the
+  status check module, and filter its results by marker
+- Record the `X-Redirect-By` header of every redirect in the redirect chain of
+  the migration check
+- Add the extension setting `requiresParameterField`: a checkbox field of the
+  pages that marks pages showing content only with a parameter. A URL calling
+  such a page without one gets the verdict `detailPageWithoutRecord` in the
+  migration check — instead of `missing` and the like — and the marker
+  `detailPageWithoutRecord` in `websitecheck:checksitemap`; neither fails a
+  run. The sitemap row gets the warning `listedDetailPageWithoutRecord`
+- Add the warning `pageAlsoRendersRecords` to the migration check for a
+  sitemap URL whose page renders records under other URLs
+- Add the backend module **Help**: what every verdict, warning and marker
+  means, who acts on it — an editor, the integrator or nobody — and what to
+  do. Every finding in the other modules links to its entry
+- Show who acts on a finding in the status check and migration check modules,
+  filter the results by it, and explain the markers of the status check in a
+  popover
+- Read the metadata of every page in `websitecheck:checksitemap` — title,
+  meta description and robots, `og:title`, `og:description`, `og:image` —
+  and report URLs of one page sharing a title or description (`metaShared`),
+  a missing description or preview image and sitemap URLs marked noindex, in
+  a column and filter of the status check module. Requires a database schema
+  update
+- Read the JSON-LD `BreadcrumbList` of every page in
+  `websitecheck:checksitemap` and report items that link a broken page or a
+  detail page without its record (`breadcrumbItemBroken`), or a redirect
+  (`breadcrumbItemRedirects`)
+- Warn in the migration check when the same content loses its meta
+  description (`metaDescriptionLost`) or `og:image` (`openGraphImageLost`)
+- Add a glossary to the help module: the terms of the checks, and where the
+  matching settings are in the page properties of TYPO3 — canonical link,
+  "Show Content from this page", shortcut pages, URL segment, page ID, and
+  Link Management › Redirects with its fields
+- Add `Documentation/Recipes.md` for integrators: pages that require a
+  parameter, pages that show the content of another page, redirects that do
+  not lead to the final URL
+- Preview a checked page in a modal in the status check and migration check
+  modules, with a link to open it in a new window; the modules allow frames
+  from the hosts of the configured sites, snapshots and runs
+- Link a result to its page in the page module, in its language — in the
+  backend of the host it was checked on, which asks for a login if needed —
+  and a record block to the form of its record
+- Store the site language of a status check result. Requires a database
+  schema update
+
+### Changed
+
+- Show the tools of the module overview in the order of the workflow:
+  Sitemaps, status check, migration check, help; the short descriptions name
+  the step
+- Describe in the module overview and the module guides what each tool is
+  for, instead of which command it runs; the commands moved into the panel
+  that runs a check
+- Show under the composed command how to run it as a Scheduler task, with its
+  options
+- Name the selects of the command panels "Sitemap snapshot" and say that the
+  list comes from the Sitemaps module
+- Show the page in the results as title with its uid in brackets, an
+  exception by its short class name, the sitemap group "pages" as pages and
+  other groups as records; filter all exceptions at once and count the
+  results per actor above the results
+- Count a redirect in the migration check to the page whose content the
+  reference page shows (`content_from_pid`, declared through its canonical)
+  as the same content instead of `otherContent`, and suggest that page as
+  target for such a URL when it is missing
+- Report a redirect chain to the same content in the migration check as
+  `redirectNotFinal` instead of `movedWithRedirect` with a warning; a run with
+  `--fail-on-problems` fails on it now. Re-run the check, or recompute the
+  verdicts with `--analyze-only`; canonical URLs are only known after a re-run
+
 ## [0.9.0] — 2026-10-01
 
 ### Added
@@ -306,7 +394,8 @@ First alpha release.
 - Add unit tests for verdicts, redirect chains, the sitemap crawler, language
   detection, site bases, sitemap groups, identity markers and snapshot retention
 
-[Unreleased]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.6.1...v0.7.0

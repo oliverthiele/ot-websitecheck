@@ -95,6 +95,18 @@ final class SnapshotArchiveTest extends UnitTestCase
     }
 
     #[Test]
+    public function observationFromBeforeTheCanonicalIsReadWithoutOne(): void
+    {
+        $archive = $this->archive();
+        unset($archive['runs'][0]['observations'][0]['canonical_url']);
+
+        $snapshotArchive = new SnapshotArchive();
+        $decoded = $snapshotArchive->decode($snapshotArchive->encode($archive));
+
+        self::assertSame('', $decoded['runs'][0]['observations'][0]['canonical_url']);
+    }
+
+    #[Test]
     public function unknownEnvironmentIsRefused(): void
     {
         $archive = $this->archive();

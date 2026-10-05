@@ -1,2 +1,5 @@
 # cat=Archive/files/a1; type=string; label=Archive directory:Where the backend modules save sitemap snapshots and migration check runs as files and read them back, relative to the project root. Keep it out of version control and out of the public directory. Empty disables saving in the modules; the CLI commands take their own path.
 archiveDirectory = data/websitecheck
+
+# cat=Checks/pages/b1; type=string; label=Page field "requires a parameter":Name of a checkbox field in the page properties that marks pages showing content only with a parameter, e.g. the detail page of a plugin. Such a page called without one is reported as a detail page without record instead of a missing page. Empty, or a field the pages table does not have, switches this off.
+requiresParameterField =

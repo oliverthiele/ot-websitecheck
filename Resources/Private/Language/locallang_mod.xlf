@@ -14,7 +14,7 @@
     </unit>
     <unit id="mlang_labels_tabdescr">
       <segment>
-        <source>Tools that crawl XML sitemaps and record what every URL answers.</source>
+        <source>Finds broken pages and lost URLs before visitors and search engines do — on any environment, and across a relaunch. Pages and records are recognised by what they are, not by their URL, so a redirect to the wrong content is found as well. Start with Sitemaps; the help says for every finding what it means and who acts on it.</source>
       </segment>
     </unit>
     <unit id="module.status.title">
@@ -24,12 +24,12 @@
     </unit>
     <unit id="module.status.shortDescription">
       <segment>
-        <source>HTTP status and error markers per URL</source>
+        <source>Step 2 — does every page work?</source>
       </segment>
     </unit>
     <unit id="module.status.description">
       <segment>
-        <source>Review the results of the websitecheck:checksitemap and websitecheck:crawllinks commands: URLs without HTTP 200, TYPO3 error pages and links whose arguments have no effect.</source>
+        <source>Requests every URL of a snapshot and finds error pages, needless redirects and plugin links that lead nowhere. The URL list may come from another environment: check the larger sitemap of a development system — with news the live site does not have yet — against the live site.</source>
       </segment>
     </unit>
     <unit id="module.migration.title">
@@ -39,12 +39,12 @@
     </unit>
     <unit id="module.migration.shortDescription">
       <segment>
-        <source>Moved URLs without a working redirect</source>
+        <source>Step 3 — a relaunch without lost URLs</source>
       </segment>
     </unit>
     <unit id="module.migration.description">
       <segment>
-        <source>Review the results of the websitecheck:migrationcheck command: does every URL of the reference environment still lead to the same page or record on the target environment — directly or through a redirect?</source>
+        <source>Compares the old and the new website page by page: does every old URL still lead to the same content? A missing redirect is shown with the page it should point at — independent of whether redirects come from the webserver or from TYPO3.</source>
       </segment>
     </unit>
     <unit id="module.sitemaps.title">
@@ -54,12 +54,27 @@
     </unit>
     <unit id="module.sitemaps.shortDescription">
       <segment>
-        <source>Stored sitemap snapshots per site and language</source>
+        <source>Step 1 — keep the state of a website</source>
       </segment>
     </unit>
     <unit id="module.sitemaps.description">
       <segment>
-        <source>Review the snapshots of the websitecheck:importsitemaps command: how many URLs every language lists per sitemap group, which sitemap files failed, and a note per snapshot.</source>
+        <source>Stores the sitemaps of every language as a snapshot. The list of URLs stays, also when the website changes — before a relaunch, it is the only copy of what search engines know. Snapshots can be saved as files and survive a database that is replaced.</source>
+      </segment>
+    </unit>
+    <unit id="module.help.title">
+      <segment>
+        <source>Help</source>
+      </segment>
+    </unit>
+    <unit id="module.help.shortDescription">
+      <segment>
+        <source>What a finding means</source>
+      </segment>
+    </unit>
+    <unit id="module.help.description">
+      <segment>
+        <source>For every finding: what it means, whether editors can fix it themselves or the integrator has to, and what to do.</source>
       </segment>
     </unit>
   </file>

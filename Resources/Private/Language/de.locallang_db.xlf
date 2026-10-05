@@ -15,6 +15,12 @@
         <target>Seiten-UID</target>
       </segment>
     </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.language_uid">
+      <segment>
+        <source>Site language uid</source>
+        <target>Uid der Website-Sprache</target>
+      </segment>
+    </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.url">
       <segment>
         <source>URL</source>
@@ -49,6 +55,30 @@
       <segment>
         <source>Error marker</source>
         <target>Fehlermerkmal</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.final_url">
+      <segment>
+        <source>Final URL after redirects</source>
+        <target>End-URL nach Weiterleitungen</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the page</source>
+        <target>Von der Seite angegebene Canonical-URL</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.metadata">
+      <segment>
+        <source>Metadata of the page</source>
+        <target>Metadaten der Seite</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_check.meta_findings">
+      <segment>
+        <source>Metadata findings</source>
+        <target>Befunde zu Metadaten</target>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_check.checked_at">
@@ -169,6 +199,18 @@
       <segment>
         <source>Abort reason</source>
         <target>Abbruchgrund</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.canonical_url">
+      <segment>
+        <source>Canonical URL declared by the final page</source>
+        <target>Von der Endseite angegebene Canonical-URL</target>
+      </segment>
+    </unit>
+    <unit id="tx_otwebsitecheck_domain_model_observation.metadata">
+      <segment>
+        <source>Metadata of the final page</source>
+        <target>Metadaten der Endseite</target>
       </segment>
     </unit>
     <unit id="tx_otwebsitecheck_domain_model_observation.page_uid">

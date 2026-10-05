@@ -102,6 +102,19 @@
     text-underline-offset: 0.15em;
 }
 
+/* The glossary of the help module: a term above its explanation, spaced as entries. */
+.ot-websitecheck-glossary dd {
+    margin-bottom: 1rem;
+}
+
+/* The link from a finding to its entry in the help module. */
+.ot-websitecheck-help-link {
+    display: inline-flex;
+    margin-inline-end: var(--ot-websitecheck-chevron-gap, 0.25rem);
+    color: inherit;
+    vertical-align: middle;
+}
+
 /* An info icon beside a field label; the label stays the accessible name of the field. */
 .ot-websitecheck-help-icon {
     display: inline-flex;

@@ -45,7 +45,15 @@ class ObservationRepository extends AbstractRepository
         'checked_at' => ParameterType::INTEGER,
         'reviewed' => ParameterType::INTEGER,
         'note' => ParameterType::STRING,
+        'canonical_url' => ParameterType::STRING,
+        'metadata' => ParameterType::STRING,
     ];
+
+    /**
+     * String fields of ROW_FIELDS added after the first archives were written;
+     * an archived row without them gets an empty string.
+     */
+    public const array FIELDS_ADDED_LATER = ['canonical_url', 'metadata'];
 
     /**
      * Stores what was observed for one requested path on one environment.
@@ -60,6 +68,8 @@ class ObservationRepository extends AbstractRepository
         RedirectChain $redirectChain,
         PageIdentity $identity,
         int $checkedAt,
+        string $canonicalUrl = '',
+        string $metadata = '',
     ): void {
         $requestedUrl = $redirectChain->getRequestedUrl();
         $requestedPath = UrlUtility::pathWithQuery($requestedUrl);
@@ -80,6 +90,8 @@ class ObservationRepository extends AbstractRepository
             'language' => $identity->language,
             'record_table' => $identity->recordTable,
             'record_uid' => $identity->recordUid,
+            'canonical_url' => $canonicalUrl,
+            'metadata' => $metadata,
             'checked_at' => $checkedAt,
         ];
 

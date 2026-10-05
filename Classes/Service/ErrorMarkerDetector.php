@@ -29,14 +29,30 @@ class ErrorMarkerDetector
     public const string MARKER_TOO_MANY_REDIRECTS = 'tooManyRedirects';
     public const string MARKER_RESPONSE_TOO_LARGE = 'responseTooLarge';
     public const string MARKER_REDIRECTED = 'redirected';
+    public const string MARKER_REDIRECT_CHAIN = 'redirectChain';
+    public const string MARKER_CANONICAL_ELSEWHERE = 'canonicalElsewhere';
+    public const string MARKER_DETAIL_PAGE_WITHOUT_RECORD = 'detailPageWithoutRecord';
+
+    /**
+     * Markers of a page that works: they point at something to tidy up, not at
+     * a broken page, and do not fail a run with --fail-on-problems.
+     */
+    public const array NOTICE_MARKERS = [
+        self::MARKER_REDIRECTED,
+        self::MARKER_REDIRECT_CHAIN,
+        self::MARKER_CANONICAL_ELSEWHERE,
+        self::MARKER_DETAIL_PAGE_WITHOUT_RECORD,
+    ];
 
     /**
      * The marker of a fetched page: a failed connection is a marker of its own,
      * and a timeout one apart from it — a slow page is not a broken one. A page
      * reached only through a redirect is marked as such unless its body shows
      * an error; the status is that of the final page.
+     *
+     * @param bool $canonicalElsewhere the page answers directly and names another URL as canonical
      */
-    public function detectFor(FetchedPage $page): string
+    public function detectFor(FetchedPage $page, bool $canonicalElsewhere = false): string
     {
         $marker = match ($page->transferFailure) {
             TransferFailure::Timeout => self::MARKER_TIMEOUT,
@@ -46,7 +62,16 @@ class ErrorMarkerDetector
             default => self::MARKER_CONNECTION_ERROR,
         };
 
-        return $marker === '' && $page->isRedirected() ? self::MARKER_REDIRECTED : $marker;
+        if ($marker !== '') {
+            return $marker;
+        }
+
+        return match (true) {
+            $page->redirectCount > 1 => self::MARKER_REDIRECT_CHAIN,
+            $page->isRedirected() => self::MARKER_REDIRECTED,
+            $canonicalElsewhere && $page->isOk() => self::MARKER_CANONICAL_ELSEWHERE,
+            default => '',
+        };
     }
 
     public function detect(string $html): string

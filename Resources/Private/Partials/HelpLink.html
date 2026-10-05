@@ -1,0 +1,17 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers"
+    xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment><!--
+    Link to the entry of the help module that explains a finding and says what
+    to do. Arguments: entry (help entry name, nothing is rendered when empty).
+--></f:comment>
+<f:if condition="{entry}">
+    <f:variable name="languageFile" value="LLL:EXT:ot_websitecheck/Resources/Private/Language/locallang.xlf:"/>
+    <a href="{be:moduleLink(route: 'site_websitecheck_help')}#faq-{entry}" class="ot-websitecheck-help-link" title="{f:translate(key: '{languageFile}help.whatToDo')}"><core:icon identifier="actions-question-circle" size="small"/><span class="visually-hidden">{f:translate(key: '{languageFile}help.whatToDo')}</span></a>
+</f:if>
+
+</html>
