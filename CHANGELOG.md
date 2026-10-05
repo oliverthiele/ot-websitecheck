@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Explain in the help module why the page preview can stay empty — a page
+  that allows frames on its own host only — and add a recipe for letting
+  staging and development allow the live backend with `frame-ancestors`
+
 ## [0.10.0] — 2026-10-05
 
 ### Added
