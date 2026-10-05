@@ -2649,6 +2649,30 @@
         <target>Für die Migration ist nichts zu tun. Ist die URL wichtig, etwa weil sie von außen verlinkt ist, eine Weiterleitung auf eine passende Seite anlegen.</target>
       </segment>
     </unit>
+    <unit id="faq.previewBlocked.title">
+      <segment>
+        <source>The page preview stays empty or shows a blocking message</source>
+        <target>Die Seitenvorschau bleibt leer oder zeigt eine Sperrmeldung</target>
+      </segment>
+    </unit>
+    <unit id="faq.previewBlocked.findings">
+      <segment>
+        <source>Page preview in the status check and migration check</source>
+        <target>Seitenvorschau im Status-Check und Migrations-Check</target>
+      </segment>
+    </unit>
+    <unit id="faq.previewBlocked.meaning">
+      <segment>
+        <source>A click on a checked URL shows the page in a preview inside the module. Whether a page may be shown inside another page is decided by the page itself: many servers allow it only on their own host. The backend of the live site then cannot show a page of staging or development — the browser says the page does not allow being embedded. A page behind a password asks for it inside the preview as well. Nothing is wrong with the page or the check.</source>
+        <target>Ein Klick auf eine geprüfte URL zeigt die Seite in einer Vorschau im Modul. Ob eine Seite in einer anderen Seite angezeigt werden darf, entscheidet die Seite selbst: Viele Server erlauben es nur auf ihrem eigenen Host. Das Backend der Live-Website kann dann keine Seite von Staging oder Development zeigen — der Browser meldet, dass die Seite das Einbetten nicht erlaubt. Eine Seite hinter einem Passwort fragt auch in der Vorschau danach. Mit der Seite und dem Check ist alles in Ordnung.</target>
+      </segment>
+    </unit>
+    <unit id="faq.previewBlocked.action">
+      <segment>
+        <source>Use "Open in a new window" in the preview, or the window icon beside the URL — that always works. If previews across environments are needed often, the integrator can let staging and development allow the live backend.</source>
+        <target>In der Vorschau „In neuem Fenster öffnen“ nutzen oder das Fenster-Symbol neben der URL — das funktioniert immer. Werden Vorschauen über Umgebungen hinweg oft gebraucht, kann die Integration Staging und Development so einstellen, dass sie das Live-Backend zulassen.</target>
+      </segment>
+    </unit>
     <unit id="glossary.title">
       <segment>
         <source>Glossary</source>

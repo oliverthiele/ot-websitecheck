@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] — 2026-10-05
+
+### Added
+
+- Explain in the help module why the page preview can stay empty — a page
+  that allows frames on its own host only — and add a recipe for letting
+  staging and development allow the live backend with `frame-ancestors`
+
 ## [0.10.0] — 2026-10-05
 
 ### Added
@@ -394,7 +402,8 @@ First alpha release.
 - Add unit tests for verdicts, redirect chains, the sitemap crawler, language
   detection, site bases, sitemap groups, identity markers and snapshot retention
 
-[Unreleased]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/oliverthiele/ot-websitecheck/compare/v0.7.0...v0.8.0

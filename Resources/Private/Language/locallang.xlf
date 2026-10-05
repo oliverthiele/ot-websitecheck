@@ -2207,6 +2207,26 @@
         <source>Nothing to do for the migration. If the URL matters, e.g. because it is linked from outside, give it a redirect to a fitting page.</source>
       </segment>
     </unit>
+    <unit id="faq.previewBlocked.title">
+      <segment>
+        <source>The page preview stays empty or shows a blocking message</source>
+      </segment>
+    </unit>
+    <unit id="faq.previewBlocked.findings">
+      <segment>
+        <source>Page preview in the status check and migration check</source>
+      </segment>
+    </unit>
+    <unit id="faq.previewBlocked.meaning">
+      <segment>
+        <source>A click on a checked URL shows the page in a preview inside the module. Whether a page may be shown inside another page is decided by the page itself: many servers allow it only on their own host. The backend of the live site then cannot show a page of staging or development — the browser says the page does not allow being embedded. A page behind a password asks for it inside the preview as well. Nothing is wrong with the page or the check.</source>
+      </segment>
+    </unit>
+    <unit id="faq.previewBlocked.action">
+      <segment>
+        <source>Use "Open in a new window" in the preview, or the window icon beside the URL — that always works. If previews across environments are needed often, the integrator can let staging and development allow the live backend.</source>
+      </segment>
+    </unit>
     <unit id="glossary.title">
       <segment>
         <source>Glossary</source>

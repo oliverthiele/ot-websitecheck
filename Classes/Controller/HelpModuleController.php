@@ -42,6 +42,7 @@ class HelpModuleController extends AbstractModuleController
         'breadcrumb' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::RECIPES_URL . '#structured-data-for-the-breadcrumb'],
         'argumentsIgnored' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::README_URL . 'websitecheckcrawllinks'],
         'referenceNotOk' => ['actors' => [FindingGuide::ACTOR_NONE], 'readOn' => ''],
+        'previewBlocked' => ['actors' => [FindingGuide::ACTOR_INTEGRATOR], 'readOn' => self::RECIPES_URL . '#previewing-pages-of-another-environment'],
     ];
 
     /**

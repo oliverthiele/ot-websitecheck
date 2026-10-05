@@ -203,6 +203,38 @@ parameter — see [Pages that require a parameter](#pages-that-require-a-paramet
 
 ---
 
+## Previewing pages of another environment
+
+**Finding:** the page preview in the modules stays empty, or the browser shows
+that the page does not allow being embedded.
+
+**Why:** the preview shows a checked page in a frame of the backend. The
+backend allows frames from the hosts of the configured sites, snapshots and
+runs — but the page itself decides whether it may be framed. A webserver that
+sends `X-Frame-Options: SAMEORIGIN` allows frames on its own host only, so the
+backend of the live site cannot show a page of staging or development. Pages
+behind Basic Auth ask for credentials inside the frame as well.
+
+**Fix:** use "Open in a new window" — that always works. To preview across
+environments, let the environments that are checked allow the backends that
+check them. `X-Frame-Options` cannot name another host; a `frame-ancestors`
+directive can, and browsers ignore `X-Frame-Options` when it is present:
+
+```nginx
+# Staging and development: may be framed by their own host and the live backend
+add_header Content-Security-Policy "frame-ancestors 'self' https://www.example.com" always;
+```
+
+```apache
+Header always set Content-Security-Policy "frame-ancestors 'self' https://www.example.com"
+```
+
+Merge it into a `Content-Security-Policy` header the site already sends rather
+than adding a second one. Keep the live site as it is: it does not need to be
+framed by any other environment.
+
+---
+
 ## Markers the checked site has to render
 
 The migration check compares pages by uid and records by table and uid, not by
